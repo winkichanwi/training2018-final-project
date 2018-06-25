@@ -1,6 +1,6 @@
 # training2018-final-project
 
-**プロジェクト作成の流れ**
+## プロジェクト作成の流れ**
 1. 計画 (0.5日)
 2. 環境構築 (0.5日)
 * Docker image 作成
@@ -23,3 +23,11 @@
 7. Phase 3 の実装: Service logic (4日)
 8. Phase 4 の実装: UX UI Design (2日)
 9. セキュリティー(1日)
+
+## Docker images (sbt project)
+** 1. Create image **
+`$ docker build -t restaurant-remote-reception . `
+** 2. Run docker container **
+` $ docker run -it -p 9000:9000 --rm restaurant-remote-reception `
+** 3. Interact with container **
+` $ curl -I localhost:9000 `
