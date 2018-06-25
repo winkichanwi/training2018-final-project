@@ -3,14 +3,14 @@
 ## プロジェクト作成の流れ**
 1. 計画 (0.5日)
 2. 環境構築 (0.5日)
-* Docker image 作成
-- sbt project (with Play & Slick)
-- Angular project
-* AWSでの環境構築
-- IAM, VPC
-- Docker image をECS にpush
-- RDSでDatabaseの初期化
-- S3でFile systemの初期化
+- Docker image 作成
+  - sbt project (with Play & Slick)
+  - Angular project
+- AWSでの環境構築
+  - IAM, VPC
+  - Docker image をECS にpush
+  - RDSでDatabaseの初期化
+  - S3でFile systemの初期化
 3. サービスの構成計画 (1日)
 - サービスロジックを計画
 - クラス構成を計画
@@ -25,9 +25,11 @@
 9. セキュリティー(1日)
 
 ## Docker images (sbt project)
-** 1. Create image **
+**1. Create image**
 `$ docker build -t restaurant-remote-reception . `
-** 2. Run docker container **
+
+**2. Run docker container**
 ` $ docker run -it -p 9000:9000 --rm restaurant-remote-reception `
-** 3. Interact with container **
+
+**3. Interact with container**
 ` $ curl -I localhost:9000 `
