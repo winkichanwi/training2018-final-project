@@ -2,10 +2,10 @@
 
 ## Docker images (sbt project)
 **1. Create image**
-`$ docker build -t restaurant-remote-reception . `
+`$ sbt docker:publishLocal`
 
 **2. Run docker container**
-` $ docker run -it -p 9000:9000 --rm restaurant-remote-reception `
+` $ docker run --env APPLICATION_SECRET={application secret} -p 9000:9000 restaurant-remote-reception:1.0-SNAPSHOT`
 
 **3. Interact with container**
 ` $ curl -I localhost:9000 `
