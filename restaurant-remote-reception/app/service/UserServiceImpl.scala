@@ -19,6 +19,7 @@ class UserServiceImpl @Inject()(userDAO: UserDAO) extends UserService {
     override def getUser(id: Long): Future[Option[User]] = {
         userDAO.get(id)
     }
+
     override def listAllUsers: Future[Seq[User]] = {
         userDAO.listAll
     }

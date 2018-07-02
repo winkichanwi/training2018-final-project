@@ -13,3 +13,8 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /home                       controllers.UserController.home
 POST    /add                        controllers.UserController.addUser
 GET     /delete/:id                 controllers.UserController.deleteUser(id : Long)
+
+# JSON API
+GET         /users              controllers.UserJsonController.list
+POST        /users              controllers.UserJsonController.create
+DELETE      /users/:id          controllers.UserJsonController.delete(id: Long)
