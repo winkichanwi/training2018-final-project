@@ -17,4 +17,4 @@ GET     /delete/:id                 controllers.UserController.deleteUser(id : L
 # JSON API
 GET         /users              controllers.UserJsonController.list
 POST        /users              controllers.UserJsonController.create
-DELETE      /users/:id          controllers.UserJsonController.delete(id: Long)
+DELETE      /users/:userId      controllers.UserJsonController.remove(userId: Int)
