@@ -1,0 +1,10 @@
+.button-panel {
+  display: flex;
+  width: 50%;
+  margin: auto;
+  text-align: center;
+}
+
+.button-panel .btn {
+  margin: auto;
+}

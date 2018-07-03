@@ -3,16 +3,16 @@ package controllers
 import play.api.mvc._
 import play.api.db.slick._
 import play.api.db.slick.DatabaseConfigProvider
-import slick.jdbc.JdbcProfile
+import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import scala.concurrent.Future
 
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider)
+class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
     // コンパニオンオブジェクトに定義したReads、Writesを参照するためにimport文を追加
     import UserJsonController._
@@ -35,8 +35,10 @@ class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     def create = Action.async(parse.json) { implicit rs =>
         rs.body.validate[UserForm].map { form =>
             // OKの場合はユーザを登録
-            val user = UserRow(0, form.userFullname, form.userEmail)
-            db.run(User += user).map { _ =>
+            val newUser = UserRow(0, form.userFullname, form.email)
+            db.run((User returning User.map(_.userId)) += newUser).map { userId =>
+                val userAcc = UserAccountRow(userId, form.password)
+                db.run(UserAccount += userAcc)
                 Ok(Json.obj("result" -> "success"))
             }
         }.recoverTotal { e =>
@@ -54,7 +56,7 @@ class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     def update = Action.async(parse.json) { implicit rs =>
         rs.body.validate[UserForm].map { form =>
             // OKの場合はユーザ情報を更新
-            val user = UserRow(form.userId.get, form.userFullname, form.userEmail)
+            val user = UserRow(form.userId.get, form.userFullname, form.email)
             db.run(User.filter(t => t.userId === user.userId.bind).update(user)).map { _ =>
                 Ok(Json.obj("result" -> "success"))
             }
@@ -80,17 +82,18 @@ class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 object UserJsonController {
     // UsersRowをJSONに変換するためのWritesを定義
     implicit val userWrites: Writes[UserRow] = (
-        (__ \ "id"       ).write[Int]   and
-        (__ \ "fullName"     ).write[String] and
+        (__ \ "id").write[Int]   and
+        (__ \ "full_name").write[String] and
         (__ \ "email").write[String]
     )(unlift(UserRow.unapply))
 
-    case class UserForm(userId: Option[Int], userFullname : String, userEmail : String )
+    case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
 
     // JSONをUserFormに変換するためのReadsを定義
     implicit val userFormReads: Reads[UserForm] = (
-        (__ \ "id"       ).readNullable[Int] and
-        (__ \ "full_name"     ).read[String] and
-        (__ \ "email").read[String]
+        (__ \ "id").readNullable[Int] and
+        (__ \ "full_name").read[String] and
+        (__ \ "email").read[String] and
+        (__ \ "password").read[String]
     )(UserForm)
 }

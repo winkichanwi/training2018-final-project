@@ -1,0 +1,21 @@
+create schema if not exists restaurant_remote_reception;
+use restaurant_remote_reception;
+
+create table USER (
+  USER_ID INT NOT NULL AUTO_INCREMENT,
+  USER_FULLNAME VARCHAR(50) NOT NULL,
+  EMAIL VARCHAR(100) NOT NULL,
+ PRIMARY KEY(USER_ID),
+ UNIQUE INDEX email_UNIQUE (EMAIL ASC),
+ UNIQUE INDEX id_UNIQUE (USER_ID ASC)
+);
+
+INSERT INTO USER (USER_FULLNAME,EMAIL) VALUES ("Yuri Tanaka", "yuritanaka@rainbow.com");
+
+create table USER_ACCOUNT (
+  USER_ID INT NOT NULL,
+  PASSWORD VARCHAR(300) NOT NULL,
+ PRIMARY KEY(USER_ID),
+FOREIGN KEY(USER_ID) REFERENCES USER(USER_ID),
+UNIQUE INDEX id_UNIQUE (USER_ID ASC)
+);
