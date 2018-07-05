@@ -113,8 +113,8 @@
 			<width>247</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>-302</x>
-			<y>89</y>
+			<x>-307</x>
+			<y>-97</y>
 			<color>
 				<r>128</r>
 				<g>128</g>
@@ -132,15 +132,320 @@
 			</table_properties>
 		</table>
 		<table>
+			<physical_name>RESTAURANTS</physical_name>
+			<logical_name>レストラン</logical_name>
+			<description></description>
+			<height>215</height>
+			<width>279</width>
+			<font_name>.AppleSystemUIFont</font_name>
+			<font_size>9</font_size>
+			<x>26</x>
+			<y>237</y>
+			<color>
+				<r>0</r>
+				<g>142</g>
+				<b>0</b>
+			</color>
+			<connections>
+				<relationship>
+					<name>FK_RESTAURANT_SHOPPING_CENTER</name>
+					<source>table.SHOPPING_CENTERS</source>
+					<target>table.RESTAURANTS</target>
+					<fk_columns>
+						<fk_column>
+							<fk_column_name>RESTAURANT_ID</fk_column_name>
+						</fk_column>
+					</fk_columns>
+					<parent_cardinality>1</parent_cardinality>
+					<child_cardinality>0..n</child_cardinality>
+					<reference_for_pk>true</reference_for_pk>
+					<on_delete_action>RESTRICT</on_delete_action>
+					<on_update_action>RESTRICT</on_update_action>
+					<source_xp>40</source_xp>
+					<source_yp>0</source_yp>
+				</relationship>
+			</connections>
+			<columns>
+				<normal_column>
+					<physical_name>RESTAURANT_ID</physical_name>
+					<logical_name>レストランID</logical_name>
+					<referred_column>table.SHOPPING_CENTERS.SHOPPING_CENTER_ID</referred_column>
+					<relationship>FK_RESTAURANT_SHOPPING_CENTER</relationship>
+					<not_null>true</not_null>
+					<primary_key>true</primary_key>
+					<auto_increment>true</auto_increment>
+				</normal_column>
+				<normal_column>
+					<physical_name>RESTAURANT_NAME</physical_name>
+					<logical_name>レストラン名</logical_name>
+					<type>varchar(n)</type>
+					<length>100</length>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>SHOPPING_CENTER_ID</physical_name>
+					<logical_name>ショッピングセンターID</logical_name>
+					<type>integer</type>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>RESTAURANT_STATUS</physical_name>
+					<logical_name>レストラン状態</logical_name>
+					<type>varchar(n)</type>
+					<length>20</length>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>FLOOR</physical_name>
+					<logical_name>フロア</logical_name>
+					<type>varchar(n)</type>
+					<length>10</length>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>SEAT_NO</physical_name>
+					<logical_name>席数</logical_name>
+					<type>integer</type>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>CUISINE</physical_name>
+					<logical_name>料理</logical_name>
+					<type>varchar(n)</type>
+					<length>100</length>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>PHONE_NO</physical_name>
+					<logical_name>電話番号</logical_name>
+					<type>varchar(n)</type>
+					<length>20</length>
+					<not_null>true</not_null>
+					<unique_key>true</unique_key>
+				</normal_column>
+				<normal_column>
+					<physical_name>OPENING_HOUR</physical_name>
+					<logical_name>営業時間</logical_name>
+					<type>varchar(n)</type>
+					<length>100</length>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>IMAGE_URL</physical_name>
+					<logical_name>画像URL</logical_name>
+					<type>varchar(n)</type>
+					<length>300</length>
+				</normal_column>
+			</columns>
+			<indexes>
+			</indexes>
+			<compound_unique_key_list>
+				<compound_unique_key>
+					<name>UQ_RESTAURANT_SHOPPING_CENTER</name>
+					<columns>
+						<column>
+							<column_id>table.RESTAURANTS.RESTAURANT_NAME</column_id>
+						</column>
+						<column>
+							<column_id>table.RESTAURANTS.SHOPPING_CENTER_ID</column_id>
+						</column>
+					</columns>
+				</compound_unique_key>
+			</compound_unique_key_list>
+			<table_properties>
+			</table_properties>
+		</table>
+		<table>
+			<physical_name>SHOPPING_CENTERS</physical_name>
+			<logical_name>ショッピングセンター</logical_name>
+			<description></description>
+			<height>89</height>
+			<width>348</width>
+			<font_name>.AppleSystemUIFont</font_name>
+			<font_size>9</font_size>
+			<x>-25</x>
+			<y>501</y>
+			<color>
+				<r>0</r>
+				<g>143</g>
+				<b>81</b>
+			</color>
+			<connections>
+			</connections>
+			<columns>
+				<normal_column>
+					<physical_name>SHOPPING_CENTER_ID</physical_name>
+					<logical_name>ショッピングセンターID</logical_name>
+					<type>integer</type>
+					<not_null>true</not_null>
+					<primary_key>true</primary_key>
+					<auto_increment>true</auto_increment>
+				</normal_column>
+				<normal_column>
+					<physical_name>SHOPPING_CENTER_NAME</physical_name>
+					<logical_name>ショッピングセンター名</logical_name>
+					<type>varchar(n)</type>
+					<length>100</length>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>BRANCH_NAME</physical_name>
+					<logical_name>支店名</logical_name>
+					<type>varchar(n)</type>
+					<length>100</length>
+					<not_null>true</not_null>
+				</normal_column>
+			</columns>
+			<indexes>
+			</indexes>
+			<compound_unique_key_list>
+				<compound_unique_key>
+					<name>UQ_SHOPPING_CENTER_NAME_BRANCH</name>
+					<columns>
+						<column>
+							<column_id>table.SHOPPING_CENTERS.SHOPPING_CENTER_NAME</column_id>
+						</column>
+						<column>
+							<column_id>table.SHOPPING_CENTERS.BRANCH_NAME</column_id>
+						</column>
+					</columns>
+				</compound_unique_key>
+			</compound_unique_key_list>
+			<table_properties>
+			</table_properties>
+		</table>
+		<table>
+			<physical_name>TICKETS</physical_name>
+			<logical_name>整理券</logical_name>
+			<description></description>
+			<height>179</height>
+			<width>221</width>
+			<font_name>.AppleSystemUIFont</font_name>
+			<font_size>9</font_size>
+			<x>83</x>
+			<y>23</y>
+			<color>
+				<r>82</r>
+				<g>27</g>
+				<b>146</b>
+			</color>
+			<connections>
+				<relationship>
+					<name>FK_TICKET_RESTAURANT</name>
+					<source>table.RESTAURANTS</source>
+					<target>table.TICKETS</target>
+					<fk_columns>
+						<fk_column>
+							<fk_column_name>RESTAURANT_ID</fk_column_name>
+						</fk_column>
+					</fk_columns>
+					<parent_cardinality>1</parent_cardinality>
+					<child_cardinality>0..n</child_cardinality>
+					<reference_for_pk>true</reference_for_pk>
+					<on_delete_action>RESTRICT</on_delete_action>
+					<on_update_action>RESTRICT</on_update_action>
+					<source_xp>37</source_xp>
+					<source_yp>0</source_yp>
+				</relationship>
+				<relationship>
+					<name>FK_TICKET_USER</name>
+					<source>table.USER</source>
+					<target>table.TICKETS</target>
+					<fk_columns>
+						<fk_column>
+							<fk_column_name>CREATED_BY_ID</fk_column_name>
+						</fk_column>
+					</fk_columns>
+					<parent_cardinality>1</parent_cardinality>
+					<child_cardinality>0..n</child_cardinality>
+					<reference_for_pk>true</reference_for_pk>
+					<on_delete_action>RESTRICT</on_delete_action>
+					<on_update_action>RESTRICT</on_update_action>
+				</relationship>
+			</connections>
+			<columns>
+				<normal_column>
+					<physical_name>TICKET_ID</physical_name>
+					<logical_name>整理券ID</logical_name>
+					<type>integer</type>
+					<not_null>true</not_null>
+					<primary_key>true</primary_key>
+					<auto_increment>true</auto_increment>
+				</normal_column>
+				<normal_column>
+					<physical_name>TICKET_NO</physical_name>
+					<logical_name>整理券番号</logical_name>
+					<type>integer</type>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>RESTAURANT_ID</physical_name>
+					<referred_column>table.RESTAURANTS.RESTAURANT_ID</referred_column>
+					<relationship>FK_TICKET_RESTAURANT</relationship>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>CREATED_BY_ID</physical_name>
+					<logical_name>作成者ID</logical_name>
+					<referred_column>table.USER.USER_ID</referred_column>
+					<relationship>FK_TICKET_USER</relationship>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>CREATED_AT</physical_name>
+					<logical_name>作成時間</logical_name>
+					<type>datetime</type>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>SEAT_NUM</physical_name>
+					<logical_name>席数</logical_name>
+					<type>integer</type>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>TICKET_TYPE</physical_name>
+					<logical_name>整理券種類</logical_name>
+					<type>varchar(n)</type>
+					<length>20</length>
+					<not_null>true</not_null>
+				</normal_column>
+				<normal_column>
+					<physical_name>TICKET_STATUS</physical_name>
+					<logical_name>整理券状態</logical_name>
+					<type>varchar(n)</type>
+					<length>20</length>
+					<not_null>true</not_null>
+				</normal_column>
+			</columns>
+			<indexes>
+			</indexes>
+			<compound_unique_key_list>
+				<compound_unique_key>
+					<name>UQ_TICKET_TYPE_RESTAURANT_CREATED_BY_STATUS</name>
+					<columns>
+						<column>
+							<column_id>table.TICKETS.RESTAURANT_ID</column_id>
+						</column>
+						<column>
+							<column_id>table.TICKETS.CREATED_BY_ID</column_id>
+						</column>
+					</columns>
+				</compound_unique_key>
+			</compound_unique_key_list>
+			<table_properties>
+			</table_properties>
+		</table>
+		<table>
 			<physical_name>USER</physical_name>
 			<logical_name>ユーザー</logical_name>
 			<description></description>
 			<height>92</height>
-			<width>274</width>
+			<width>279</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>2</x>
-			<y>-167</y>
+			<x>31</x>
+			<y>-192</y>
 			<color>
 				<r>117</r>
 				<g>213</g>
@@ -148,14 +453,9 @@
 			</color>
 			<connections>
 				<relationship>
-					<name>FK_USER_USER_LOGIN</name>
-					<source>table.USER_LOGIN</source>
+					<name>FK_USER_USER_ACCOUNT</name>
+					<source>table.USER_SECRET</source>
 					<target>table.USER</target>
-					<bendpoint>
-						<relative>false</relative>
-						<x>-137</x>
-						<y>-119</y>
-					</bendpoint>
 					<fk_columns>
 						<fk_column>
 							<fk_column_name>USER_ID</fk_column_name>
@@ -171,8 +471,8 @@
 			<columns>
 				<normal_column>
 					<physical_name>USER_ID</physical_name>
-					<referred_column>table.USER_LOGIN.USER_ID</referred_column>
-					<relationship>FK_USER_USER_LOGIN</relationship>
+					<referred_column>table.USER_SECRET.USER_ID</referred_column>
+					<relationship>FK_USER_USER_ACCOUNT</relationship>
 					<not_null>true</not_null>
 					<primary_key>true</primary_key>
 					<auto_increment>true</auto_increment>
@@ -201,15 +501,15 @@
 			</table_properties>
 		</table>
 		<table>
-			<physical_name>USER_LOGIN</physical_name>
-			<logical_name>ユーザーログイン情報</logical_name>
+			<physical_name>USER_SECRET</physical_name>
+			<logical_name>ユーザーシクレクト</logical_name>
 			<description></description>
 			<height>73</height>
-			<width>256</width>
+			<width>269</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>-263</x>
-			<y>-56</y>
+			<x>-309</x>
+			<y>-189</y>
 			<color>
 				<r>117</r>
 				<g>213</g>
@@ -242,7 +542,7 @@
 			</table_properties>
 		</table>
 		<walker_group>
-			<height>418</height>
+			<height>230</height>
 			<width>672</width>
 			<font_name></font_name>
 			<font_size>9</font_size>
@@ -257,7 +557,7 @@
 			</connections>
 			<walker_group_name>Customer</walker_group_name>
 			<diagram_walker>table.USER</diagram_walker>
-			<diagram_walker>table.USER_LOGIN</diagram_walker>
+			<diagram_walker>table.USER_SECRET</diagram_walker>
 		</walker_group>
 	</diagram_walkers>
 	<vdiagrams>

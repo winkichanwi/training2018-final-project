@@ -12,10 +12,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
+class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
     // コンパニオンオブジェクトに定義したReads、Writesを参照するためにimport文を追加
-    import UserJsonController._
+    import UserController._
 
     /**
       * 一覧表示
@@ -23,7 +23,7 @@ class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 
     def list = Action.async { implicit rs =>
         // IDの昇順にすべてのユーザ情報を取得
-        db.run(User.sortBy(t => t.userId).result).map { users =>
+        db.run(Users.sortBy(t => t.userId).result).map { users =>
             // ユーザの一覧をJSONで返す
             Ok(Json.obj("users" -> users))
         }
@@ -35,10 +35,12 @@ class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider)
     def create = Action.async(parse.json) { implicit rs =>
         rs.body.validate[UserForm].map { form =>
             // OKの場合はユーザを登録
-            val newUser = UserRow(0, form.userFullname, form.email)
-            db.run((User returning User.map(_.userId)) += newUser).map { userId =>
-                val userAcc = UserAccountRow(userId, form.password)
-                db.run(UserAccount += userAcc)
+            val newUser = UsersRow(0, form.userFullname, form.email)
+            val actionAddUser = ((Users returning Users.map(_.userId)) += newUser).flatMap { userId =>
+                val userAcc = UserSecretRow(userId, form.password)
+                UserSecret += userAcc
+            }
+            db.run(actionAddUser).map { _ =>
                 Ok(Json.obj("result" -> "success"))
             }
         }.recoverTotal { e =>
@@ -48,44 +50,45 @@ class UserJsonController @Inject()(val dbConfigProvider: DatabaseConfigProvider)
             }
         }
     }
-    //db.run(users.filter(_.id === id).result.headOption)
 
     /**
       * ユーザ更新
       */
-    def update = Action.async(parse.json) { implicit rs =>
-        rs.body.validate[UserForm].map { form =>
-            // OKの場合はユーザ情報を更新
-            val user = UserRow(form.userId.get, form.userFullname, form.email)
-            db.run(User.filter(t => t.userId === user.userId.bind).update(user)).map { _ =>
-                Ok(Json.obj("result" -> "success"))
-            }
-        }.recoverTotal { e =>
-            // NGの場合はバリデーションエラーを返す
-            Future {
-                BadRequest(Json.obj("result" ->"failure", "error" -> JsError.toJson(e)))
-            }
-        }
-    }
+    def update = TODO
+//        Action.async(parse.json) { implicit rs =>
+//        rs.body.validate[UserForm].map { form =>
+//            // OKの場合はユーザ情報を更新
+//            val user = UserRow(form.userId.get, form.userFullname, form.email)
+//            db.run(User.filter(t => t.userId === user.userId.bind).update(user)).map { _ =>
+//                Ok(Json.obj("result" -> "success"))
+//            }
+//        }.recoverTotal { e =>
+//            // NGの場合はバリデーションエラーを返す
+//            Future {
+//                BadRequest(Json.obj("result" ->"failure", "error" -> JsError.toJson(e)))
+//            }
+//        }
+//    }
 
     /**
       * ユーザ削除
       */
-    def remove(userId: Int) = Action.async { implicit rs =>
-        // ユーザを削除
-        db.run(User.filter(t => t.userId === userId.bind).delete).map { _ =>
-            Ok(Json.obj("result" -> "success"))
-        }
-    }
+    def remove(userId: Int) = TODO
+//        Action.async { implicit rs =>
+//        // ユーザを削除
+//        db.run(User.filter(t => t.userId === userId.bind).delete).map { _ =>
+//            Ok(Json.obj("result" -> "success"))
+//        }
+//    }
 }
 
-object UserJsonController {
+object UserController {
     // UsersRowをJSONに変換するためのWritesを定義
-    implicit val userWrites: Writes[UserRow] = (
+    implicit val userWrites: Writes[UsersRow] = (
         (__ \ "id").write[Int]   and
         (__ \ "full_name").write[String] and
         (__ \ "email").write[String]
-    )(unlift(UserRow.unapply))
+    )(unlift(UsersRow.unapply))
 
     case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
 

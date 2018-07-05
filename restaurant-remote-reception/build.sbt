@@ -9,8 +9,7 @@ lazy val root = (project in file("."))
         name := "restaurant-remote-reception",
         packageName in Docker := "restaurant-remote-reception",
         dockerBaseImage := "openjdk:8",
-        dockerExposedPorts := Seq(9000, 9443),
-        dockerExposedVolumes := Seq("/opt/docker/logs")
+        dockerExposedPorts := Seq(9000, 9443)
     )
 
 scalaVersion := "2.11.11"

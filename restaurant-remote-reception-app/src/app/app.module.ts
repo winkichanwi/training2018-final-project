@@ -7,12 +7,16 @@ import { AppComponent } from './app.component';
 import { SignupComponent } from './signup/signup.component';
 import { AppRoutingModule} from './app-routing.module';
 import { HomeComponent } from './home/home.component';
+import { UserLoginComponent } from './user-login/user-login.component';
+import { ShoppingCentersComponent } from './shopping-centers/shopping-centers.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SignupComponent,
-    HomeComponent
+    HomeComponent,
+    UserLoginComponent,
+    ShoppingCentersComponent
   ],
   imports: [
     BrowserModule,
