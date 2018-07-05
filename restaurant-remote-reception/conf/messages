@@ -1,1 +1,11 @@
 # https://www.playframework.com/documentation/latest/ScalaI18N
+
+# App name
+app.name = Restaurant Remote Reception
+
+#Title
+page.title = User Registration
+
+# Flash Scope
+flash.success = success
+flash.error = error

@@ -8,3 +8,8 @@ GET     /                           controllers.HomeController.index
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+# JSON API
+GET         /users              controllers.UserJsonController.list
+POST        /users              controllers.UserJsonController.create
+DELETE      /users/:userId      controllers.UserJsonController.remove(userId: Int)
