@@ -398,7 +398,7 @@
 					<not_null>true</not_null>
 				</normal_column>
 				<normal_column>
-					<physical_name>SEAT_NUM</physical_name>
+					<physical_name>TICKET_SEAT_NO</physical_name>
 					<logical_name>席数</logical_name>
 					<type>integer</type>
 					<not_null>true</not_null>
@@ -429,6 +429,9 @@
 						</column>
 						<column>
 							<column_id>table.TICKETS.CREATED_BY_ID</column_id>
+						</column>
+						<column>
+							<column_id>table.TICKETS.TICKET_STATUS</column_id>
 						</column>
 					</columns>
 				</compound_unique_key>

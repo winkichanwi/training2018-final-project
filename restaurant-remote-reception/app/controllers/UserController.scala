@@ -36,10 +36,12 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         rs.body.validate[UserForm].map { form =>
             // OKの場合はユーザを登録
             val newUser = UsersRow(0, form.userFullname, form.email)
-            val actionAddUser = ((Users returning Users.map(_.userId)) += newUser).flatMap { userId =>
-                val userAcc = UserSecretRow(userId, form.password)
-                UserSecret += userAcc
-            }
+            val actionAddUser = for {
+                userId <- (Users returning Users.map(_.userId)) += newUser
+                userAcc <- UserSecretRow(userId, form.password)
+                result <- UserSecret += userAcc
+            } yield result
+
             db.run(actionAddUser).map { _ =>
                 Ok(Json.obj("result" -> "success"))
             }
