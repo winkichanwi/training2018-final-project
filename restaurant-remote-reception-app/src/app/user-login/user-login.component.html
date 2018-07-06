@@ -1,10 +1,6 @@
 <div class="container">
-  <h2> 登録 </h2>
-  <form (ngSubmit)="onSubmit()" #signupForm="ngForm">
-    <div class="form-group">
-      <label for="inputFullname">Full name</label>
-      <input type="text" class="form-control" id="inputFullname" placeholder="Enter full name" [(ngModel)]="user.full_name" name="inputFullname" required>
-    </div>
+  <h2> ログイン </h2>
+  <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
     <div class="form-group">
       <label for="inputEmail">Email address</label>
       <input type="email" class="form-control" id="inputEmail" placeholder="Enter email" [(ngModel)]="user.email" name="inputEmail" required email>
@@ -12,7 +8,6 @@
     <div class="form-group">
       <label for="inputPassword">Password</label>
       <input type="password" class="form-control" id="inputPassword" aria-describedby="passwordHelp" placeholder="Password" [(ngModel)]="user.password" name="inputPassword" required>
-      <small id="passwordHelp" class="form-text text-muted">Please enter 6-20 characters or/ and numbers.</small>
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>

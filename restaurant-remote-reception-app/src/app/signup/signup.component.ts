@@ -1,13 +1,19 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserSignup } from './user-signup';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+import { Router} from '@angular/router';
 
 const httpOptions = {
   headers: new HttpHeaders({
-    'Content-Type':  'application/json',
+    'Content-Type':  'application/signupJson',
   })
 };
+
+interface SignupResponse {
+  result: String;
+}
 
 @Component({
   selector: 'app-signup',
@@ -18,20 +24,20 @@ const httpOptions = {
 export class SignupComponent implements OnInit {
   signupForm: FormGroup;
   user = new UserSignup('', '', '');
-  json = '';
-  apiHost = 'http://localhost:9000';
-  postUrl = this.apiHost + '/users';
+  signupJson = '';
+  postUrl = environment.apiUrl + '/users';
 
-  constructor (private http: HttpClient) { }
+  constructor (private http: HttpClient, private router: Router) { }
+
 
   ngOnInit() {
     this.signupForm = new FormGroup({
       'inputFullname': new FormControl(this.user.full_name, Validators.required),
-      'inputEmail': new FormControl(this.user.full_name, [
+      'inputEmail': new FormControl(this.user.email, [
         Validators.required,
         Validators.email
       ]),
-      'inputPassword': new FormControl(this.user.full_name, [
+      'inputPassword': new FormControl(this.user.password, [
         Validators.required,
         Validators.minLength(6),
         Validators.maxLength(20)
@@ -41,7 +47,21 @@ export class SignupComponent implements OnInit {
   }
 
   onSubmit() {
-    this.json = JSON.stringify(this.user);
-    this.http.post(this.postUrl, this.json, httpOptions).subscribe( res => console.log(res));
+    this.signupJson = JSON.stringify(this.user);
+    this.http.post<SignupResponse>(this.postUrl, this.signupJson, httpOptions)
+      .subscribe(
+        res => {
+          if (res.result === 'success') {
+            this.router.navigate(['/home']);
+          }
+        },
+        (err: HttpErrorResponse) => {
+          if (err.error instanceof Error) {
+            console.log('Client-side error occured.');
+          } else {
+            console.log('Server-side error occured.');
+          }
+        }
+      );
   }
 }
