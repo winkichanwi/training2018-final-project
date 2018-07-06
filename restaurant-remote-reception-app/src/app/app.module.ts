@@ -11,6 +11,7 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
 
 import { ShoppingCenterService } from './services/shopping-center.service';
+import {RestaurantListComponent} from './restaurant-list/restaurant-list.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { ShoppingCenterService } from './services/shopping-center.service';
     SignupComponent,
     HomeComponent,
     UserLoginComponent,
-    ShoppingCenterListComponent
+    ShoppingCenterListComponent,
+    RestaurantListComponent
   ],
   imports: [
     BrowserModule,

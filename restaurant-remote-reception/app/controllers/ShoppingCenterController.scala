@@ -23,6 +23,18 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
             Ok(Json.toJson(shoppingCenters))
         }
     }
+
+    def get(shoppingCenterId: Int) = Action.async {implicit rs =>
+        val queryShoppingCenterById =
+            ShoppingCenters.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result.headOption
+        db.run(queryShoppingCenterById).map {
+            case Some(shoppingCenter) => Ok(Json.toJson(shoppingCenter))
+            case None => BadRequest(Json.obj("error" ->
+                Json.toJson("Shopping center (id: " + shoppingCenterId + ") not found.")
+            ))
+        }
+    }
+
 }
 
 object ShoppingCenterController {

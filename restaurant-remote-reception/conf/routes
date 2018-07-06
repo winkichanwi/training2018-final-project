@@ -20,4 +20,4 @@ POST        /api/users/authentication   controllers.LoginController.authenticate
 
 # Shopping centers
 GET         /api/shopping-centers   controllers.ShoppingCenterController.list
-
+GET         /api/shopping-centers/:shoppingCenterId   controllers.ShoppingCenterController.get(shoppingCenterId: Int)
