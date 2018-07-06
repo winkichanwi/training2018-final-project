@@ -6,7 +6,7 @@
   <div class="row">
     <div class="col-lg-4 col-sm-6 portfolio-item" *ngFor="let shoppingCenter of shoppingCenters">
       <div class="card h-100">
-        <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+        <a routerLink="/shopping-centers/{{shoppingCenter.id}}"><img class="card-img-top" src="http://placehold.it/700x400" alt="{{shoppingCenter.name}} {{shoppingCenter.branch}}"></a>
         <div class="card-body">
           <h4 class="card-title">
             <a routerLink="/shopping-centers/{{shoppingCenter.id}}">{{shoppingCenter.name}}<span *ngIf="shoppingCenter.branch"> ({{shoppingCenter.branch}})</span></a>
