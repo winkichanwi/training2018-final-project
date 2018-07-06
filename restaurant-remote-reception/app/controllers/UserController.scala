@@ -38,7 +38,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             val newUser = UsersRow(0, form.userFullname, form.email)
             val actionAddUser = for {
                 userId <- (Users returning Users.map(_.userId)) += newUser
-                userAcc <- UserSecretRow(userId, form.password)
+                userAcc = UserSecretRow(userId, form.password)
                 result <- UserSecret += userAcc
             } yield result
 
