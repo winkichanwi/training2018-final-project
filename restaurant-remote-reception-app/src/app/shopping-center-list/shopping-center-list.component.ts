@@ -11,11 +11,11 @@ interface ShoppingCenters {
 
 @Component({
   selector: 'app-shopping-centers',
-  templateUrl: './shopping-centers.component.html',
-  styleUrls: ['./shopping-centers.component.css']
+  templateUrl: './shopping-center-list.component.html',
+  styleUrls: ['./shopping-center-list.component.css']
 })
 
-export class ShoppingCentersComponent implements OnInit {
+export class ShoppingCenterListComponent implements OnInit {
   getUrl = environment.apiUrl + '/shopping-centers';
   shoppingCenters: ShoppingCenters[];
 
