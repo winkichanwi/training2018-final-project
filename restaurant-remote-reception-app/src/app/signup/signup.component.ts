@@ -7,7 +7,7 @@ import { Router} from '@angular/router';
 
 const httpOptions = {
   headers: new HttpHeaders({
-    'Content-Type':  'application/signupJson',
+    'Content-Type':  'application/json',
   })
 };
 

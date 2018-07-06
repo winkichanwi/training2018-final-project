@@ -18,9 +18,9 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
 
     import ShoppingCenterController._
 
-    def list = Action.async(parse.json) { implicit rs =>
+    def list = Action.async { implicit rs =>
         db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result).map { shoppingCenters =>
-            Ok(Json.obj("shopping_centers" -> shoppingCenters))
+            Ok(Json.toJson(shoppingCenters))
         }
     }
 }
@@ -29,6 +29,6 @@ object ShoppingCenterController {
     implicit val shoppingCentersWrites: Writes[ShoppingCentersRow] = (
         (__ \ "id").write[Int]   and
         (__ \ "name").write[String] and
-        (__ \ "branch").write[Option[String]]
+        (__ \ "branch").writeNullable[String]
     )(unlift(ShoppingCentersRow.unapply))
 }

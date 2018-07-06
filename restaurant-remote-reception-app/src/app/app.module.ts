@@ -21,8 +21,8 @@ import { ShoppingCentersComponent } from './shopping-centers/shopping-centers.co
   imports: [
     BrowserModule,
     HttpClientModule,
-    AppRoutingModule,
-    FormsModule
+    FormsModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]
