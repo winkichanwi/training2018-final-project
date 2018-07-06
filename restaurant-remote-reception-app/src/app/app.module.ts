@@ -9,6 +9,7 @@ import { AppRoutingModule} from './app-routing.module';
 import { HomeComponent } from './home/home.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { ShoppingCentersComponent } from './shopping-centers/shopping-centers.component';
+import { RestaurantListComponent } from './restaurant-list/restaurant-list.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { ShoppingCentersComponent } from './shopping-centers/shopping-centers.co
     SignupComponent,
     HomeComponent,
     UserLoginComponent,
-    ShoppingCentersComponent
+    ShoppingCentersComponent,
+    RestaurantListComponent
   ],
   imports: [
     BrowserModule,
