@@ -10,6 +10,8 @@ import { HomeComponent } from './home/home.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
 
+import { ShoppingCenterService } from './services/shopping-center.service';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -24,7 +26,7 @@ import { ShoppingCenterListComponent } from './shopping-center-list/shopping-cen
     FormsModule,
     AppRoutingModule
   ],
-  providers: [],
+  providers: [ShoppingCenterService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
