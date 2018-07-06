@@ -8,8 +8,7 @@ import { SignupComponent } from './signup/signup.component';
 import { AppRoutingModule} from './app-routing.module';
 import { HomeComponent } from './home/home.component';
 import { UserLoginComponent } from './user-login/user-login.component';
-import { ShoppingCentersComponent } from './shopping-centers/shopping-centers.component';
-import { RestaurantListComponent } from './restaurant-list/restaurant-list.component';
+import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
 
 @NgModule({
   declarations: [
@@ -17,8 +16,7 @@ import { RestaurantListComponent } from './restaurant-list/restaurant-list.compo
     SignupComponent,
     HomeComponent,
     UserLoginComponent,
-    ShoppingCentersComponent,
-    RestaurantListComponent
+    ShoppingCenterListComponent
   ],
   imports: [
     BrowserModule,

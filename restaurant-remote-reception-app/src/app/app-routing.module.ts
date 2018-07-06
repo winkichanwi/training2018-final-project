@@ -4,14 +4,14 @@ import { RouterModule, Routes } from '@angular/router';
 import { SignupComponent} from './signup/signup.component';
 import { HomeComponent } from './home/home.component';
 import { UserLoginComponent } from './user-login/user-login.component';
-import {ShoppingCentersComponent} from './shopping-centers/shopping-centers.component';
+import {ShoppingCenterListComponent} from './shopping-center-list/shopping-center-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full'},
   { path: 'home', component: HomeComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: UserLoginComponent },
-  { path: 'shopping-centers', component: ShoppingCentersComponent }
+  { path: 'shopping-centers', component: ShoppingCenterListComponent }
 ];
 
 @NgModule({
