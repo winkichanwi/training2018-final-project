@@ -2,12 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-
-interface ShoppingCenters {
-  id: number;
-  name: string;
-  branch: string;
-}
+import {IShoppingCenter, ShoppingCenterService} from '../services/shopping-center.service';
 
 @Component({
   selector: 'app-shopping-centers',
@@ -16,11 +11,10 @@ interface ShoppingCenters {
 })
 
 export class ShoppingCenterListComponent implements OnInit {
-  getUrl = environment.apiUrl + '/shopping-centers';
-  shoppingCenters: ShoppingCenters[];
+  shoppingCenters: IShoppingCenter[];
 
-  constructor (private http: HttpClient, private router: Router) {
-    this.http.get(this.getUrl).subscribe((res: ShoppingCenters[]) => {
+  constructor (private shoppingCenterService: ShoppingCenterService) {
+    this.shoppingCenterService.getList().subscribe((res: IShoppingCenter[]) => {
       this.shoppingCenters = res;
     });
   }
