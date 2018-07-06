@@ -1,13 +1,26 @@
 <div class="container">
-  <h3><small><a routerLink="/shopping-centers">ショッピングセンター</a> > </small>{{shoppingCenter.name}} <span *ngIf="shoppingCenter.branch"> ({{shoppingCenter.branch}})</span></h3>
-  <div class="row">
-    <div class="col-md-3">
-      <img class="img-fluid rounded mb-3 mb-md-0" src="http://placehold.it/300x200" alt="">
-    </div>
-    <div class="col-md-9">
-      <h3>Project One</h3>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium veniam exercitationem expedita laborum at voluptate. Labore, voluptates totam at aut nemo deserunt rem magni pariatur quos perspiciatis atque eveniet unde.</p>
-      <a class="btn btn-primary" href="#">View Project</a>
-    </div>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/shopping-centers">ショッピングセンター</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{shoppingCenter.name}}<span *ngIf="shoppingCenter.branch"> ({{shoppingCenter.branch}})</span></li>
+    </ol>
+  </nav>
+ <div class="row" *ngFor="let restaurant of restaurants">
+      <div class="col-md-3">
+        <img class="img-fluid rounded mb-3 mb-md-0" src="http://placehold.it/300x200" alt="">
+      </div>
+      <div class="col-md-4">
+        <h4>{{restaurant.name}} <span class="badge badge-secondary">{{restaurant.cuisine}}</span></h4>
+        <dl class="row">
+          <dt class="col-sm-4">フロア：</dt><dd class="col-sm-8">{{restaurant.floor}}</dd>
+          <dt class="col-sm-4">席数：</dt><dd class="col-sm-8">{{restaurant.seat_no}}</dd>
+          <dt class="col-sm-4">電話：</dt><dd class="col-sm-8">{{restaurant.phone_no}}</dd>
+          <dt class="col-sm-4">営業時間：</dt><dd class="col-sm-8">{{restaurant.opening_hour}}</dd>
+        </dl>
+      </div>
+      <div class="col-md-5">
+        <a class="btn btn-primary" href="#">Press</a>
+      </div>
   </div>
+
 </div>

@@ -1,19 +1,18 @@
 package controllers
 
-import javax.inject.Inject
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.functional.syntax.unlift
-import play.api.libs.json.{Writes, __}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc._
+import play.api.db.slick._
+import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
+import javax.inject.Inject
+
+import scala.concurrent.ExecutionContext
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-import scala.concurrent.ExecutionContext
-
-class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
+class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
 
     import ShoppingCenterController._
@@ -30,11 +29,10 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
         db.run(queryShoppingCenterById).map {
             case Some(shoppingCenter) => Ok(Json.toJson(shoppingCenter))
             case None => BadRequest(Json.obj("error" ->
-                Json.toJson("Shopping center (id: " + shoppingCenterId + ") not found.")
+                Json.toJson("Shopping center (id: " + shoppingCenterId.toString() + ") not found.")
             ))
         }
     }
-
 }
 
 object ShoppingCenterController {

@@ -12,6 +12,7 @@ import { ShoppingCenterListComponent } from './shopping-center-list/shopping-cen
 
 import { ShoppingCenterService } from './services/shopping-center.service';
 import {RestaurantListComponent} from './restaurant-list/restaurant-list.component';
+import {RestaurantService} from './services/restaurant.service';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,9 @@ import {RestaurantListComponent} from './restaurant-list/restaurant-list.compone
     FormsModule,
     AppRoutingModule
   ],
-  providers: [ShoppingCenterService],
+  providers: [
+    ShoppingCenterService,
+    RestaurantService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
