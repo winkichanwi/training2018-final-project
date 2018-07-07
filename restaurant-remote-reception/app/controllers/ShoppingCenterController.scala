@@ -8,6 +8,7 @@ import play.api.mvc.{Action, Controller}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
+import models.Utils
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
