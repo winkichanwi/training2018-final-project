@@ -7,7 +7,7 @@ import { Router} from '@angular/router';
 
 const httpOptions = {
   headers: new HttpHeaders({
-    'Content-Type':  'application/signupJson',
+    'Content-Type':  'application/json',
   })
 };
 
@@ -39,8 +39,7 @@ export class SignupComponent implements OnInit {
       ]),
       'inputPassword': new FormControl(this.user.password, [
         Validators.required,
-        Validators.minLength(6),
-        Validators.maxLength(20)
+        Validators.minLength(6)
       ]),
 
     });

@@ -8,7 +8,7 @@ import {AppComponent} from '../app.component';
 
 const httpOptions = {
   headers: new HttpHeaders({
-    'Content-Type':  'application/signupJson',
+    'Content-Type':  'application/json',
   })
 };
 
