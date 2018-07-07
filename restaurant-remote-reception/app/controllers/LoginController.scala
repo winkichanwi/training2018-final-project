@@ -43,10 +43,9 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (i
                         val pwdIncorrectRes = ErrorResponse(Constants.failure, "Password incorrect. ")
                         BadRequest(Json.toJson(pwdIncorrectRes))
                     }
-                case None => {
+                case None =>
                     val emailIncorrectRes = ErrorResponse(Constants.failure, "Email (" + loginEmail + ") incorrect. ")
                     BadRequest(Json.toJson(emailIncorrectRes))
-                }
             }
         }.recoverTotal { e =>
             Future { resForBadRequest(e) }
