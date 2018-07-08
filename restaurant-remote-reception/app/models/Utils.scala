@@ -16,15 +16,15 @@ object ErrorResponse {
 }
 
 object Constants {
-    val success = "success"
-    val failure = "failure"
+    val SUCCESS = "success"
+    val FAILURE = "failure"
 
-    val successJson : JsValue = Json.obj("result" -> success)
+    val SUCCESS_JSON : JsValue = Json.obj("result" -> SUCCESS)
 }
 
 object Utils {
     def resForBadRequest(e: JsError) : Result = {
-        val errorResponse = ErrorResponse(Constants.failure, JsError.toJson(e).toString())
+        val errorResponse = ErrorResponse(Constants.FAILURE, JsError.toJson(e).toString())
         BadRequest(Json.toJson(errorResponse))
     }
 }

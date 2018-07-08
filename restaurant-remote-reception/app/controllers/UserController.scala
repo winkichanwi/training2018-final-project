@@ -47,7 +47,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             } yield result
 
             db.run(actionAddUser).map { _ =>
-                Ok(Constants.successJson)
+                Ok(Constants.SUCCESS_JSON)
             }
         }.recoverTotal { e =>
             Future { resForBadRequest(e) }

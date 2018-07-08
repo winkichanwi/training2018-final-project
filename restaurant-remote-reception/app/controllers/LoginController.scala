@@ -36,15 +36,15 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (i
             db.run(queryPasswordByEmail).map {
                 case Some(loginInfo) =>
                     if (loginInfo.password == loginPassword) {
-                        Ok(Json.obj("result" -> Constants.success, "full_name" -> loginInfo.userFullname))
+                        Ok(Json.obj("result" -> Constants.SUCCESS, "full_name" -> loginInfo.userFullname))
                             .withSession("connected" -> loginInfo.userId.toString())
                         // TODO set full name and id to cache?
                     } else {
-                        val pwdIncorrectRes = ErrorResponse(Constants.failure, "Password incorrect. ")
+                        val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")
                         BadRequest(Json.toJson(pwdIncorrectRes))
                     }
                 case None =>
-                    val emailIncorrectRes = ErrorResponse(Constants.failure, "Email (" + loginEmail + ") incorrect. ")
+                    val emailIncorrectRes = ErrorResponse(Constants.FAILURE, "Email (" + loginEmail + ") incorrect. ")
                     BadRequest(Json.toJson(emailIncorrectRes))
             }
         }.recoverTotal { e =>
