@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import {environment} from '../../environments/environment';
 import {HttpClient} from '@angular/common/http';
+import {AppSettings} from '../app-common';
 
 export interface IRestaurant {
   id: number;
@@ -20,12 +20,9 @@ export interface IRestaurant {
 })
 
 export class RestaurantService {
-  getListUrl = '';
-
   constructor(private http: HttpClient) { }
 
   public getList(shoppingCenterId: string) {
-    this.getListUrl = environment.apiUrl + '/shopping-centers/' + shoppingCenterId + '/restaurants';
-    return this.http.get(this.getListUrl);
+    return this.http.get(AppSettings.RESTAURANTS_API_ENDPOINT(shoppingCenterId));
   }
 }

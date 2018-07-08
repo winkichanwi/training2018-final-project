@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { UserSignup } from './user-signup';
+import { UserSignup } from '../models/user-signup';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { Router} from '@angular/router';
+import { AppSettings} from '../app-common';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -22,43 +22,28 @@ interface SignupResponse {
 })
 
 export class SignupComponent implements OnInit {
-  signupForm: FormGroup;
   user = new UserSignup('', '', '');
   signupJson = '';
-  postUrl = environment.apiUrl + '/users';
 
   constructor (private http: HttpClient, private router: Router) { }
 
 
-  ngOnInit() {
-    this.signupForm = new FormGroup({
-      'inputFullname': new FormControl(this.user.full_name, Validators.required),
-      'inputEmail': new FormControl(this.user.email, [
-        Validators.required,
-        Validators.email
-      ]),
-      'inputPassword': new FormControl(this.user.password, [
-        Validators.required,
-        Validators.minLength(6)
-      ]),
-
-    });
-  }
+  ngOnInit() {}
 
   onSubmit() {
     this.signupJson = JSON.stringify(this.user);
-    this.http.post<SignupResponse>(this.postUrl, this.signupJson, httpOptions)
+    this.http.post(AppSettings.USERS_API_ENDPOINT, this.signupJson, httpOptions)
       .subscribe(
-        res => {
+        (res: SignupResponse) => {
           if (res.result === 'success') {
-            this.router.navigate(['/home']);
+            this.router.navigate(['/login']);
           }
         },
-        (err: HttpErrorResponse) => {
+        err => {
           if (err.error instanceof Error) {
             console.log('Client-side error occured.');
           } else {
-            console.log('Server-side error occured.');
+            console.log(err.error.message);
           }
         }
       );

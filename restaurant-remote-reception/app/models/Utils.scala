@@ -7,11 +7,11 @@ import play.api.mvc.Results._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class ErrorResponse(result: String, errorMessage: String)
+case class ErrorResponse(result: String, message: String)
 object ErrorResponse {
     implicit val errorWrites: Writes[ErrorResponse] = (
         (__ \ "result").write[String] and
-        (__ \ "error_message").write[String]
+        (__ \ "message").write[String]
     )(unlift(ErrorResponse.unapply))
 }
 

@@ -8,6 +8,7 @@ import {IRestaurant, RestaurantService} from '../services/restaurant.service';
   templateUrl: './restaurant-list.component.html',
   styleUrls: ['./restaurant-list.component.css']
 })
+
 export class RestaurantListComponent implements OnInit {
   shoppingCenterId: string;
   shoppingCenter: IShoppingCenter;
@@ -21,7 +22,6 @@ export class RestaurantListComponent implements OnInit {
 
   ngOnInit() {
     this.shoppingCenterId = this.route.snapshot.paramMap.get('shoppingCenterId');
-    console.log(this.shoppingCenterId);
     this.shoppingCenterService.getInfo(this.shoppingCenterId).subscribe((res: IShoppingCenter) => {
       this.shoppingCenter = res;
     });
