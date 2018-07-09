@@ -2,13 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { UserSignup } from '../models/user-signup';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router} from '@angular/router';
-import { AppSettings, AppUtils} from '../app-common';
+import { AppUtils} from '../app-common';
+import {environment} from '../../environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({
     'Content-Type':  'application/json',
   })
 };
+
+const USERS_API_ENDPOINT = environment.API_HOST + '/api/users';
 
 interface SignupResponse {
   result: String;
@@ -36,7 +39,7 @@ export class SignupComponent implements OnInit {
   }
 
   private signUp() {
-    this.http.post(AppSettings.USERS_API_ENDPOINT, this.signupJson, httpOptions)
+    this.http.post(USERS_API_ENDPOINT, this.signupJson, httpOptions)
       .subscribe(
         (res: SignupResponse) => {
           if (res.result === 'success') {

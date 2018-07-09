@@ -1,14 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {AppSettings, AppUtils} from '../app-common';
+import { AppUtils} from '../app-common';
 import {Router} from '@angular/router';
 import {UserLogin} from '../models/user-login';
+import {environment} from '../../environments/environment';
 
 const httpOptions = {
   headers: new HttpHeaders({
     'Content-Type':  'application/json',
   })
 };
+
+const USER_AUTHENTICATION_API_ENDPOINT = environment.API_HOST + '/api/users/authentication';
 
 interface LoginResponse {
   result: String;
@@ -38,7 +41,7 @@ export class UserLoginComponent implements OnInit {
   }
 
   private login() {
-    this.http.post(AppSettings.USER_AUTHENTICATION_API_ENDPOINT, this.loginJson, httpOptions)
+    this.http.post(USER_AUTHENTICATION_API_ENDPOINT, this.loginJson, httpOptions)
       .subscribe(
         (res: LoginResponse) => {
           if (res.result === 'success') {
