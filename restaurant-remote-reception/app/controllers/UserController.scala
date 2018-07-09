@@ -7,9 +7,13 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
+import models.ErrorResponse._
+import models.Utils._
+import models.{Constants, ErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
+import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
@@ -25,7 +29,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         // IDの昇順にすべてのユーザ情報を取得
         db.run(Users.sortBy(t => t.userId).result).map { users =>
             // ユーザの一覧をJSONで返す
-            Ok(Json.obj("users" -> users))
+            Ok(Json.toJson(users))
         }
     }
 
@@ -43,13 +47,10 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             } yield result
 
             db.run(actionAddUser).map { _ =>
-                Ok(Json.obj("result" -> "success"))
+                Ok(Constants.SUCCESS_JSON)
             }
         }.recoverTotal { e =>
-            // NGの場合はバリデーションエラーを返す
-            Future {
-                BadRequest(Json.obj("result" ->"failure", "error" -> JsError.toJson(e)))
-            }
+            Future { resForBadRequest(e) }
         }
     }
 
@@ -98,7 +99,7 @@ object UserController {
     implicit val userFormReads: Reads[UserForm] = (
         (__ \ "id").readNullable[Int] and
         (__ \ "full_name").read[String] and
-        (__ \ "email").read[String] and
-        (__ \ "password").read[String]
+        (__ \ "email").read[String](email) and
+        (__ \ "password").read[String](minLength[String](6))
     )(UserForm)
 }

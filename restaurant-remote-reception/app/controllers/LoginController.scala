@@ -7,9 +7,13 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
+import models.ErrorResponse._
+import models.Utils._
+import models.{Constants, ErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
+import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
 class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
@@ -22,29 +26,29 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (i
             var loginEmail = form.email
             var loginPassword = form.password
 
-            val queryPassword = Users.join(UserSecret).on(_.userId === _.userId)
+            val queryPasswordByEmail = Users.join(UserSecret).on(_.userId === _.userId)
                 .filter { case (t1, t2) =>
                     t1.email === loginEmail
                 }.map { case (t1, t2) =>
                     (t1.userId, t1.userFullname, t2.password) <> (LoginInfo.tupled, LoginInfo.unapply)
                 }.result.headOption
 
-            db.run(queryPassword).map {
+            db.run(queryPasswordByEmail).map {
                 case Some(loginInfo) =>
                     if (loginInfo.password == loginPassword) {
-                        Ok(Json.obj("result" -> "success", "full_name" -> loginInfo.userFullname))
+                        Ok(Json.obj("result" -> Constants.SUCCESS, "full_name" -> loginInfo.userFullname))
                             .withSession("connected" -> loginInfo.userId.toString())
                         // TODO set full name and id to cache?
                     } else {
-                        BadRequest(Json.obj("result" ->"failure", "email" -> loginEmail, "login_password" -> loginPassword))
+                        val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")
+                        BadRequest(Json.toJson(pwdIncorrectRes))
                     }
-                case None => BadRequest(Json.obj("result" ->"failure", "email" -> loginEmail, "login_password" -> loginPassword))
+                case None =>
+                    val emailIncorrectRes = ErrorResponse(Constants.FAILURE, "Email (" + loginEmail + ") incorrect. ")
+                    BadRequest(Json.toJson(emailIncorrectRes))
             }
         }.recoverTotal { e =>
-            // NGの場合はバリデーションエラーを返す
-            Future {
-                BadRequest(Json.obj("result" ->"failure", "error" -> JsError.toJson(e)))
-            }
+            Future { resForBadRequest(e) }
         }
     }
 
@@ -56,7 +60,7 @@ object LoginController {
     case class LoginForm(email : String, password : String )
 
     implicit val userFormReads: Reads[LoginForm] = (
-        (__ \ "email").read[String] and
-        (__ \ "password").read[String]
+        (__ \ "email").read[String](email) and
+        (__ \ "password").read[String](minLength[String](6))
     )(LoginForm)
 }

@@ -7,6 +7,8 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
+import models.ErrorResponse._
+import models.{ErrorResponse, Constants}
 
 import scala.concurrent.ExecutionContext
 import play.api.libs.json._
@@ -28,9 +30,10 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
             ShoppingCenters.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result.headOption
         db.run(queryShoppingCenterById).map {
             case Some(shoppingCenter) => Ok(Json.toJson(shoppingCenter))
-            case None => BadRequest(Json.obj("error" ->
-                Json.toJson("Shopping center (id: " + shoppingCenterId + ") not found.")
-            ))
+            case None => {
+                val errorResponse = ErrorResponse(Constants.FAILURE, "Shopping center (id: " + shoppingCenterId + ") is not found.")
+                BadRequest(Json.toJson(errorResponse))
+            }
         }
     }
 }

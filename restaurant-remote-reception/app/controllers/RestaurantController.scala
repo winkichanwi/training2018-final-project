@@ -21,7 +21,9 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     def list(shoppingCenterId: Int) = Action.async { implicit rs =>
         val queryRestaurantsByShoppingCenterId =
             Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
-        db.run(queryRestaurantsByShoppingCenterId).map {restaurants => Ok(Json.toJson(restaurants))}
+        db.run(queryRestaurantsByShoppingCenterId).map { restaurants =>
+            Ok(Json.toJson(restaurants))
+        }
     }
 
 }
