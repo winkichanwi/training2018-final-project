@@ -1,6 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import {AppConstants} from '../app-common';
-import {ITicketCount, TicketService} from '../services/ticket.service';
+import {ITicketCount, TICKET_TYPES, TicketService} from '../services/ticket.service';
 
 @Component({
   selector: 'app-ticket-display-panel',
@@ -18,7 +17,7 @@ export class TicketDisplayPanelComponent implements OnInit {
   }
 
   private ticketTypeSeatLabel(type: String): String {
-    for (const typeEntry of AppConstants.TICKET_TYPES) {
+    for (const typeEntry of TICKET_TYPES) {
       if (typeEntry.type === type) {
         return typeEntry.min_seat_no + '-' + typeEntry.max_seat_no;
       }
