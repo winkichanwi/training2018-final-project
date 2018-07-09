@@ -32,7 +32,7 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
             case Some(shoppingCenter) => Ok(Json.toJson(shoppingCenter))
             case None => {
                 val errorResponse = ErrorResponse(Constants.FAILURE, "Shopping center (id: " + shoppingCenterId + ") is not found.")
-                BadRequest(Json.toJson(errorResponse))
+                NotFound(Json.toJson(errorResponse))
             }
         }
     }
