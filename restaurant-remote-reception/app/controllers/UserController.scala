@@ -48,6 +48,11 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
 
             db.run(actionAddUser).map { _ =>
                 Ok(Constants.SUCCESS_JSON)
+            }.fallbackTo {
+                val signupFailRes = ErrorResponse(Constants.FAILURE, "Fail in signing up or email address (" + form.email + ") has been registered. ")
+                Future {
+                    BadRequest(Json.toJson(signupFailRes))
+                }
             }
         }.recoverTotal { e =>
             Future { resForBadRequest(e) }

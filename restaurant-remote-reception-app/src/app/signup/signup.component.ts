@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { UserSignup } from '../models/user-signup';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router} from '@angular/router';
-import { AppSettings} from '../app-common';
+import { AppSettings, AppUtils} from '../app-common';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -22,16 +21,21 @@ interface SignupResponse {
 })
 
 export class SignupComponent implements OnInit {
+  loading = false;
   user = new UserSignup('', '', '');
-  signupJson = '';
+  signupJson: any;
 
   constructor (private http: HttpClient, private router: Router) { }
-
 
   ngOnInit() {}
 
   onSubmit() {
+    this.loading = true;
     this.signupJson = JSON.stringify(this.user);
+    this.signUp();
+  }
+
+  private signUp() {
     this.http.post(AppSettings.USERS_API_ENDPOINT, this.signupJson, httpOptions)
       .subscribe(
         (res: SignupResponse) => {
@@ -40,11 +44,8 @@ export class SignupComponent implements OnInit {
           }
         },
         err => {
-          if (err.error instanceof Error) {
-            console.log('Client-side error occured.');
-          } else {
-            console.log(err.error.message);
-          }
+          AppUtils.handleError(err);
+          this.loading = false;
         }
       );
   }

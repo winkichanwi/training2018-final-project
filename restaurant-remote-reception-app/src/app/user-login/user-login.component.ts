@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-import {AppSettings} from '../app-common';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {AppSettings, AppUtils} from '../app-common';
 import {Router} from '@angular/router';
 import {UserLogin} from '../models/user-login';
 
@@ -22,8 +22,9 @@ interface LoginResponse {
 })
 
 export class UserLoginComponent implements OnInit {
+  loading = false;
   user = new UserLogin('', '');
-  loginJson = '';
+  loginJson: any;
   sessionToken: String;
 
   constructor (private http: HttpClient, private router: Router) { }
@@ -31,7 +32,12 @@ export class UserLoginComponent implements OnInit {
   ngOnInit() {}
 
   onSubmit() {
+    this.loading = true;
     this.loginJson = JSON.stringify(this.user);
+    this.login();
+  }
+
+  private login() {
     this.http.post(AppSettings.USER_AUTHENTICATION_API_ENDPOINT, this.loginJson, httpOptions)
       .subscribe(
         (res: LoginResponse) => {
@@ -40,11 +46,8 @@ export class UserLoginComponent implements OnInit {
           }
         },
         err => {
-          if (err.error instanceof Error) {
-            console.log('Client-side error occured.');
-          } else {
-            console.log(err.error.message);
-          }
+          AppUtils.handleError(err);
+          this.loading = false;
         }
       );
   }
