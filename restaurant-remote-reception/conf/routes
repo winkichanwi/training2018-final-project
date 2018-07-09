@@ -24,3 +24,5 @@ GET         /api/shopping-centers/:shoppingCenterId   controllers.ShoppingCenter
 
 # Restaurants
 GET         /api/shopping-centers/:shoppingCenterId/restaurants controllers.RestaurantController.list(shoppingCenterId: Int)
+
+# Tickets
