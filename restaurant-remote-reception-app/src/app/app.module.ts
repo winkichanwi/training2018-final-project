@@ -8,7 +8,9 @@ import { SignupComponent } from './signup/signup.component';
 import { AppRoutingModule} from './app-routing.module';
 import { HomeComponent } from './home/home.component';
 import { UserLoginComponent } from './user-login/user-login.component';
-import { ShoppingCentersComponent } from './shopping-centers/shopping-centers.component';
+import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
+
+import { ShoppingCenterService } from './services/shopping-center.service';
 
 @NgModule({
   declarations: [
@@ -16,15 +18,15 @@ import { ShoppingCentersComponent } from './shopping-centers/shopping-centers.co
     SignupComponent,
     HomeComponent,
     UserLoginComponent,
-    ShoppingCentersComponent
+    ShoppingCenterListComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
-    AppRoutingModule,
-    FormsModule
+    FormsModule,
+    AppRoutingModule
   ],
-  providers: [],
+  providers: [ShoppingCenterService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
