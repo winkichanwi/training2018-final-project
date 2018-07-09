@@ -29,15 +29,13 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (i
             val queryPasswordByEmail = Users.join(UserSecret).on(_.userId === _.userId)
                 .filter { case (t1, t2) =>
                     t1.email === loginEmail
-                }.map { case (t1, t2) =>
-                    (t1.userId, t1.userFullname, t2.password) <> (LoginInfo.tupled, LoginInfo.unapply)
                 }.result.headOption
 
             db.run(queryPasswordByEmail).map {
-                case Some(loginInfo) =>
-                    if (loginInfo.password == loginPassword) {
-                        Ok(Json.obj("result" -> Constants.SUCCESS, "full_name" -> loginInfo.userFullname))
-                            .withSession("connected" -> loginInfo.userId.toString())
+                case Some((user, userSecret)) =>
+                    if (userSecret.password == loginPassword) {
+                        Ok(Json.obj("result" -> Constants.SUCCESS, "full_name" -> user.userFullname))
+                            .withSession("connected" -> user.userId.toString())
                         // TODO set full name and id to cache?
                     } else {
                         val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")
@@ -55,8 +53,6 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (i
 }
 
 object LoginController {
-    case class LoginInfo(userId: Int, userFullname: String, password: String)
-
     case class LoginForm(email : String, password : String )
 
     implicit val userFormReads: Reads[LoginForm] = (
