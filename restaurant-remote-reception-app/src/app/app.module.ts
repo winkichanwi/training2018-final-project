@@ -11,6 +11,8 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
 
 import { ShoppingCenterService } from './services/shopping-center.service';
+import {RestaurantListComponent} from './restaurant-list/restaurant-list.component';
+import {RestaurantService} from './services/restaurant.service';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,8 @@ import { ShoppingCenterService } from './services/shopping-center.service';
     SignupComponent,
     HomeComponent,
     UserLoginComponent,
-    ShoppingCenterListComponent
+    ShoppingCenterListComponent,
+    RestaurantListComponent
   ],
   imports: [
     BrowserModule,
@@ -26,7 +29,9 @@ import { ShoppingCenterService } from './services/shopping-center.service';
     FormsModule,
     AppRoutingModule
   ],
-  providers: [ShoppingCenterService],
+  providers: [
+    ShoppingCenterService,
+    RestaurantService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
