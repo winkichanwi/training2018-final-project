@@ -26,7 +26,7 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     }
 
     def get(shoppingCenterId: Int) = Action.async {implicit rs =>
-        val queryShoppingCenterById =
+        def queryShoppingCenterById =
             ShoppingCenters.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result.headOption
         db.run(queryShoppingCenterById).map {
             case Some(shoppingCenter) => Ok(Json.toJson(shoppingCenter))

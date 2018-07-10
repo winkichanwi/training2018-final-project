@@ -13,10 +13,12 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 # User CRUD
 GET         /api/users              controllers.UserController.list
 POST        /api/users              controllers.UserController.create
+GET         /api/users/:userId      controllers.UserController.get(userId: Int)
 DELETE      /api/users/:userId      controllers.UserController.remove(userId: Int)
+GET         /api/users2             controllers.UserController.getInfo
 
 # User authentication
-POST        /api/users/authentication   controllers.LoginController.authenticate
+POST        /api/users/authentication   controllers.LoginController.login
 
 # Shopping centers
 GET         /api/shopping-centers                     controllers.ShoppingCenterController.list
@@ -24,6 +26,7 @@ GET         /api/shopping-centers/:shoppingCenterId   controllers.ShoppingCenter
 
 # Restaurants
 GET         /api/shopping-centers/:shoppingCenterId/restaurants controllers.RestaurantController.list(shoppingCenterId: Int)
+GET         /api/restaurants/:restaurantId                      controllers.RestaurantController.get(restaurantId: Int)
 
 # Tickets
 GET         /api/restaurants/:restaurantId/tickets  controllers.TicketController.countTickets(restaurantId: Int)

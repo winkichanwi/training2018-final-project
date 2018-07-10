@@ -43,5 +43,4 @@ export class RestaurantListComponent implements OnInit {
       this.restaurants = res;
     });
   }
-
 }

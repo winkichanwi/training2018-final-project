@@ -11,7 +11,7 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import models.TicketStatus
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
@@ -21,17 +21,19 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     private val activeTicketStatusSeq: Seq[String] = TicketStatus.values.filter(_.isActive).map(value => value.toString).toSeq
 
     def countTickets(restaurantId: Int) = Action.async { implicit rs =>
-        Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) &&
-            (t.ticketStatus inSet activeTicketStatusSeq))
+        def groupTicketTypes = Tickets.filter(t =>
+            (t.restaurantId === restaurantId.bind) && (t.ticketStatus inSet activeTicketStatusSeq))
             .groupBy(_.ticketType)
-            .map { case (ticketType, t) =>
-                ticketType, t.length
-            }
+        def queryTicketCounts = for {
+         (ticketType, ticketRows) <- groupTicketTypes
+        } yield (ticketType, ticketRows.length)
 
-        db.run().map {
-            Ok(Json.toJson())
-        }
+        for {
+            ticketCountRows: Seq[(String, Int)] <- db.run(queryTicketCounts.result)
+            counts = ticketCountRows.map { row =>
+                RestaurantTicketCounts(row._1, row._2)
+            }
+        } yield Ok(Json.toJson(counts))
     }
 }
 
@@ -40,6 +42,6 @@ object TicketController {
 
     implicit val restaurantTicketCountWrites: Writes[RestaurantTicketCounts] = (
         (__ \ "ticket_type").write[String] and
-        (__ \ "ticket_count").write[String]
+        (__ \ "ticket_count").write[Int]
     )(unlift(RestaurantTicketCounts.unapply))
 }

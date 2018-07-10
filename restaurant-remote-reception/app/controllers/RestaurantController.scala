@@ -10,6 +10,8 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import models.ErrorResponse._
+import models.{ErrorResponse, Constants}
 
 import scala.concurrent.ExecutionContext
 
@@ -19,10 +21,22 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     import RestaurantController._
 
     def list(shoppingCenterId: Int) = Action.async { implicit rs =>
-        val queryRestaurantsByShoppingCenterId =
+        def queryRestaurantsByShoppingCenterId =
             Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
         db.run(queryRestaurantsByShoppingCenterId).map { restaurants =>
             Ok(Json.toJson(restaurants))
+        }
+    }
+
+    def get(restaurantId: Int) = Action.async { implicit rs =>
+        def queryRestaurantById =
+            Restaurants.filter(t => t.restaurantId === restaurantId.bind).result.headOption
+        db.run(queryRestaurantById).map {
+            case Some(restaurant) => Ok(Json.toJson(restaurant))
+            case None => {
+                val errorResponse = ErrorResponse(Constants.FAILURE, "Restaurant is not found.")
+                NotFound(Json.toJson(errorResponse))
+            }
         }
     }
 

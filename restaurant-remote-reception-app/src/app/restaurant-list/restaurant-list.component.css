@@ -11,3 +11,8 @@
 .ticket-button-row {
   margin-top: 10px;
 }
+
+.badge-cuisine {
+  color: #fff;
+  background-color: #FFB400;
+}

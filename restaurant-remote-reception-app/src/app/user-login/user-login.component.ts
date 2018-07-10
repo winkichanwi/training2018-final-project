@@ -1,19 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
 import { AppUtils} from '../app-common';
-import {Router} from '@angular/router';
-import {UserLogin} from '../models/user-login';
-import {environment} from '../../environments/environment';
+import { Router } from '@angular/router';
+import { UserService, UserLogin  } from '../services/user.service';
 
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-Type':  'application/json',
-  })
-};
-
-const USER_AUTHENTICATION_API_ENDPOINT = environment.API_HOST + '/api/users/authentication';
-
-interface LoginResponse {
+interface ILoginResponse {
   result: String;
   full_name: String;
 }
@@ -30,7 +20,8 @@ export class UserLoginComponent implements OnInit {
   loginJson: any;
   sessionToken: String;
 
-  constructor (private http: HttpClient, private router: Router) { }
+  constructor (private router: Router,
+               private userService: UserService) { }
 
   ngOnInit() {}
 
@@ -41,9 +32,9 @@ export class UserLoginComponent implements OnInit {
   }
 
   private login() {
-    this.http.post(USER_AUTHENTICATION_API_ENDPOINT, this.loginJson, httpOptions)
+    this.userService.login(this.loginJson)
       .subscribe(
-        (res: LoginResponse) => {
+        (res: ILoginResponse) => {
           if (res.result === 'success') {
             this.router.navigate(['/shopping-centers']);
           }

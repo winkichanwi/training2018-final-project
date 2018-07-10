@@ -10,9 +10,13 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
 
 import { ShoppingCenterService } from './services/shopping-center.service';
-import {RestaurantListComponent} from './restaurant-list/restaurant-list.component';
-import {RestaurantService} from './services/restaurant.service';
+import { RestaurantListComponent } from './restaurant-list/restaurant-list.component';
+import { RestaurantService } from './services/restaurant.service';
 import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-display-panel.component';
+import { TickerReservationComponent } from './ticker-reservation/ticker-reservation.component';
+import { CookieService } from 'ngx-cookie-service';
+import {TicketService} from './services/ticket.service';
+import {UserService} from './services/user.service';
 
 @NgModule({
   declarations: [
@@ -21,7 +25,8 @@ import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-displ
     UserLoginComponent,
     ShoppingCenterListComponent,
     RestaurantListComponent,
-    TicketDisplayPanelComponent
+    TicketDisplayPanelComponent,
+    TickerReservationComponent
   ],
   imports: [
     BrowserModule,
@@ -31,7 +36,11 @@ import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-displ
   ],
   providers: [
     ShoppingCenterService,
-    RestaurantService],
+    RestaurantService,
+    TicketService,
+    UserService,
+    CookieService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -9,33 +9,35 @@ import models.Tables._
 import javax.inject.Inject
 import models.ErrorResponse._
 import models.Utils._
-import models.{Constants, ErrorResponse}
+import models.{Constants, ErrorResponse, Utils}
+import play.api.cache._
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
+class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cache: CacheApi) (implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
     import LoginController._
 
-    def authenticate = Action.async(parse.json) { implicit rs =>
+    def login = Action.async(parse.json) { implicit rs =>
         rs.body.validate[LoginForm].map { form =>
-            var loginEmail = form.email
-            var loginPassword = form.password
+            val loginEmail = form.email
+            val loginPassword = form.password
 
-            val queryPasswordByEmail = Users.join(UserSecret).on(_.userId === _.userId)
+            def queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
                 .filter { case (t1, t2) =>
                     t1.email === loginEmail
                 }.result.headOption
 
-            db.run(queryPasswordByEmail).map {
+            db.run(queryUserInfoSecretDBIO).map {
                 case Some((user, userSecret)) =>
                     if (userSecret.password == loginPassword) {
+                        cache.set(Constants.CACHE_TOKEN_USER_ID, user.userId.toString())
                         Ok(Json.obj("result" -> Constants.SUCCESS, "full_name" -> user.userFullname))
-                            .withSession("connected" -> user.userId.toString())
+                            .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
                         // TODO set full name and id to cache?
                     } else {
                         val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")

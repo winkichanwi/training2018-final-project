@@ -1,19 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { UserSignup } from '../models/user-signup';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router} from '@angular/router';
 import { AppUtils} from '../app-common';
-import {environment} from '../../environments/environment';
+import { UserService, UserSignup } from '../services/user.service';
 
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-Type':  'application/json',
-  })
-};
-
-const USERS_API_ENDPOINT = environment.API_HOST + '/api/users';
-
-interface SignupResponse {
+interface ISignupResponse {
   result: String;
 }
 
@@ -28,7 +18,8 @@ export class SignupComponent implements OnInit {
   user = new UserSignup('', '', '');
   signupJson: any;
 
-  constructor (private http: HttpClient, private router: Router) { }
+  constructor (private router: Router,
+               private userService: UserService) { }
 
   ngOnInit() {}
 
@@ -39,9 +30,9 @@ export class SignupComponent implements OnInit {
   }
 
   private signUp() {
-    this.http.post(USERS_API_ENDPOINT, this.signupJson, httpOptions)
+    this.userService.create(this.signupJson)
       .subscribe(
-        (res: SignupResponse) => {
+        (res: ISignupResponse) => {
           if (res.result === 'success') {
             this.router.navigate(['/login']);
           }

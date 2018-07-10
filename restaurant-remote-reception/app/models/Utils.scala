@@ -16,6 +16,7 @@ object ErrorResponse {
 }
 
 object Constants {
+    val CACHE_TOKEN_USER_ID = "user-id"
     val SUCCESS = "success"
     val FAILURE = "failure"
 
