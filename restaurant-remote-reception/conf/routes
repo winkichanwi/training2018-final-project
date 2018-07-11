@@ -29,4 +29,5 @@ GET         /api/shopping-centers/:shoppingCenterId/restaurants controllers.Rest
 GET         /api/restaurants/:restaurantId                      controllers.RestaurantController.get(restaurantId: Int)
 
 # Tickets
-GET         /api/restaurants/:restaurantId/tickets  controllers.TicketController.countTickets(restaurantId: Int)
+#GET         /api/restaurants/:restaurantId/tickets  controllers.TicketController.countTickets(restaurantId: Int)
+GET         /api/restaurants/:restaurantId/tickets controllers.TicketController.getLastTicket(restaurantId: Int)

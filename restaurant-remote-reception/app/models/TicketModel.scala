@@ -1,6 +1,5 @@
 package models
 
-
 object TicketStatus extends Enumeration {
     protected case class Val(status : String, isActive: Boolean) extends super.Val {
         override def toString = status
@@ -10,8 +9,10 @@ object TicketStatus extends Enumeration {
 
     val ACTIVE = Val("Active", true)
     val CALLED = Val("Called", true)
-    val CANCELLED = Val("Cancelled", false)
-    val CLOSED = Val("Closed", false)
+    val CANCELLED = Val("Cancelled", false) // cancelled by either customer or restaurant
+    val ACCEPTED = Val("Accepted", false) // accepted by restaurant
+    val CLOSED = Val("Archived", false) // archive when restaurant closes
+
 }
 
 object TicketType extends Enumeration {

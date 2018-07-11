@@ -13,16 +13,12 @@
   padding: 10px;
 }
 
-.ticket-display-panel.card-text {
+.ticket-display-panel.ticket-no {
   font-size: 25px;
   padding: 5px 35px;
   border: 1px solid rgba(0,0,0,.125);
   border-radius: 5px;
   background-color: white;
-
-  display: inline;
-  margin-left: 50px;
-  margin-right: 10px;
 }
 
 .ticket-display-panel.card-subtitle {
@@ -36,12 +32,12 @@
 }
 
 @media (min-width: 992px) {
-  .ticket-display-panel.card-title, .ticket-display-panel.card-subtitle, .ticket-display-panel.card-text{
+  .ticket-display-panel.card-title, .ticket-display-panel.card-subtitle{
     display: block;
   }
 
-  .ticket-display-panel.card-text {
-    width: 90%;
+  .ticket-display-panel.ticket-no {
+    width: 80%;
     margin: auto;
   }
 }

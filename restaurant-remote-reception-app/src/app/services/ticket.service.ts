@@ -7,6 +7,12 @@ export interface ITicketCount {
   ticket_count: string;
 }
 
+export interface ITicketLastNo {
+  ticket_type: string;
+  last_called: number;
+  last_active: number;
+}
+
 export const TICKET_TYPES = [
   { type: 'A', min_seat_no: 1, max_seat_no: 2},
   { type: 'B', min_seat_no: 3, max_seat_no: 5},
@@ -17,8 +23,9 @@ export const TICKET_TYPES = [
 export const TICKET_STATUS = [
   { status: 'Active', is_active: true },
   { status: 'Called', is_active: true },
-  { status: 'Cancelled', is_active: false },
-  { status: 'Closed', is_active: false },
+  { status: 'Cancelled', is_active: false }, // cancelled by either customer or restaurant
+  { status: 'Accepted', is_active: false }, // accepted by restaurant
+  { status: 'Archived', is_active: false }, // archive when restaurant closes
 ];
 
 @Injectable({
@@ -32,6 +39,10 @@ export class TicketService{
   constructor(private http: HttpClient) { }
 
   public getTicketCount(restaurantId: number) {
+    return this.http.get(TicketService.genRestaurantTicketApiEndpoint(restaurantId));
+  }
+
+  public getTicketLastNo(restaurantId: number) {
     return this.http.get(TicketService.genRestaurantTicketApiEndpoint(restaurantId));
   }
 }
