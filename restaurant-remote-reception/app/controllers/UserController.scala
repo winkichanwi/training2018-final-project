@@ -10,14 +10,12 @@ import javax.inject.Inject
 import models.ErrorResponse._
 import models.Utils._
 import models.{Constants, ErrorResponse}
-import play.api.cache.CacheApi
-
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cache: CacheApi)(implicit ec: ExecutionContext)
+class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
     // コンパニオンオブジェクトに定義したReads、Writesを参照するためにimport文を追加
     import UserController._
@@ -65,22 +63,15 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cac
         }
     }
 
-    def getInfo = TODO
-//        Action.async { implicit rs =>
-//
-//        def userId = rs.session.get(Constants.CACHE_TOKEN_USER_ID)
-//        def userOpt = userId.flatMap { userId =>
-//            Users.filter(t => t.userId === userId.bind).result.headOption
-//        }
-//        def result = userOpt.map { user =>
-//            db.run(userOpt).map {
-//                case Some(user) => Ok()
-//                case None => NotFound()
-//            }
-//        }
-//
-//
-//    }
+    def getInfo = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.CACHE_TOKEN_USER_ID).getOrElse("0")
+        def userDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
+        def userFuture = db.run(userDBIO)
+        userFuture.map {
+            case Some(user) => Ok(Json.toJson(user))
+            case None => NotFound(Json.toJson(ErrorResponse(Constants.FAILURE, "User not found")))
+        }
+    }
 
     /**
       * ユーザ更新

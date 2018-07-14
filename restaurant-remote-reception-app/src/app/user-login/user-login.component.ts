@@ -5,7 +5,6 @@ import { UserService, UserLogin  } from '../services/user.service';
 
 interface ILoginResponse {
   result: String;
-  full_name: String;
 }
 
 @Component({
@@ -18,7 +17,6 @@ export class UserLoginComponent implements OnInit {
   loading = false;
   user = new UserLogin('', '');
   loginJson: any;
-  sessionToken: String;
 
   constructor (private router: Router,
                private userService: UserService) { }

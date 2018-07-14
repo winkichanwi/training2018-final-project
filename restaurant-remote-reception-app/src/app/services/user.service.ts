@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import {environment} from '../../environments/environment';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
-const USERS_API_ENDPOINT = environment.API_HOST + '/api/users';
-const USER_AUTHENTICATION_API_ENDPOINT = environment.API_HOST + '/api/users/authentication';
+const USERS_API_ENDPOINT = '/api/users';
+const USER_API_ENDPOINT = '/api/user';
+const USER_AUTHENTICATION_API_ENDPOINT = '/api/users/authentication';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -36,10 +36,6 @@ export class UserLogin {
   providedIn: 'root'
 })
 export class UserService {
-  static genUserApiEndpoint(userId: string) {
-    return USERS_API_ENDPOINT + '/' + userId;
-  }
-
   constructor(private http: HttpClient) { }
 
   public create(signupForm: any) {
@@ -50,7 +46,7 @@ export class UserService {
     return this.http.post(USER_AUTHENTICATION_API_ENDPOINT, loginForm, httpOptions);
   }
 
-  public getInfo(userId: string) {
-    return this.http.get(UserService.genUserApiEndpoint(userId));
+  public getInfo() {
+    return this.http.get(USER_API_ENDPOINT);
   }
 }

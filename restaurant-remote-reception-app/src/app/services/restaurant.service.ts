@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {environment} from '../../environments/environment';
 
 export interface IRestaurant {
   id: number;
@@ -21,11 +20,11 @@ export interface IRestaurant {
 
 export class RestaurantService {
   static genRestaurantsListApiEndpoint(shoppingCenterId: string) {
-    return environment.API_HOST + '/api/shopping-centers/' + shoppingCenterId + '/restaurants';
+    return '/api/shopping-centers/' + shoppingCenterId + '/restaurants';
   }
 
   static genRestaurantApiEndpoint(restaurantId: string) {
-    return environment.API_HOST + '/api/restaurants/' + restaurantId;
+    return '/api/restaurants/' + restaurantId;
   }
 
   constructor(private http: HttpClient) { }

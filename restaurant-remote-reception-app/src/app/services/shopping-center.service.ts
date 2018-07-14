@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 
-const SHOPPING_CENTERS_API_ENDPOINT = environment.API_HOST + '/api/shopping-centers';
+const SHOPPING_CENTERS_API_ENDPOINT = '/api/shopping-centers';
 
 export interface IShoppingCenter {
   id: number;

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import {  ITicketLastNo, TICKET_TYPES, TicketService} from '../services/ticket.service';
+import { ITicketCurrentCount, TICKET_TYPES, TicketService} from '../services/ticket.service';
 import { AppUtils} from '../app-common';
 import {interval} from 'rxjs';
 
@@ -12,7 +12,7 @@ const intervalCounter = interval(10000);
 })
 export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
   @Input() restaurantId: number;
-  ticketLastNos: ITicketLastNo[];
+  ticketCurrentCounts: ITicketCurrentCount[];
   alive: boolean;
 
   constructor(private ticketService: TicketService) {
@@ -20,12 +20,12 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.getTicketCount();
-    // intervalCounter.subscribe(() => {
-    //   if (this.alive) {
-    //     this.getTicketCount();
-    //   }
-    // });
+    this.getTicketCurrentCount();
+    intervalCounter.subscribe(() => {
+      if (this.alive) {
+        this.getTicketCurrentCount();
+      }
+    });
   }
 
   private ticketTypeSeatLabel(type: String): String {
@@ -36,10 +36,10 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getTicketCount() {
-    this.ticketService.getTicketCount(this.restaurantId).subscribe(
-      (res: ITicketLastNo[]) => {
-        this.ticketLastNos = res;
+  private getTicketCurrentCount() {
+    this.ticketService.getTicketCurrentCount(this.restaurantId).subscribe(
+      (res: ITicketCurrentCount[]) => {
+        this.ticketCurrentCounts = res;
       },
       err => {
         AppUtils.handleError(err);

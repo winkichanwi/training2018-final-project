@@ -11,14 +11,14 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import models.TicketStatus
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
     import TicketController._
 
-    private val activeTicketStatusSeq: Seq[String] = TicketStatus.values.filter(_.isActive).map(value => value.toString).toSeq
+    private val activeTicketStatusSeq: Seq[String] = TicketStatus.values.filter(_.isWaiting).map(value => value.toString).toSeq
 
     def countTickets(restaurantId: Int) = Action.async { implicit rs =>
         def groupTicketTypes = Tickets.filter(t =>
@@ -46,27 +46,27 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                 (ticketType, ticketRows.map(_.ticketNo).max)
             }
 
-        def queryTicketLastActive = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) && (t.ticketStatus === TicketStatus.ACTIVE.status))
+        def queryTicketLastTaken = Tickets.filter(t =>
+            (t.restaurantId === restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status))
             .sortBy(_.ticketNo.desc)
             .groupBy(_.ticketType)
             .map { case (ticketType, ticketRows) =>
                 (ticketType, ticketRows.map(_.ticketNo).max)
             }
 
-        def joinLastCalledLastActive =
-            queryTicketLastCalled.joinFull(queryTicketLastActive).on(_._1 === _._1)
+        def joinLastCalledLastTaken =
+            queryTicketLastCalled.joinFull(queryTicketLastTaken).on(_._1 === _._1)
             .map { case (t1, t2) =>
                 (t1.flatMap(_._1.?), t1.flatMap(_._2), t2.flatMap(_._1.?), t2.flatMap(_._2))
             }
 
         for {
-            ticketLastNoRows: Seq[(Option[String], Option[Int], Option[String], Option[Int])] <- db.run(joinLastCalledLastActive.result)
+            ticketLastNoRows: Seq[(Option[String], Option[Int], Option[String], Option[Int])] <- db.run(joinLastCalledLastTaken.result)
             ticketLastNo = ticketLastNoRows.map { row =>
                 val ticketType = row._1.getOrElse(row._3.get)
                 val lastCalled = row._2.getOrElse(0)
-                val lastActive = row._4.getOrElse(0)
-                RestaurantTicketLastNo(ticketType, lastCalled, lastActive)
+                val lastTaken = row._4.getOrElse(0)
+                RestaurantTicketLastNo(ticketType, lastCalled, lastTaken)
             }
         } yield Ok(Json.toJson(ticketLastNo))
     }
@@ -80,11 +80,11 @@ object TicketController {
         (__ \ "ticket_count").write[Int]
     )(unlift(RestaurantTicketCounts.unapply))
 
-    case class RestaurantTicketLastNo(ticketType: String, lastCalledNo: Int, lastActiveNo: Int)
+    case class RestaurantTicketLastNo(ticketType: String, lastCalled: Int, lastTaken: Int)
 
     implicit val restaurantTicketLastNoWrites: Writes[RestaurantTicketLastNo] = (
         (__ \ "ticket_type").write[String] and
             (__ \ "last_called").write[Int] and
-            (__ \ "last_active").write[Int]
+            (__ \ "last_taken").write[Int]
         )(unlift(RestaurantTicketLastNo.unapply))
 }

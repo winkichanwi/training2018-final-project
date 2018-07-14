@@ -9,15 +9,14 @@ import models.Tables._
 import javax.inject.Inject
 import models.ErrorResponse._
 import models.Utils._
-import models.{Constants, ErrorResponse, Utils}
-import play.api.cache._
+import models.{Constants, ErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cache: CacheApi) (implicit ec: ExecutionContext)
+class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
     import LoginController._
@@ -35,8 +34,7 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(ca
             db.run(queryUserInfoSecretDBIO).map {
                 case Some((user, userSecret)) =>
                     if (userSecret.password == loginPassword) {
-                        cache.set(Constants.CACHE_TOKEN_USER_ID, user.userId.toString())
-                        Ok(Json.obj("result" -> Constants.SUCCESS, "full_name" -> user.userFullname))
+                        Ok(Json.obj("result" -> Constants.SUCCESS))
                             .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
                         // TODO set full name and id to cache?
                     } else {

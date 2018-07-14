@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule} from '@angular/common/http';
+import {HttpClientModule, HttpClientXsrfModule} from '@angular/common/http';
 import { FormsModule} from '@angular/forms';
 
 import { AppComponent } from './app.component';
@@ -14,9 +14,8 @@ import { RestaurantListComponent } from './restaurant-list/restaurant-list.compo
 import { RestaurantService } from './services/restaurant.service';
 import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-display-panel.component';
 import { TickerReservationComponent } from './ticker-reservation/ticker-reservation.component';
-import { CookieService } from 'ngx-cookie-service';
-import {TicketService} from './services/ticket.service';
-import {UserService} from './services/user.service';
+import { TicketService } from './services/ticket.service';
+import { UserService } from './services/user.service';
 
 @NgModule({
   declarations: [
@@ -31,6 +30,10 @@ import {UserService} from './services/user.service';
   imports: [
     BrowserModule,
     HttpClientModule,
+    HttpClientXsrfModule.withOptions({
+      cookieName: 'PLAY_SESSION_CSRF',
+      headerName: 'Csrf-Token'
+    }),
     FormsModule,
     AppRoutingModule
   ],
@@ -38,8 +41,7 @@ import {UserService} from './services/user.service';
     ShoppingCenterService,
     RestaurantService,
     TicketService,
-    UserService,
-    CookieService
+    UserService
   ],
   bootstrap: [AppComponent]
 })
