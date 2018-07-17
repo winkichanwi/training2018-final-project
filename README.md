@@ -10,14 +10,7 @@ $ sbt docker:publishLocal
 ```
  $ docker run --env APPLICATION_SECRET={} --env ALLOWED_HOST_DOMAIN={} --env MYSQL_DATABASE_URL={} --env MYSQL_DATABASE_USER={} --env MYSQL_DATABASE_PWD={} --env ALLOWED_HOST_DOMAIN={} -p 9000:9000 restaurant-remote-reception:latest
  ```
- docker run --env APPLICATION_SECRET='6lcsVk73>cZ9gJN=4Fvo4[iA[f_Hi>LNC7m_SNv?7H8InM68fzOgSI@8rGuH' --env ALLOWED_HOST_DOMAIN_1="localhost:4200" --env MYSQL_DATABASE_URL="jdbc:mysql://localhost:3306/restaurant_remote_reception" --env MYSQL_DATABASE_USER="root" --env MYSQL_DATABASE_PWD="mysql" -p 9000:9000 restaurant-remote-reception:latest
-
- docker run --env APPLICATION_SECRET='6lcsVk73>cZ9gJN=4Fvo4[iA[f_Hi>LNC7m_SNv?7H8InM68fzOgSI@8rGuH' --env ALLOWED_HOST_DOMAIN_1='localhost:9000' ALLOWED_HOST_DOMAIN_2='localhost:4200' -p 9000:9000 restaurant-remote-reception:latest
-
- docker run --env APPLICATION_SECRET='6lcsVk73>cZ9gJN=4Fvo4[iA[f_Hi>LNC7m_SNv?7H8InM68fzOgSI@8rGuH' --env ALLOWED_HOST_DOMAIN_1='localhost:9000' --env ALLOWED_HOST_DOMAIN_2='localhost:9000' --env ALLOWED_HOST_DOMAIN_3='localhost:9000' --env ALLOWED_HOST_DOMAIN_4='localhost:9000' -p 9000:9000 restaurant-remote-reception:latest
-"ec2-18-182-40-10.ap-northeast-1.compute.amazonaws.com",
-
-
+ 
 **3. Interact with container**
 ```
  $ curl -I localhost:9000
