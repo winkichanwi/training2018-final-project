@@ -45,6 +45,7 @@ export class RestaurantListComponent implements OnInit {
       },
       err => {
         AppUtils.handleError(err);
-      });
+      }
+    );
   }
 }
