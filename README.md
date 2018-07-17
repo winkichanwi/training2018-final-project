@@ -8,9 +8,9 @@ $ sbt docker:publishLocal
 
 **2. Run docker container**
 ```
- $ docker run --env APPLICATION_SECRET={} --env ALLOWED_HOST_DOMAIN={} --env MYSQL_DATABASE_URL={} --env MYSQL_DATABASE_USER={} --env MYSQL_DATABASE_PWD={} --env ALLOWED_HOST_DOMAIN={} -p 9000:9000 restaurant-remote-reception:latest
+ $ docker run --env APPLICATION_SECRET={} --env MYSQL_DATABASE_URL={} --env MYSQL_DATABASE_USER={} --env MYSQL_DATABASE_PWD={} --env ALLOWED_ORIGINS_1={} -p 9000:9000 restaurant-remote-reception:latest
  ```
- 
+
 **3. Interact with container**
 ```
  $ curl -I localhost:9000

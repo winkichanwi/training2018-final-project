@@ -14,12 +14,12 @@ import play.filters.hosts.AllowedHostsFilter
  */
 class Filters @Inject() (
   csrfFilter: CSRFFilter,
-  allowedHostsFilter: AllowedHostsFilter,
+//  allowedHostsFilter: AllowedHostsFilter,
   securityHeadersFilter: SecurityHeadersFilter,
   corsFilter: CORSFilter
 ) extends DefaultHttpFilters(
   csrfFilter,
-  allowedHostsFilter, 
+//  allowedHostsFilter,
   securityHeadersFilter,
   corsFilter
 )
