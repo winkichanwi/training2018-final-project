@@ -3,10 +3,8 @@ import { AppUtils} from '../app-common';
 import { Router } from '@angular/router';
 import { UserService} from '../services/user.service';
 import {UserLogin} from '../models/user.model';
+import {IStatus} from '../models/status.model';
 
-interface ILoginResponse {
-  result: String;
-}
 
 @Component({
   selector: 'app-user-login',
@@ -26,15 +24,16 @@ export class UserLoginComponent implements OnInit {
 
   onSubmit() {
     this.isLoading = true;
-    this.loginJson = JSON.stringify(this.user);
+
     this.login();
   }
 
   private login() {
-    this.userService.login(this.loginJson)
+    const loginJson = JSON.stringify(this.user);
+    this.userService.login(loginJson)
       .subscribe(
-        (res: ILoginResponse) => {
-          if (res.result === 'success') {
+        (res: IStatus) => {
+          if (res.status_code === 2000) {
             this.router.navigate(['/shopping-centers']);
           }
         },

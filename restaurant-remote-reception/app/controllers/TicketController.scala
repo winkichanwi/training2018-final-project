@@ -79,7 +79,7 @@ case class RestaurantTicketLastNo(ticketType: String, lastCalled: Int, lastTaken
 object RestaurantTicketLastNo {
     implicit val restaurantTicketLastNoWrites: Writes[RestaurantTicketLastNo] = (
         (__ \ "ticket_type").write[String] and
-            (__ \ "last_called").write[Int] and
-            (__ \ "last_taken").write[Int]
-        ) (unlift(RestaurantTicketLastNo.unapply))
+        (__ \ "last_called").write[Int] and
+        (__ \ "last_taken").write[Int]
+    ) (unlift(RestaurantTicketLastNo.unapply))
 }
