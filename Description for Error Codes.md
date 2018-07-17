@@ -17,3 +17,5 @@ Request is not make public. Client should not repeat the request.
 The requested resource is not found.
 
 ## 5000 Server Error
+**5000 Internal Server Error**
+The server encountered an unexpected condition in fulfilling the request.
