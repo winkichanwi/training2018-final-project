@@ -5,9 +5,7 @@ import play.api.libs.functional.syntax._
 import play.api.mvc._
 import play.api.mvc.Results._
 
-import scala.concurrent.{ExecutionContext, Future}
-
-case class ErrorResponse(result: String, message: String)
+case class ErrorResponse(status_code: String, message: String)
 object ErrorResponse {
     implicit val errorWrites: Writes[ErrorResponse] = (
         (__ \ "result").write[String] and

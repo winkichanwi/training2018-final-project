@@ -9,7 +9,7 @@ import models.Tables._
 import javax.inject.Inject
 import models.ErrorResponse._
 import models.Utils._
-import models.{Constants, ErrorResponse}
+import models.{Constants, ErrorResponse, StatusCode, StatusResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
@@ -31,21 +31,21 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
                     t1.email === loginEmail
                 }.result.headOption
 
+            val authenFailRes = StatusResponse(StatusCode.AUTHENTICATION_FAILURE.code, StatusCode.AUTHENTICATION_FAILURE.message)
             db.run(queryUserInfoSecretDBIO).map {
                 case Some((user, userSecret)) =>
                     if (userSecret.password == loginPassword) {
-                        Ok(Json.obj("result" -> Constants.SUCCESS))
+                        Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
                             .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
                     } else {
-                        val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")
-                        BadRequest(Json.toJson(pwdIncorrectRes))
+
+                        BadRequest(Json.toJson(authenFailRes))
                     }
                 case None =>
-                    val emailIncorrectRes = ErrorResponse(Constants.FAILURE, "Email address (" + loginEmail + ") incorrect. ")
-                    BadRequest(Json.toJson(emailIncorrectRes))
+                    BadRequest(Json.toJson(authenFailRes))
             }
         }.recoverTotal { e =>
-            Future { resForBadRequest(e) }
+            Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))) }
         }
     }
 
