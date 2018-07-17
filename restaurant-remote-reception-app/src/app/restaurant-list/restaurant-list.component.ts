@@ -39,8 +39,13 @@ export class RestaurantListComponent implements OnInit {
   }
 
   private getListOfRestaurants() {
-    this.restaurantService.getList(this.shoppingCenterId).subscribe((res: IRestaurant[]) => {
+    this.restaurantService.getList(this.shoppingCenterId).subscribe(
+      (res: IRestaurant[]) => {
       this.restaurants = res;
-    });
+      },
+      err => {
+        AppUtils.handleError(err);
+      }
+    );
   }
 }

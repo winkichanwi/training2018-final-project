@@ -110,11 +110,9 @@ object UserController {
         (__ \ "full_name").write[String] and
         (__ \ "email").write[String]
     )(unlift(UsersRow.unapply))
-}
 
-case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
+    case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
 
-object UserForm {
     implicit val userFormReads: Reads[UserForm] = (
     (__ \ "id").readNullable[Int] and
         (__ \ "full_name").read[String] and
