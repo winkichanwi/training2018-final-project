@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 const USERS_API_ENDPOINT = '/api/users';
-const USER_API_ENDPOINT = '/api/user';
+const USER_API_ENDPOINT = '/api/me';
 const USER_AUTHENTICATION_API_ENDPOINT = '/api/users/authentication';
 
 const httpOptions = {
