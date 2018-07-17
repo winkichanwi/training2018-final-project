@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router} from '@angular/router';
 import { AppUtils} from '../app-common';
-import { UserService, UserSignup } from '../services/user.service';
+import { UserService} from '../services/user.service';
+import {UserSignup} from '../models/user.model';
 
 interface ISignupResponse {
   result: String;
@@ -14,9 +15,8 @@ interface ISignupResponse {
 })
 
 export class SignupComponent implements OnInit {
-  loading = false;
+  isLoading = false;
   user = new UserSignup('', '', '');
-  signupJson: any;
 
   constructor (private router: Router,
                private userService: UserService) { }
@@ -24,13 +24,13 @@ export class SignupComponent implements OnInit {
   ngOnInit() {}
 
   onSubmit() {
-    this.loading = true;
-    this.signupJson = JSON.stringify(this.user);
+    this.isLoading = true;
     this.signUp();
   }
 
   private signUp() {
-    this.userService.create(this.signupJson)
+    const signupJson = JSON.stringify(this.user);
+    this.userService.create(signupJson)
       .subscribe(
         (res: ISignupResponse) => {
           if (res.result === 'success') {
@@ -39,7 +39,7 @@ export class SignupComponent implements OnInit {
         },
         err => {
           AppUtils.handleError(err);
-          this.loading = false;
+          this.isLoading = false;
         }
       );
   }

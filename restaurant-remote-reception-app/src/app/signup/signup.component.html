@@ -18,7 +18,7 @@
         <div *ngIf="signupForm.submitted && inputPassword.invalid" class="invalid-feedback">Password is invalid.</div>
         <small id="passwordHelp" class="form-text text-muted">Please enter at least 6 characters or numbers.</small>
       </div>
-      <button type="submit" class="btn btn-primary">登録</button> <img *ngIf="loading" src="../../assets/icon_loader.gif">
+      <button type="submit" class="btn btn-primary">登録</button> <img *ngIf="isLoading" src="../../assets/icon_loader.gif">
     </form>
   </div>
 </div>

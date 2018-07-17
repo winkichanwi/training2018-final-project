@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AppUtils} from '../app-common';
 import { Router } from '@angular/router';
-import { UserService, UserLogin  } from '../services/user.service';
+import { UserService} from '../services/user.service';
+import {UserLogin} from '../models/user.model';
 
 interface ILoginResponse {
   result: String;
@@ -14,7 +15,7 @@ interface ILoginResponse {
 })
 
 export class UserLoginComponent implements OnInit {
-  loading = false;
+  isLoading = false;
   user = new UserLogin('', '');
   loginJson: any;
 
@@ -24,7 +25,7 @@ export class UserLoginComponent implements OnInit {
   ngOnInit() {}
 
   onSubmit() {
-    this.loading = true;
+    this.isLoading = true;
     this.loginJson = JSON.stringify(this.user);
     this.login();
   }
@@ -39,7 +40,7 @@ export class UserLoginComponent implements OnInit {
         },
         err => {
           AppUtils.handleError(err);
-          this.loading = false;
+          this.isLoading = false;
         }
       );
   }

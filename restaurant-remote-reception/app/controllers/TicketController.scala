@@ -16,25 +16,17 @@ import scala.concurrent.ExecutionContext
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
-    import TicketController._
-
-    private val activeTicketStatusSeq: Seq[String] = TicketStatus.values.filter(_.isWaiting).map(value => value.toString).toSeq
-
     def countTickets(restaurantId: Int) = Action.async { implicit rs =>
-        def groupTicketTypes = Tickets.filter(t =>
+        val activeTicketStatusSeq: Seq[String] = Seq(TicketStatus.ACTIVE, TicketStatus.CALLED).map(_.toString)
+        val groupTicketTypes = Tickets.filter(t =>
             (t.restaurantId === restaurantId.bind) && (t.ticketStatus inSet activeTicketStatusSeq))
             .groupBy(_.ticketType)
+            .map { case (ticketType, rows) => (ticketType, rows.length) }
+            .result
 
-        def queryTicketCounts = for {
-         (ticketType, ticketRows) <- groupTicketTypes
-        } yield (ticketType, ticketRows.length)
-
-        for {
-            ticketCountRows: Seq[(String, Int)] <- db.run(queryTicketCounts.result)
-            counts = ticketCountRows.map { row =>
-                RestaurantTicketCounts(row._1, row._2)
-            }
-        } yield Ok(Json.toJson(counts))
+        db.run(groupTicketTypes)
+            .map(_.map(row => RestaurantTicketCounts(row._1, row._2)))
+            .map(counts => Ok(Json.toJson(counts)))
     }
 
     def getLastTicket(restaurantId: Int) = Action.async { implicit rs =>
@@ -72,19 +64,22 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     }
 }
 
-object TicketController {
-    case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
+case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
 
+object RestaurantTicketCounts {
     implicit val restaurantTicketCountWrites: Writes[RestaurantTicketCounts] = (
         (__ \ "ticket_type").write[String] and
         (__ \ "ticket_count").write[Int]
     )(unlift(RestaurantTicketCounts.unapply))
+}
 
-    case class RestaurantTicketLastNo(ticketType: String, lastCalled: Int, lastTaken: Int)
 
+case class RestaurantTicketLastNo(ticketType: String, lastCalled: Int, lastTaken: Int)
+
+object RestaurantTicketLastNo {
     implicit val restaurantTicketLastNoWrites: Writes[RestaurantTicketLastNo] = (
         (__ \ "ticket_type").write[String] and
             (__ \ "last_called").write[Int] and
             (__ \ "last_taken").write[Int]
-        )(unlift(RestaurantTicketLastNo.unapply))
+        ) (unlift(RestaurantTicketLastNo.unapply))
 }
