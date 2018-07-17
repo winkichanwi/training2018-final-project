@@ -6,6 +6,9 @@
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
 
+# Return message for a successfully received GET request on health check
+GET     /api/health-check           controllers.HealthCheckController.healthCheck
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
@@ -13,9 +16,9 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 # User CRUD
 GET         /api/users              controllers.UserController.list
 POST        /api/users              controllers.UserController.create
-GET         /api/users/:userId      controllers.UserController.get(userId: Int)
-DELETE      /api/users/:userId      controllers.UserController.remove(userId: Int)
-GET         /api/users2             controllers.UserController.getInfo
+#GET         /api/users/:userId      controllers.UserController.get(userId: Int)
+#DELETE      /api/users/:userId      controllers.UserController.remove(userId: Int)
+GET         /api/user               controllers.UserController.getInfo
 
 # User authentication
 POST        /api/users/authentication   controllers.LoginController.login
@@ -29,5 +32,5 @@ GET         /api/shopping-centers/:shoppingCenterId/restaurants controllers.Rest
 GET         /api/restaurants/:restaurantId                      controllers.RestaurantController.get(restaurantId: Int)
 
 # Tickets
-#GET         /api/restaurants/:restaurantId/tickets  controllers.TicketController.countTickets(restaurantId: Int)
-GET         /api/restaurants/:restaurantId/tickets controllers.TicketController.getLastTicket(restaurantId: Int)
+GET         /api/restaurants/:restaurantId/ticket-counter  controllers.TicketController.countTickets(restaurantId: Int)
+#GET         /api/restaurants/:restaurantId/tickets controllers.TicketController.getLastTicket(restaurantId: Int)
