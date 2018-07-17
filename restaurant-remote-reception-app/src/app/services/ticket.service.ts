@@ -26,7 +26,7 @@ export const TICKET_STATUS = [
 })
 export class TicketService{
   static genRestaurantTicketApiEndpoint(restaurantId: number) {
-    return environment.API_HOST + '/api/restaurants/' + restaurantId + '/tickets';
+    return '/api/restaurants/' + restaurantId + '/tickets';
   }
 
   constructor(private http: HttpClient) { }

@@ -21,11 +21,11 @@ export interface IRestaurant {
 
 export class RestaurantService {
   static genRestaurantsListApiEndpoint(shoppingCenterId: string) {
-    return environment.API_HOST + '/api/shopping-centers/' + shoppingCenterId + '/restaurants';
+    return '/api/shopping-centers/' + shoppingCenterId + '/restaurants';
   }
 
   static genRestaurantApiEndpoint(restaurantId: string) {
-    return environment.API_HOST + '/api/restaurants/' + restaurantId;
+    return '/api/restaurants/' + restaurantId;
   }
 
   constructor(private http: HttpClient) { }
