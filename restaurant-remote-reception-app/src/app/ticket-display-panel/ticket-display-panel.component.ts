@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { ITicketCurrentCount, TICKET_TYPES, TicketService} from '../services/ticket.service';
+import { TICKET_TYPES, TicketService} from '../services/ticket.service';
 import { AppUtils} from '../app-common';
 import {interval} from 'rxjs';
+import {ITicketCurrentCount} from '../models/ticket.model';
 
 const intervalCounter = interval(10000);
 

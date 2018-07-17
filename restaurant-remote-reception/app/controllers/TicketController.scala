@@ -30,7 +30,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     }
 
     def getLastTicket(restaurantId: Int) = Action.async { implicit rs =>
-        def queryTicketLastCalled = Tickets.filter(t =>
+        val queryTicketLastCalled = Tickets.filter(t =>
             (t.restaurantId === restaurantId.bind) && (t.ticketStatus === TicketStatus.CALLED.status))
             .sortBy(_.ticketNo.desc)
             .groupBy(_.ticketType)
@@ -38,7 +38,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                 (ticketType, ticketRows.map(_.ticketNo).max)
             }
 
-        def queryTicketLastTaken = Tickets.filter(t =>
+        val queryTicketLastTaken = Tickets.filter(t =>
             (t.restaurantId === restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status))
             .sortBy(_.ticketNo.desc)
             .groupBy(_.ticketType)
@@ -46,7 +46,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                 (ticketType, ticketRows.map(_.ticketNo).max)
             }
 
-        def joinLastCalledLastTaken =
+        val joinLastCalledLastTaken =
             queryTicketLastCalled.joinFull(queryTicketLastTaken).on(_._1 === _._1)
             .map { case (t1, t2) =>
                 (t1.flatMap(_._1.?), t1.flatMap(_._2), t2.flatMap(_._1.?), t2.flatMap(_._2))
@@ -62,6 +62,8 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
             }
         } yield Ok(Json.toJson(ticketLastNo))
     }
+
+    def create = TODO
 }
 
 case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)

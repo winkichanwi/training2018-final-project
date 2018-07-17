@@ -1,16 +1,7 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
-export interface ITicketCurrentCount {
-  ticket_type: string;
-  ticket_count: string;
-}
-
-export interface ITicketLastNo {
-  ticket_type: string;
-  last_called: number;
-  last_taken: number;
-}
+const TICKETS_API_ENDPOINT = '/api/tickets';
 
 export const TICKET_TYPES = [
   { type: 'A', min_seat_no: 1, max_seat_no: 2},
@@ -27,10 +18,16 @@ export const TICKET_STATUS = [
   { status: 'Archived', is_waiting: false }, // archive when restaurant closes
 ];
 
+const HTTTP_OPTIONS = {
+  headers: new HttpHeaders({
+    'Content-Type':  'application/json',
+  })
+};
+
 @Injectable({
   providedIn: 'root'
 })
-export class TicketService{
+export class TicketService {
   static genRestaurantTicketCountsApiEndpoint(restaurantId: number) {
     return '/api/restaurants/' + restaurantId + '/tickets';
   }
@@ -39,5 +36,9 @@ export class TicketService{
 
   public getTicketCurrentCount(restaurantId: number) {
     return this.http.get(TicketService.genRestaurantTicketCountsApiEndpoint(restaurantId));
+  }
+
+  public create(ticketForm: any) {
+    return this.http.post(TICKETS_API_ENDPOINT, ticketForm, HTTTP_OPTIONS);
   }
 }
