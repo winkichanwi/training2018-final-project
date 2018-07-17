@@ -14,7 +14,7 @@ export class TickerReservationComponent implements OnInit {
   restaurantId: string;
   restaurant: IRestaurant;
   user: IUser;
-  seatNo = 0;
+  seatNo = 1;
   isLoading = false;
 
   constructor(

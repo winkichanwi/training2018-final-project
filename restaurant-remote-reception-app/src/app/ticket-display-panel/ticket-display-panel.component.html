@@ -1,10 +1,13 @@
 <div class="row ticket-display-panel">
-  <div class="col-lg ticket-display-panel" *ngFor="let ticketCount of ticketCounts">
+  <div class="col-lg ticket-display-panel" *ngFor="let ticketCurrentCount of ticketCurrentCounts">
     <div class="card ticket-display-panel">
       <div class="card-body ticket-display-panel">
-        <h3 class="card-title ticket-display-panel">{{ticketCount.ticket_type}}</h3>
-        <h5 class="card-subtitle mb-3 ticket-display-panel">{{ticketTypeSeatLabel(ticketCount.ticket_type)}} 人</h5>
-        <div class="card-text ticket-display-panel">{{ticketCount.ticket_count}}</div>
+        <h3 class="card-title ticket-display-panel">{{ticketCurrentCount.ticket_type}}</h3>
+        <h5 class="card-subtitle mb-2 ticket-display-panel">{{ticketTypeSeatLabel(ticketCurrentCount.ticket_type)}} 人</h5>
+        <div class="card-text ticket-display-panel ticket-no-label">
+          <div class="ticket-display-panel ticket-no-title">待ち行列</div>
+          <div class="ticket-display-panel ticket-no">{{ticketCurrentCount.ticket_count}}</div>
+        </div>
       </div>
     </div>
   </div>

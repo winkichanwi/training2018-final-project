@@ -1,4 +1,8 @@
-# Description for Error Codes
+# Description for Status Codes
+
+## 2000 Successful
+**2000 Successful**
+Request has succeeded.
 
 ## 4000 Client Error
 **4000 Unsupported Format**

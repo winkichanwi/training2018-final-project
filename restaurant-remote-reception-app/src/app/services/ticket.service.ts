@@ -1,8 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {environment} from '../../environments/environment';
 
-export interface ITicketCount {
+export interface ITicketCurrentCount {
   ticket_type: string;
   ticket_count: string;
 }
@@ -15,23 +14,24 @@ export const TICKET_TYPES = [
 ];
 
 export const TICKET_STATUS = [
-  { status: 'Active', is_active: true },
-  { status: 'Called', is_active: true },
-  { status: 'Cancelled', is_active: false },
-  { status: 'Closed', is_active: false },
+  { status: 'Active', is_waiting: true },
+  { status: 'Called', is_waiting: true },
+  { status: 'Cancelled', is_waiting: false }, // cancelled by either customer or restaurant
+  { status: 'Accepted', is_waiting: false }, // accepted by restaurant
+  { status: 'Archived', is_waiting: false }, // archive when restaurant closes
 ];
 
 @Injectable({
   providedIn: 'root'
 })
 export class TicketService{
-  static genRestaurantTicketApiEndpoint(restaurantId: number) {
+  static genRestaurantTicketCountsApiEndpoint(restaurantId: number) {
     return '/api/restaurants/' + restaurantId + '/tickets';
   }
 
   constructor(private http: HttpClient) { }
 
-  public getTicketCount(restaurantId: number) {
-    return this.http.get(TicketService.genRestaurantTicketApiEndpoint(restaurantId));
+  public getTicketCurrentCount(restaurantId: number) {
+    return this.http.get(TicketService.genRestaurantTicketCountsApiEndpoint(restaurantId));
   }
 }
