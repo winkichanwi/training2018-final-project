@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 const USERS_API_ENDPOINT = '/api/users';
-const USER_API_ENDPOINT = '/api/user';
+const CURRENT_USER_API_ENDPOINT = '/api/me';
 const USER_AUTHENTICATION_API_ENDPOINT = '/api/users/authentication';
 
 const httpOptions = {
@@ -10,27 +10,6 @@ const httpOptions = {
     'Content-Type':  'application/json',
   })
 };
-
-export interface IUser {
-  id: number;
-  full_name: string;
-  email: string;
-}
-
-export class UserSignup {
-  constructor(
-    public full_name: string,
-    public email: string,
-    public password: string
-  ) { }
-}
-
-export class UserLogin {
-  constructor(
-    public email: string,
-    public password: string
-  ) { }
-}
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +25,7 @@ export class UserService {
     return this.http.post(USER_AUTHENTICATION_API_ENDPOINT, loginForm, httpOptions);
   }
 
-  public getInfo() {
-    return this.http.get(USER_API_ENDPOINT);
+  public getMe() {
+    return this.http.get(CURRENT_USER_API_ENDPOINT);
   }
 }

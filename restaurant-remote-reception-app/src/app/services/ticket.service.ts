@@ -30,9 +30,9 @@ export const TICKET_STATUS = [
 @Injectable({
   providedIn: 'root'
 })
-export class TicketService {
+export class TicketService{
   static genRestaurantTicketCountsApiEndpoint(restaurantId: number) {
-    return '/api/restaurants/' + restaurantId + '/ticket-counter';
+    return '/api/restaurants/' + restaurantId + '/tickets';
   }
 
   constructor(private http: HttpClient) { }

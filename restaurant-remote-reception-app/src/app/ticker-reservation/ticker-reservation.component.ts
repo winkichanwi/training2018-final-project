@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IRestaurant, RestaurantService } from '../services/restaurant.service';
 import { AppUtils } from '../app-common';
-import { IUser, UserService } from '../services/user.service';
+import { UserService } from '../services/user.service';
+import {IUser} from '../models/user.model';
 
 @Component({
   selector: 'app-ticker-reservation',
@@ -14,7 +15,7 @@ export class TickerReservationComponent implements OnInit {
   restaurant: IRestaurant;
   user: IUser;
   seatNo = 1;
-  loading = false;
+  isLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -33,7 +34,7 @@ export class TickerReservationComponent implements OnInit {
   }
 
   private getUserInfo() {
-      this.userService.getInfo().subscribe(
+      this.userService.getMe().subscribe(
         (res: IUser) => {
           this.user = res;
         },

@@ -26,7 +26,7 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
             val loginEmail = form.email
             val loginPassword = form.password
 
-            def queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
+            val queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
                 .filter { case (t1, t2) =>
                     t1.email === loginEmail
                 }.result.headOption
@@ -36,7 +36,6 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
                     if (userSecret.password == loginPassword) {
                         Ok(Json.obj("result" -> Constants.SUCCESS))
                             .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
-                        // TODO set full name and id to cache?
                     } else {
                         val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")
                         BadRequest(Json.toJson(pwdIncorrectRes))
@@ -55,7 +54,7 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
 object LoginController {
     case class LoginForm(email : String, password : String )
 
-    implicit val userFormReads: Reads[LoginForm] = (
+    implicit val loginFormReads: Reads[LoginForm] = (
         (__ \ "email").read[String](email) and
         (__ \ "password").read[String](minLength[String](6))
     )(LoginForm)
