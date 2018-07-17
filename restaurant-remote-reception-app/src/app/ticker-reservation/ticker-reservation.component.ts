@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IRestaurant, RestaurantService } from '../services/restaurant.service';
 import { AppUtils } from '../app-common';
-import { IUser, UserService } from '../services/user.service';
-import { CookieService } from 'ngx-cookie-service';
+import { UserService } from '../services/user.service';
+import {IUser} from '../models/user.model';
 
 @Component({
   selector: 'app-ticker-reservation',
@@ -11,25 +11,19 @@ import { CookieService } from 'ngx-cookie-service';
   styleUrls: ['./ticker-reservation.component.css']
 })
 export class TickerReservationComponent implements OnInit {
-  sessionToken: string;
   restaurantId: string;
   restaurant: IRestaurant;
-  userId = '1';
   user: IUser;
   seatNo = 0;
-  loading = false;
+  isLoading = false;
 
   constructor(
     private route: ActivatedRoute,
     private restaurantService: RestaurantService,
-    private userService: UserService,
-    private cookieService: CookieService
+    private userService: UserService
   ) { }
 
   ngOnInit() {
-    this.sessionToken = this.cookieService.get('user-id');
-    console.log('Session');
-    console.log(this.sessionToken);
     this.restaurantId = this.route.snapshot.paramMap.get('restaurantId');
     this.getRestaurantInfo();
     this.getUserInfo();
@@ -39,7 +33,7 @@ export class TickerReservationComponent implements OnInit {
   }
 
   private getUserInfo() {
-      this.userService.getInfo(this.userId).subscribe(
+      this.userService.getMe().subscribe(
         (res: IUser) => {
           this.user = res;
         },

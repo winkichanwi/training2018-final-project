@@ -14,9 +14,8 @@ import { RestaurantListComponent } from './restaurant-list/restaurant-list.compo
 import { RestaurantService } from './services/restaurant.service';
 import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-display-panel.component';
 import { TickerReservationComponent } from './ticker-reservation/ticker-reservation.component';
-import { CookieService } from 'ngx-cookie-service';
-import {TicketService} from './services/ticket.service';
-import {UserService} from './services/user.service';
+import { TicketService } from './services/ticket.service';
+import { UserService } from './services/user.service';
 
 @NgModule({
   declarations: [
@@ -38,8 +37,7 @@ import {UserService} from './services/user.service';
     ShoppingCenterService,
     RestaurantService,
     TicketService,
-    UserService,
-    CookieService
+    UserService
   ],
   bootstrap: [AppComponent]
 })

@@ -27,7 +27,7 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(ca
             val loginEmail = form.email
             val loginPassword = form.password
 
-            def queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
+            val queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
                 .filter { case (t1, t2) =>
                     t1.email === loginEmail
                 }.result.headOption
@@ -57,7 +57,7 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(ca
 object LoginController {
     case class LoginForm(email : String, password : String )
 
-    implicit val userFormReads: Reads[LoginForm] = (
+    implicit val loginFormReads: Reads[LoginForm] = (
         (__ \ "email").read[String](email) and
         (__ \ "password").read[String](minLength[String](6))
     )(LoginForm)

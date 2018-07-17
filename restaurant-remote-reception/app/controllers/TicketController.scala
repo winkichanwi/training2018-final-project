@@ -16,11 +16,8 @@ import scala.concurrent.ExecutionContext
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
-    import TicketController._
-
-    private val activeTicketStatusSeq: Seq[String] = TicketStatus.values.filter(_.isActive).map(value => value.toString).toSeq
-
     def countTickets(restaurantId: Int) = Action.async { implicit rs =>
+        val activeTicketStatusSeq: Seq[String] = Seq(TicketStatus.ACTIVE, TicketStatus.CALLED).map(_.toString)
         val groupTicketTypes = Tickets.filter(t =>
             (t.restaurantId === restaurantId.bind) && (t.ticketStatus inSet activeTicketStatusSeq))
             .groupBy(_.ticketType)
@@ -33,9 +30,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     }
 }
 
-object TicketController {
-    case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
+case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
 
+object RestaurantTicketCounts {
     implicit val restaurantTicketCountWrites: Writes[RestaurantTicketCounts] = (
         (__ \ "ticket_type").write[String] and
         (__ \ "ticket_count").write[Int]

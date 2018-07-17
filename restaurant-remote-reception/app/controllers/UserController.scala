@@ -10,14 +10,13 @@ import javax.inject.Inject
 import models.ErrorResponse._
 import models.Utils._
 import models.{Constants, ErrorResponse}
-import play.api.cache.CacheApi
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cache: CacheApi)(implicit ec: ExecutionContext)
+class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
     // コンパニオンオブジェクトに定義したReads、Writesを参照するためにimport文を追加
     import UserController._
@@ -41,7 +40,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cac
         rs.body.validate[UserForm].map { form =>
             // OKの場合はユーザを登録
             val newUser = UsersRow(0, form.userFullname, form.email)
-            def addUserDBIO = for {
+            val addUserDBIO = for {
                 userId <- (Users returning Users.map(_.userId)) += newUser
                 userAcc = UserSecretRow(userId, form.password)
                 result <- UserSecret += userAcc
@@ -56,7 +55,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cac
     }
 
     def get(userId: Int) = Action.async { implicit rs =>
-        def queryUserById = Users.filter(t => t.userId === userId.bind).result.headOption
+        val queryUserById = Users.filter(t => t.userId === userId.bind).result.headOption
         db.run(queryUserById).map{
             case Some(user) => Ok(Json.toJson(user))
             case None =>
@@ -65,7 +64,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cac
         }
     }
 
-    def getInfo = TODO
+    def getMe = TODO
 //        Action.async { implicit rs =>
 //
 //        def userId = rs.session.get(Constants.CACHE_TOKEN_USER_ID)
@@ -114,18 +113,18 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(cac
 }
 
 object UserController {
-    // UsersRowをJSONに変換するためのWritesを定義
     implicit val userWrites: Writes[UsersRow] = (
         (__ \ "id").write[Int]   and
         (__ \ "full_name").write[String] and
         (__ \ "email").write[String]
     )(unlift(UsersRow.unapply))
+}
 
-    case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
+case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
 
-    // JSONをUserFormに変換するためのReadsを定義
+object UserForm {
     implicit val userFormReads: Reads[UserForm] = (
-        (__ \ "id").readNullable[Int] and
+    (__ \ "id").readNullable[Int] and
         (__ \ "full_name").read[String] and
         (__ \ "email").read[String](email) and
         (__ \ "password").read[String](minLength[String](6))
