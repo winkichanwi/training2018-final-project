@@ -11,7 +11,7 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import models.TicketStatus
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
@@ -21,19 +21,15 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     private val activeTicketStatusSeq: Seq[String] = TicketStatus.values.filter(_.isActive).map(value => value.toString).toSeq
 
     def countTickets(restaurantId: Int) = Action.async { implicit rs =>
-        def groupTicketTypes = Tickets.filter(t =>
+        val groupTicketTypes = Tickets.filter(t =>
             (t.restaurantId === restaurantId.bind) && (t.ticketStatus inSet activeTicketStatusSeq))
             .groupBy(_.ticketType)
-        def queryTicketCounts = for {
-         (ticketType, ticketRows) <- groupTicketTypes
-        } yield (ticketType, ticketRows.length)
+            .map { case (ticketType, rows) => (ticketType, rows.length) }
+            .result
 
-        for {
-            ticketCountRows: Seq[(String, Int)] <- db.run(queryTicketCounts.result)
-            counts = ticketCountRows.map { row =>
-                RestaurantTicketCounts(row._1, row._2)
-            }
-        } yield Ok(Json.toJson(counts))
+        db.run(groupTicketTypes)
+            .map(_.map(row => RestaurantTicketCounts(row._1, row._2)))
+            .map(counts => Ok(Json.toJson(counts)))
     }
 }
 
