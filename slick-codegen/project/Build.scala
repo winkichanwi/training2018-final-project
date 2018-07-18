@@ -29,7 +29,7 @@ object myBuild extends Build {
     val outputDir = "../restaurant-remote-reception/app"
     val url = "jdbc:mysql://localhost:3306/restaurant_remote_reception"
     val username = "root"
-    val password = ""
+    val password = "mysql"
     val jdbcDriver = "com.mysql.jdbc.Driver"
     val slickDriver = "slick.driver.MySQLDriver"
     val pkg = "models"

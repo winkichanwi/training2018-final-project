@@ -5,7 +5,7 @@ import { AppUtils } from '../app-common';
 import { UserService } from '../services/user.service';
 import {IUser} from '../models/user.model';
 import {Ticket} from '../models/ticket.model';
-import {TICKET_STATUS, TicketService} from '../services/ticket.service';
+import {TicketService} from '../services/ticket.service';
 
 @Component({
   selector: 'app-ticker-reservation',
@@ -30,7 +30,6 @@ export class TicketReservationComponent implements OnInit {
     this.ticket.restaurant_id = parseInt(this.route.snapshot.paramMap.get('restaurantId'), 10);
     this.getRestaurantInfo();
     this.getUserInfo();
-    this.ticket.created_by_id = this.user.id;
   }
 
   onSubmit() {
@@ -41,9 +40,7 @@ export class TicketReservationComponent implements OnInit {
     const ticketForm = JSON.stringify(this.ticket);
     this.ticketService.create(ticketForm).subscribe(
       (res: Response) => {
-        if (res.status === 200) {
-          this.router.navigate(['/shopping-centers', this.restaurant.shopping_center_id]);
-        }
+        this.router.navigate(['/shopping-centers', this.restaurant.shopping_center_id]);
       },
       err => {
         AppUtils.handleError(err);
@@ -55,6 +52,7 @@ export class TicketReservationComponent implements OnInit {
       this.userService.getMe().subscribe(
         (res: IUser) => {
           this.user = res;
+          this.ticket.created_by_id = this.user.id;
         },
         err => {
           AppUtils.handleError(err);

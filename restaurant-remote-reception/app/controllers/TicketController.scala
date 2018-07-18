@@ -3,7 +3,6 @@ package controllers
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import controllers.LoginController.LoginForm
 import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json.Writes
@@ -14,9 +13,8 @@ import play.api.mvc.{Action, Controller}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
-import models.TicketStatus
+import models.{TicketStatus, TicketType}
 import models.Utils.resForBadRequest
-import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -72,9 +70,26 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
 
     def create = Action.async(parse.json) { implicit rs =>
         rs.body.validate[TicketForm].map { form =>
+            val ticketType = TicketType.values.filter { ticketType =>
+                    ticketType.minSeatNo <= form.ticketSeatNo && ticketType.maxSeatNo >= form.ticketSeatNo
+                }.map(_.typeName).head
+
+            val queryTicketLastTakenNo = Tickets.filter(t =>
+                (t.restaurantId === form.restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status) && (t.ticketType === ticketType.bind))
+                .sortBy(_.ticketNo.desc)
+                .map(_.ticketNo).max
 
             val now = Timestamp.valueOf(LocalDateTime.now())
-            TicketsRow(0, ?, form.restaurantId, form.createdById, form.ticketSeatNo, 'A', form.ticketStatus, now)
+            val newTicket = db.run(queryTicketLastTakenNo.result).map{
+                case Some(ticketNo) =>
+                    TicketsRow(0, ticketNo + 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, form.ticketStatus)
+                case None =>
+                    TicketsRow(0, 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, form.ticketStatus)
+            }
+
+            newTicket.flatMap { newTicketRow =>
+                db.run(Tickets += newTicketRow).map(_ => Ok(Json.obj("result" -> "success")))
+            }
         }.recoverTotal { e =>
             Future { resForBadRequest(e) }
         }
@@ -110,5 +125,5 @@ object TicketForm {
         (__ \ "created_by_id").read[Int] and
         (__ \ "seat_no").read[Int](min(1)) and
         (__ \ "ticket_status").read[String]
-    )(TicketForm)
+    )(TicketForm.apply _)
 }
