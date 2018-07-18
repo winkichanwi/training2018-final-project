@@ -33,7 +33,7 @@ export class TickerReservationComponent implements OnInit {
   }
 
   private getUserInfo() {
-      this.userService.getMe().subscribe(
+      this.userService.getCurrentUserInfo().subscribe(
         (res: IUser) => {
           this.user = res;
         },

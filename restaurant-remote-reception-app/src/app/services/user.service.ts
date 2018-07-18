@@ -26,7 +26,7 @@ export class UserService {
     return this.http.post(USER_AUTHENTICATION_API_ENDPOINT, loginForm, httpOptions);
   }
 
-  public getMe() {
+  public getCurrentUserInfo() {
     return this.http.get(CURRENT_USER_API_ENDPOINT);
   }
 }
