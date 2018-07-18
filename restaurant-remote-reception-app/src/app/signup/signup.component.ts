@@ -1,17 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { UserSignup } from './user-signup';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { Router} from '@angular/router';
+import { AppUtils} from '../app-common';
+import { UserService} from '../services/user.service';
+import {UserSignup} from '../models/user.model';
 
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-Type':  'application/json',
-  })
-};
-
-interface SignupResponse {
+interface ISignupResponse {
   result: String;
 }
 
@@ -22,44 +15,31 @@ interface SignupResponse {
 })
 
 export class SignupComponent implements OnInit {
-  signupForm: FormGroup;
+  isLoading = false;
   user = new UserSignup('', '', '');
-  signupJson = '';
-  postUrl = environment.apiUrl + '/users';
 
-  constructor (private http: HttpClient, private router: Router) { }
+  constructor (private router: Router,
+               private userService: UserService) { }
 
-
-  ngOnInit() {
-    this.signupForm = new FormGroup({
-      'inputFullname': new FormControl(this.user.full_name, Validators.required),
-      'inputEmail': new FormControl(this.user.email, [
-        Validators.required,
-        Validators.email
-      ]),
-      'inputPassword': new FormControl(this.user.password, [
-        Validators.required,
-        Validators.minLength(6)
-      ]),
-
-    });
-  }
+  ngOnInit() {}
 
   onSubmit() {
-    this.signupJson = JSON.stringify(this.user);
-    this.http.post<SignupResponse>(this.postUrl, this.signupJson, httpOptions)
+    this.isLoading = true;
+    this.signUp();
+  }
+
+  private signUp() {
+    const signupJson = JSON.stringify(this.user);
+    this.userService.create(signupJson)
       .subscribe(
-        res => {
+        (res: ISignupResponse) => {
           if (res.result === 'success') {
-            this.router.navigate(['/home']);
+            this.router.navigate(['/login']);
           }
         },
-        (err: HttpErrorResponse) => {
-          if (err.error instanceof Error) {
-            console.log('Client-side error occured.');
-          } else {
-            console.log('Server-side error occured.');
-          }
+        err => {
+          AppUtils.handleError(err);
+          this.isLoading = false;
         }
       );
   }

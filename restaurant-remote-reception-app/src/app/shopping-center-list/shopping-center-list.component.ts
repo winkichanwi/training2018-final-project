@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 import {IShoppingCenter, ShoppingCenterService} from '../services/shopping-center.service';
+import {AppUtils} from '../app-common';
 
 @Component({
   selector: 'app-shopping-centers',
@@ -13,13 +14,21 @@ import {IShoppingCenter, ShoppingCenterService} from '../services/shopping-cente
 export class ShoppingCenterListComponent implements OnInit {
   shoppingCenters: IShoppingCenter[];
 
-  constructor (private shoppingCenterService: ShoppingCenterService) {
-    this.shoppingCenterService.getList().subscribe((res: IShoppingCenter[]) => {
-      this.shoppingCenters = res;
-    });
-  }
+  constructor (private shoppingCenterService: ShoppingCenterService) {}
 
   ngOnInit() {
+    this.getListOfShoppingCenters();
+  }
+
+  private getListOfShoppingCenters() {
+    this.shoppingCenterService.getList().subscribe(
+      (res: IShoppingCenter[]) => {
+        this.shoppingCenters = res;
+      },
+      err => {
+        AppUtils.handleError(err);
+      }
+    );
   }
 
 }

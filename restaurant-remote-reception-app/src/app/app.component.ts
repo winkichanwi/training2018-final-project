@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {UserLoginComponent} from './user-login/user-login.component';
 
 @Component({
@@ -6,7 +6,12 @@ import {UserLoginComponent} from './user-login/user-login.component';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'レストレ';
   userName = '';
+
+  constructor() { }
+
+  ngOnInit() {
+  }
 }

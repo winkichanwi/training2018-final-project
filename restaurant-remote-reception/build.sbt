@@ -19,3 +19,4 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1
 libraryDependencies += "com.typesafe.play" %% "play-slick" % "2.0.2"
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.36"
 
+

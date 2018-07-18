@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 
+const SHOPPING_CENTERS_API_ENDPOINT = '/api/shopping-centers';
+
 export interface IShoppingCenter {
   id: number;
   name: string;
@@ -13,17 +15,13 @@ export interface IShoppingCenter {
 })
 
 export class ShoppingCenterService {
-  getListUrl = environment.apiUrl + '/shopping-centers';
-  getInfoUrl = '';
-
   constructor(private http: HttpClient) { }
 
   public getList() {
-    return this.http.get(this.getListUrl);
+    return this.http.get(SHOPPING_CENTERS_API_ENDPOINT);
   }
 
   public getInfo(shoppingCenterId: string) {
-    this.getInfoUrl = environment.apiUrl + '/shopping-centers/' + shoppingCenterId;
-    return this.http.get(this.getInfoUrl);
+    return this.http.get(SHOPPING_CENTERS_API_ENDPOINT + '/' + shoppingCenterId);
   }
 }

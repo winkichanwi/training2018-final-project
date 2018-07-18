@@ -40,19 +40,46 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         rs.body.validate[UserForm].map { form =>
             // OKの場合はユーザを登録
             val newUser = UsersRow(0, form.userFullname, form.email)
-            val actionAddUser = for {
+            val addUserDBIO = for {
                 userId <- (Users returning Users.map(_.userId)) += newUser
                 userAcc = UserSecretRow(userId, form.password)
                 result <- UserSecret += userAcc
             } yield result
 
-            db.run(actionAddUser).map { _ =>
+            db.run(addUserDBIO).map { _ =>
                 Ok(Constants.SUCCESS_JSON)
             }
         }.recoverTotal { e =>
             Future { resForBadRequest(e) }
         }
     }
+
+    def get(userId: Int) = Action.async { implicit rs =>
+        val queryUserById = Users.filter(t => t.userId === userId.bind).result.headOption
+        db.run(queryUserById).map{
+            case Some(user) => Ok(Json.toJson(user))
+            case None =>
+                val errorResponse = ErrorResponse(Constants.FAILURE, "User is not found.")
+                NotFound(Json.toJson(errorResponse))
+        }
+    }
+
+    def getMe = TODO
+//        Action.async { implicit rs =>
+//
+//        def userId = rs.session.get(Constants.CACHE_TOKEN_USER_ID)
+//        def userOpt = userId.flatMap { userId =>
+//            Users.filter(t => t.userId === userId.bind).result.headOption
+//        }
+//        def result = userOpt.map { user =>
+//            db.run(userOpt).map {
+//                case Some(user) => Ok()
+//                case None => NotFound()
+//            }
+//        }
+//
+//
+//    }
 
     /**
       * ユーザ更新
@@ -86,7 +113,6 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
 }
 
 object UserController {
-    // UsersRowをJSONに変換するためのWritesを定義
     implicit val userWrites: Writes[UsersRow] = (
         (__ \ "id").write[Int]   and
         (__ \ "full_name").write[String] and
@@ -95,9 +121,8 @@ object UserController {
 
     case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
 
-    // JSONをUserFormに変換するためのReadsを定義
     implicit val userFormReads: Reads[UserForm] = (
-        (__ \ "id").readNullable[Int] and
+    (__ \ "id").readNullable[Int] and
         (__ \ "full_name").read[String] and
         (__ \ "email").read[String](email) and
         (__ \ "password").read[String](minLength[String](6))

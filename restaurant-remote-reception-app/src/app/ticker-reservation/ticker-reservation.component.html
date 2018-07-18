@@ -1,0 +1,28 @@
+<div class="container">
+  <div class="col-md-6 offset-md-3">
+    <h2>整理券登録</h2>
+    <form (ngSubmit)="ticketReserveForm.form.valid && onSubmit()" #ticketReserveForm="ngForm">
+      <div class="form-group">
+        <label for="inputFullname">予約者</label>
+        <input type="text" class="form-control" id="inputFullname" name="inputFullname" [(ngModel)]="user.full_name"disabled>
+      </div>
+      <div class="form-group">
+        <label for="inputRestaurantName">店名</label>
+        <input type="text" class="form-control" id="inputRestaurantName" name="inputRestaurantName" [(ngModel)]="restaurant.name" disabled>
+      </div>
+      <div class="form-group">
+        <label for="inputSeatNo">人数</label>
+        <div class="input-group">
+
+          <input type="number" [ngClass]="{'form-control': true, 'is-invalid': inputSeatNo.invalid}" id="inputSeatNo" name="inputSeatNo" [(ngModel)]="seatNo" #inputSeatNo="ngModel" required min="1">
+          <div class="input-group-append">
+            <span class="input-group-text">人</span>
+          </div>
+          <div *ngIf="ticketReserveForm.submitted && inputSeatNo.invalid" class="invalid-feedback">人数は正しくない</div>
+        </div>
+
+      </div>
+      <button type="submit" class="btn btn-primary">確認</button> <img *ngIf="isLoading" src="../../assets/icon_loader.gif">
+    </form>
+  </div>
+</div>

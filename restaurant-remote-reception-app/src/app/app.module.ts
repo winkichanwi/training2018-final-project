@@ -6,22 +6,26 @@ import { FormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
 import { SignupComponent } from './signup/signup.component';
 import { AppRoutingModule} from './app-routing.module';
-import { HomeComponent } from './home/home.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
 
 import { ShoppingCenterService } from './services/shopping-center.service';
-import {RestaurantListComponent} from './restaurant-list/restaurant-list.component';
-import {RestaurantService} from './services/restaurant.service';
+import { RestaurantListComponent } from './restaurant-list/restaurant-list.component';
+import { RestaurantService } from './services/restaurant.service';
+import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-display-panel.component';
+import { TickerReservationComponent } from './ticker-reservation/ticker-reservation.component';
+import { TicketService } from './services/ticket.service';
+import { UserService } from './services/user.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     SignupComponent,
-    HomeComponent,
     UserLoginComponent,
     ShoppingCenterListComponent,
-    RestaurantListComponent
+    RestaurantListComponent,
+    TicketDisplayPanelComponent,
+    TickerReservationComponent
   ],
   imports: [
     BrowserModule,
@@ -31,7 +35,10 @@ import {RestaurantService} from './services/restaurant.service';
   ],
   providers: [
     ShoppingCenterService,
-    RestaurantService],
+    RestaurantService,
+    TicketService,
+    UserService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

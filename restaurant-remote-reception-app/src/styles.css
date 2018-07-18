@@ -1,11 +1,31 @@
 /* You can add global styles to this file, and also import other style files */
 @import './styles/css/bootstrap.min.css';
 
-.ng-valid[required], .ng-valid.required  {
-  border-left: 5px solid #42A948; /* green */
+.btn-outline-primary,.btn-primary:hover  {
+  color: #004F8B;
+  background-color: transparent;
+  background-image: none;
+  border-color: #004F8B;
 }
 
-.ng-invalid:not(form)  {
-  border-left: 5px solid #a94442; /* red */
+.btn-primary, .btn-outline-primary:hover {
+  color: #fff;
+  background-color: #004F8B;
+  border-color: #004F8B;
 }
 
+.btn-link {
+  color: #004F8B;
+}
+
+a {
+  color: #FF8300;
+}
+
+a:hover {
+  color: #DA7000;
+}
+
+.breadcrumb {
+  background-color: #FFE0C0;
+}

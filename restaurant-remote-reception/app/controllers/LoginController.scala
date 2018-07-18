@@ -16,35 +16,32 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
+class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
     import LoginController._
 
-    def authenticate = Action.async(parse.json) { implicit rs =>
+    def login = Action.async(parse.json) { implicit rs =>
         rs.body.validate[LoginForm].map { form =>
-            var loginEmail = form.email
-            var loginPassword = form.password
+            val loginEmail = form.email
+            val loginPassword = form.password
 
-            val queryPasswordByEmail = Users.join(UserSecret).on(_.userId === _.userId)
+            val queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
                 .filter { case (t1, t2) =>
                     t1.email === loginEmail
-                }.map { case (t1, t2) =>
-                    (t1.userId, t1.userFullname, t2.password) <> (LoginInfo.tupled, LoginInfo.unapply)
                 }.result.headOption
 
-            db.run(queryPasswordByEmail).map {
-                case Some(loginInfo) =>
-                    if (loginInfo.password == loginPassword) {
-                        Ok(Json.obj("result" -> Constants.SUCCESS, "full_name" -> loginInfo.userFullname))
-                            .withSession("connected" -> loginInfo.userId.toString())
-                        // TODO set full name and id to cache?
+            db.run(queryUserInfoSecretDBIO).map {
+                case Some((user, userSecret)) =>
+                    if (userSecret.password == loginPassword) {
+                        Ok(Json.obj("result" -> Constants.SUCCESS))
+                            .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
                     } else {
                         val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")
                         BadRequest(Json.toJson(pwdIncorrectRes))
                     }
                 case None =>
-                    val emailIncorrectRes = ErrorResponse(Constants.FAILURE, "Email (" + loginEmail + ") incorrect. ")
+                    val emailIncorrectRes = ErrorResponse(Constants.FAILURE, "Email address (" + loginEmail + ") incorrect. ")
                     BadRequest(Json.toJson(emailIncorrectRes))
             }
         }.recoverTotal { e =>
@@ -55,11 +52,9 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (i
 }
 
 object LoginController {
-    case class LoginInfo(userId: Int, userFullname: String, password: String)
-
     case class LoginForm(email : String, password : String )
 
-    implicit val userFormReads: Reads[LoginForm] = (
+    implicit val loginFormReads: Reads[LoginForm] = (
         (__ \ "email").read[String](email) and
         (__ \ "password").read[String](minLength[String](6))
     )(LoginForm)
