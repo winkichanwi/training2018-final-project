@@ -17,7 +17,6 @@ interface ILoginResponse {
 export class UserLoginComponent implements OnInit {
   isLoading = false;
   user = new UserLogin('', '');
-  loginJson: any;
 
   constructor (private router: Router,
                private userService: UserService) { }
@@ -26,12 +25,12 @@ export class UserLoginComponent implements OnInit {
 
   onSubmit() {
     this.isLoading = true;
-    this.loginJson = JSON.stringify(this.user);
     this.login();
   }
 
   private login() {
-    this.userService.login(this.loginJson)
+    const loginJson = JSON.stringify(this.user);
+    this.userService.login(loginJson)
       .subscribe(
         (res: ILoginResponse) => {
           if (res.result === 'success') {

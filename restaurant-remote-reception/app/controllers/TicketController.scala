@@ -1,17 +1,22 @@
 package controllers
 
+import java.sql.Timestamp
+import java.time.LocalDateTime
+
 import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json.Writes
+import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Action, Controller}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
-import models.TicketStatus
+import models.{TicketStatus, TicketType}
+import models.Utils.resForBadRequest
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
@@ -30,7 +35,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     }
 
     def getLastTicket(restaurantId: Int) = Action.async { implicit rs =>
-        def queryTicketLastCalled = Tickets.filter(t =>
+        val queryTicketLastCalled = Tickets.filter(t =>
             (t.restaurantId === restaurantId.bind) && (t.ticketStatus === TicketStatus.CALLED.status))
             .sortBy(_.ticketNo.desc)
             .groupBy(_.ticketType)
@@ -38,7 +43,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                 (ticketType, ticketRows.map(_.ticketNo).max)
             }
 
-        def queryTicketLastTaken = Tickets.filter(t =>
+        val queryTicketLastTaken = Tickets.filter(t =>
             (t.restaurantId === restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status))
             .sortBy(_.ticketNo.desc)
             .groupBy(_.ticketType)
@@ -46,7 +51,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                 (ticketType, ticketRows.map(_.ticketNo).max)
             }
 
-        def joinLastCalledLastTaken =
+        val joinLastCalledLastTaken =
             queryTicketLastCalled.joinFull(queryTicketLastTaken).on(_._1 === _._1)
             .map { case (t1, t2) =>
                 (t1.flatMap(_._1.?), t1.flatMap(_._2), t2.flatMap(_._1.?), t2.flatMap(_._2))
@@ -62,6 +67,34 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
             }
         } yield Ok(Json.toJson(ticketLastNo))
     }
+
+    def create = Action.async(parse.json) { implicit rs =>
+        rs.body.validate[TicketForm].map { form =>
+            val ticketType = TicketType.values.filter { ticketType =>
+                    ticketType.minSeatNo <= form.ticketSeatNo && ticketType.maxSeatNo >= form.ticketSeatNo
+                }.map(_.typeName).head
+
+            val queryTicketLastTakenNo = Tickets.filter(t =>
+                (t.restaurantId === form.restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status) && (t.ticketType === ticketType.bind))
+                .sortBy(_.ticketNo.desc)
+                .map(_.ticketNo).max
+
+            val now = Timestamp.valueOf(LocalDateTime.now())
+            val newTicket = db.run(queryTicketLastTakenNo.result).map{
+                case Some(ticketNo) =>
+                    TicketsRow(0, ticketNo + 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, form.ticketStatus)
+                case None =>
+                    TicketsRow(0, 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, form.ticketStatus)
+            }
+
+            newTicket.flatMap { newTicketRow =>
+                db.run(Tickets += newTicketRow).map(_ => Ok(Json.obj("result" -> "success")))
+            }
+        }.recoverTotal { e =>
+            Future { resForBadRequest(e) }
+        }
+    }
+
 }
 
 case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
@@ -82,4 +115,15 @@ object RestaurantTicketLastNo {
             (__ \ "last_called").write[Int] and
             (__ \ "last_taken").write[Int]
         ) (unlift(RestaurantTicketLastNo.unapply))
+}
+
+case class TicketForm(restaurantId: Int, createdById: Int, ticketSeatNo: Int, ticketStatus: String)
+
+object TicketForm {
+    implicit val ticketFormReads: Reads[TicketForm] = (
+        (__ \ "restaurant_id").read[Int] and
+        (__ \ "created_by_id").read[Int] and
+        (__ \ "seat_no").read[Int](min(1)) and
+        (__ \ "ticket_status").read[String]
+    )(TicketForm.apply _)
 }

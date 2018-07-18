@@ -5,7 +5,7 @@ import { SignupComponent} from './signup/signup.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import {ShoppingCenterListComponent} from './shopping-center-list/shopping-center-list.component';
 import {RestaurantListComponent} from './restaurant-list/restaurant-list.component';
-import {TickerReservationComponent} from './ticker-reservation/ticker-reservation.component';
+import {TicketReservationComponent} from './ticket-reservation/ticket-reservation.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full'},
@@ -13,7 +13,7 @@ const routes: Routes = [
   { path: 'login', component: UserLoginComponent },
   { path: 'shopping-centers', component: ShoppingCenterListComponent },
   { path: 'shopping-centers/:shoppingCenterId', component: RestaurantListComponent },
-  { path: 'restaurants/:restaurantId/ticket-reservation', component: TickerReservationComponent}
+  { path: 'restaurants/:restaurantId/ticket-reservation', component: TicketReservationComponent}
 ];
 
 @NgModule({
