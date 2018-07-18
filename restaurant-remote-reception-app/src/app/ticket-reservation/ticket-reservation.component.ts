@@ -6,7 +6,6 @@ import { UserService } from '../services/user.service';
 import {IUser} from '../models/user.model';
 import {Ticket} from '../models/ticket.model';
 import {TICKET_STATUS, TicketService} from '../services/ticket.service';
-import {HttpHeaderResponse, HttpResponse} from '@angular/common/http';
 
 @Component({
   selector: 'app-ticker-reservation',

@@ -1,8 +1,13 @@
 package controllers
 
+import java.sql.Timestamp
+import java.time.LocalDateTime
+
+import controllers.LoginController.LoginForm
 import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json.Writes
+import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Action, Controller}
@@ -10,8 +15,10 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import models.TicketStatus
+import models.Utils.resForBadRequest
+import org.joda.time.DateTime
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
@@ -63,7 +70,16 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         } yield Ok(Json.toJson(ticketLastNo))
     }
 
-    def create = TODO
+    def create = Action.async(parse.json) { implicit rs =>
+        rs.body.validate[TicketForm].map { form =>
+
+            val now = Timestamp.valueOf(LocalDateTime.now())
+            TicketsRow(0, ?, form.restaurantId, form.createdById, form.ticketSeatNo, 'A', form.ticketStatus, now)
+        }.recoverTotal { e =>
+            Future { resForBadRequest(e) }
+        }
+    }
+
 }
 
 case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
@@ -84,4 +100,15 @@ object RestaurantTicketLastNo {
             (__ \ "last_called").write[Int] and
             (__ \ "last_taken").write[Int]
         ) (unlift(RestaurantTicketLastNo.unapply))
+}
+
+case class TicketForm(restaurantId: Int, createdById: Int, ticketSeatNo: Int, ticketStatus: String)
+
+object TicketForm {
+    implicit val ticketFormReads: Reads[TicketForm] = (
+        (__ \ "restaurant_id").read[Int] and
+        (__ \ "created_by_id").read[Int] and
+        (__ \ "seat_no").read[Int](min(1)) and
+        (__ \ "ticket_status").read[String]
+    )(TicketForm)
 }
