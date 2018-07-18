@@ -15,7 +15,6 @@ import {IStatus} from '../models/status.model';
 export class UserLoginComponent implements OnInit {
   isLoading = false;
   user = new UserLogin('', '');
-  loginJson: any;
 
   constructor (private router: Router,
                private userService: UserService) { }
@@ -24,7 +23,6 @@ export class UserLoginComponent implements OnInit {
 
   onSubmit() {
     this.isLoading = true;
-
     this.login();
   }
 

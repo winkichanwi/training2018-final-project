@@ -34,3 +34,4 @@ GET         /api/restaurants/:restaurantId                      controllers.Rest
 # Tickets
 GET         /api/restaurants/:restaurantId/tickets  controllers.TicketController.countTickets(restaurantId: Int)
 #GET         /api/restaurants/:restaurantId/tickets controllers.TicketController.getLastTicket(restaurantId: Int)
+POST        /api/tickets                            controllers.TicketController.create
