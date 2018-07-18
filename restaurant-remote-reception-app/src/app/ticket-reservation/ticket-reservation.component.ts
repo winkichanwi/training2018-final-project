@@ -49,7 +49,7 @@ export class TicketReservationComponent implements OnInit {
   }
 
   private getUserInfo() {
-      this.userService.getMe().subscribe(
+      this.userService.getCurrentUserInfo().subscribe(
         (res: IUser) => {
           this.user = res;
           this.ticket.created_by_id = this.user.id;
