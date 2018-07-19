@@ -52,7 +52,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         }
     }
 
-    def getMe = Action.async { implicit rs =>
+    def getCurrentUser = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
 
