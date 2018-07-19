@@ -5,6 +5,7 @@ import {UserLogin} from '../models/user.model';
 import {IStatus} from '../models/status.model';
 import {AuthService} from '../auth/auth.service';
 
+const LOCAL_STORAGE_TOKEN = 'authenticated';
 
 @Component({
   selector: 'app-user-login',
@@ -37,7 +38,8 @@ export class UserLoginComponent implements OnInit {
       .subscribe(
         (res: IStatus) => {
           if (res.status_code === 2000) {
-            this.authService.authenticate();
+            // this.authService.authenticate();
+            localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true));
             this.router.navigate([this.returnUrl]);
           }
         },

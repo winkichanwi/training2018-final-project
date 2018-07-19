@@ -18,7 +18,7 @@
       </ul>
 
     </div>
-    <button type="button" class="btn btn-light" (click)="authService.logout()" *ngIf="authService.isLoggedIn">ログアウト</button>
+    <button type="button" class="btn btn-light" (click)="logout()" *ngIf="authService.isLoggedIn">ログアウト</button>
     <button type="button" class="btn btn-light" routerLink="/login" *ngIf="!authService.isLoggedIn">ログイン</button>
     <button type="button" class="btn btn-link" routerLink="/signup" *ngIf="!authService.isLoggedIn">登録</button>
   </div>

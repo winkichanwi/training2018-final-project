@@ -38,18 +38,15 @@ export class AuthService {
   }
 
   login(loginForm: any) {
-    return this.http.post(USER_LOGIN_API_ENDPOINT, loginForm, HTTP_OPTIONS)
-      .pipe(
-        tap (_ =>  localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true)))
-        );
+    return this.http.post(USER_LOGIN_API_ENDPOINT, loginForm, HTTP_OPTIONS);
+      // .pipe(
+      //   tap (_ =>  localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true)))
+      //   );
   }
 
   logout() {
-    return this.http.post(USER_LOGOUT_API_ENDPOINT, JSON.stringify('logout'), HTTP_OPTIONS)
-      .pipe(
-        tap(_ => localStorage.removeItem(LOCAL_STORAGE_TOKEN)),
-        tap(_ => this.router.navigate(['/']))
-        ).subscribe();
+    return this.http.post(USER_LOGOUT_API_ENDPOINT, JSON.stringify('logout'), HTTP_OPTIONS);
+      // .pipe(tap(_ => localStorage.removeItem(LOCAL_STORAGE_TOKEN)));
   }
 
 
