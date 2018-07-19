@@ -14,10 +14,10 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
-    import LoginController._
+    import AuthController._
 
     def login = Action.async(parse.json) { implicit rs =>
         rs.body.validate[LoginForm].map { form =>
@@ -34,7 +34,7 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
                 case Some((user, userSecret)) =>
                     if (userSecret.password == loginPassword) {
                         Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
-                            .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
+                            .withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
                         BadRequest(Json.toJson(authenFailRes))
                     }
@@ -46,11 +46,9 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
         }
     }
 
-    def authorize = Action.async { implicit rs =>
-        val authorizedUserDBIO = for {
-            sessionUserId <- rs.session.get(Constants.CACHE_TOKEN_USER_ID)
-            userDBIO <- Users.filter(t => t.userId === sessionUserId.bind).result.headOption
-        } yield userDBIO
+    def authenticate = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
 
         for {
             authorizedUserOpt <- db.run(authorizedUserDBIO)
@@ -63,9 +61,13 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
         } yield result
     }
 
+    def logout = Action.async { implicit rs =>
+        Future { Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message))).withNewSession }
+    }
+
 }
 
-object LoginController {
+object AuthController {
     case class LoginForm(email : String, password : String )
 
     implicit val loginFormReads: Reads[LoginForm] = (

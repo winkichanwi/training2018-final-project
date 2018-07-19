@@ -16,6 +16,8 @@ import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-displ
 import { TicketReservationComponent } from './ticket-reservation/ticket-reservation.component';
 import { TicketService } from './services/ticket.service';
 import { UserService } from './services/user.service';
+import {AuthService} from './auth/auth.service';
+import {AuthGuard} from './auth/auth.guard';
 
 @NgModule({
   declarations: [
@@ -41,7 +43,9 @@ import { UserService } from './services/user.service';
     ShoppingCenterService,
     RestaurantService,
     TicketService,
-    UserService
+    UserService,
+    AuthService,
+    AuthGuard
   ],
   bootstrap: [AppComponent]
 })

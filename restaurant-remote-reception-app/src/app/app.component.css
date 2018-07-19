@@ -1,0 +1,7 @@
+.navbar {
+  background-color: #004F8C;
+}
+
+.navbar > div > .btn-link {
+  color: white;
+}

@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import { IRestaurant, RestaurantService } from '../services/restaurant.service';
 import { AppUtils } from '../app-common';
-import { UserService } from '../services/user.service';
 import {IUser} from '../models/user.model';
 import {Ticket} from '../models/ticket.model';
 import {TicketService} from '../services/ticket.service';
+import {UserService} from '../services/user.service';
 
 @Component({
   selector: 'app-ticker-reservation',

@@ -19,10 +19,8 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     import ShoppingCenterController._
 
     def list = Action.async { implicit rs =>
-        val authorizedUserDBIO = for {
-            sessionUserId <- rs.session.get(Constants.CACHE_TOKEN_USER_ID)
-            userDBIO <- Users.filter(t => t.userId === sessionUserId.bind).result.headOption
-        } yield userDBIO
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
 
         for {
             authorizedUserOpt <- db.run(authorizedUserDBIO)
@@ -37,10 +35,8 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     }
 
     def get(shoppingCenterId: Int) = Action.async {implicit rs =>
-        val authorizedUserDBIO = for {
-            sessionUserId <- rs.session.get(Constants.CACHE_TOKEN_USER_ID)
-            userDBIO <- Users.filter(t => t.userId === sessionUserId.bind).result.headOption
-        } yield userDBIO
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
 
         val queryShoppingCenterById =
             ShoppingCenters.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result.headOption

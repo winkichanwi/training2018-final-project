@@ -3,6 +3,7 @@ import { Router} from '@angular/router';
 import { AppUtils} from '../app-common';
 import { UserService} from '../services/user.service';
 import {UserSignup} from '../models/user.model';
+import {IStatus} from '../models/status.model';
 
 interface ISignupResponse {
   result: String;
@@ -32,8 +33,8 @@ export class SignupComponent implements OnInit {
     const signupJson = JSON.stringify(this.user);
     this.userService.create(signupJson)
       .subscribe(
-        (res: ISignupResponse) => {
-          if (res.result === 'success') {
+        (res: IStatus) => {
+          if (res.status_code === 2000) {
             this.router.navigate(['/login']);
           }
         },
