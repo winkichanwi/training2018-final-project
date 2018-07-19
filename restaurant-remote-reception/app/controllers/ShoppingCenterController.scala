@@ -20,12 +20,15 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     import ShoppingCenterController._
 
     def list = Action.async { implicit rs =>
-        val sessionUserIdOpt = rs.session.get(Constants.CACHE_TOKEN_USER_ID)
+        val sessionUserId = rs.session.get(Constants.CACHE_TOKEN_USER_ID).getOrElse("0")
+        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
+
         for {
+            authorizedUserOpt <- db.run(authorizedUserDBIO)
             shoppingCenters <- db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)
-            sessionUserIdOpt = rs.session.get(Constants.CACHE_TOKEN_USER_ID)
-            result = sessionUserIdOpt match {
-                case Some(userId) => Ok(Json.toJson(shoppingCenters))
+            result = authorizedUserOpt match {
+                case Some(_) =>
+                    Ok(Json.toJson(shoppingCenters))
                 case None => Unauthorized(Json.toJson(ErrorResponse(Constants.FAILURE, "Not yet logged in!")))
             }
         } yield result
