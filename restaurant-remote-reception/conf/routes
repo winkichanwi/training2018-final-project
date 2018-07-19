@@ -16,7 +16,6 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 # User CRUD
 GET         /api/users              controllers.UserController.list
 POST        /api/users              controllers.UserController.create
-#GET         /api/users/:userId      controllers.UserController.get(userId: Int)
 #DELETE      /api/users/:userId      controllers.UserController.remove(userId: Int)
 GET         /api/me                 controllers.UserController.getMe
 

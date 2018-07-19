@@ -13,8 +13,7 @@ import play.api.mvc.{Action, Controller}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
-import models.{TicketStatus, TicketType}
-import models.Utils.resForBadRequest
+import models.{StatusCode, StatusResponse, TicketStatus, TicketType}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -88,10 +87,12 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
             }
 
             newTicket.flatMap { newTicketRow =>
-                db.run(Tickets += newTicketRow).map(_ => Ok(Json.obj("result" -> "success")))
+                db.run(Tickets += newTicketRow).map(_ =>
+                    Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+                )
             }
         }.recoverTotal { e =>
-            Future { resForBadRequest(e) }
+            Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
         }
     }
 

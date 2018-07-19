@@ -10,8 +10,7 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import models.ErrorResponse._
-import models.{ErrorResponse, Constants}
+import models.{Constants, StatusCode, StatusResponse}
 
 import scala.concurrent.ExecutionContext
 
@@ -21,22 +20,26 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     import RestaurantController._
 
     def list(shoppingCenterId: Int) = Action.async { implicit rs =>
+        val sessionUserIdOpt = rs.session.get(Constants.CACHE_TOKEN_USER_ID)
         val queryRestaurantsByShoppingCenterId =
             Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
-        db.run(queryRestaurantsByShoppingCenterId).map { restaurants =>
-            Ok(Json.toJson(restaurants))
-        }
+        for {
+            restaurants <- db.run(queryRestaurantsByShoppingCenterId)
+            result = sessionUserIdOpt match {
+                case Some(_) => Ok(Json.toJson(restaurants))
+                case None => Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
+            }
+        } yield result
     }
 
     def get(restaurantId: Int) = Action.async { implicit rs =>
         val queryRestaurantById =
             Restaurants.filter(t => t.restaurantId === restaurantId.bind).result.headOption
         db.run(queryRestaurantById).map {
-            case Some(restaurant) => Ok(Json.toJson(restaurant))
-            case None => {
-                val errorResponse = ErrorResponse(Constants.FAILURE, "Restaurant is not found.")
-                NotFound(Json.toJson(errorResponse))
-            }
+            case Some(restaurant) =>
+                Ok(Json.toJson(restaurant))
+            case None =>
+                NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
         }
     }
 

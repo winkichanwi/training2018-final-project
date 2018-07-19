@@ -7,9 +7,8 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.ErrorResponse._
-import models.Utils._
-import models.{Constants, ErrorResponse}
+import models.{Constants, StatusCode, StatusResponse}
+
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -46,20 +45,10 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             } yield result
 
             db.run(addUserDBIO).map { _ =>
-                Ok(Constants.SUCCESS_JSON)
+                Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
             }
         }.recoverTotal { e =>
-            Future { resForBadRequest(e) }
-        }
-    }
-
-    def get(userId: Int) = Action.async { implicit rs =>
-        val queryUserById = Users.filter(t => t.userId === userId.bind).result.headOption
-        db.run(queryUserById).map{
-            case Some(user) => Ok(Json.toJson(user))
-            case None =>
-                val errorResponse = ErrorResponse(Constants.FAILURE, "User is not found.")
-                NotFound(Json.toJson(errorResponse))
+            Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
         }
     }
 
@@ -68,8 +57,10 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         def userDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
         def userFuture = db.run(userDBIO)
         userFuture.map {
-            case Some(user) => Ok(Json.toJson(user))
-            case None => NotFound(Json.toJson(ErrorResponse(Constants.FAILURE, "User not found")))
+            case Some(user) =>
+                Ok(Json.toJson(user))
+            case None =>
+                NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
         }
     }
 

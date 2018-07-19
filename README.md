@@ -27,6 +27,8 @@ $ curl -XGET http://localhost:9000/api/users
 $ curl -H "Content-type: application/json" -XPOST -d '{"full_name":"Your Fullname", "email":"youremail@email.com", "password": "password"}' http://localhost:9000/api/users
 ```
 
+curl -H "Content-type: application/json" -XPOST -d '{"email":"yuritanaka@rainbow.com", "password": "abcdef"}' --cookie-jar /cookie http://localhost:9000/api/users/authentication
+
 ## Angular project: restaurant_remote_reception-app
 Assumption: node and npm installed
 **1. Run project**
@@ -48,5 +50,5 @@ $ docker image build -t restaurant-remote-reception-app .
 ```
 **2. Run docker container**
 ```
-$ docker run -p 4200:80 --rm restaurant-remote-reception-app
+$ docker run -p 4200:4200 --rm restaurant-remote-reception-app
 ```
