@@ -8,9 +8,9 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
 import models.ErrorResponse._
-import models.{ErrorResponse, Constants}
+import models.{Constants, ErrorResponse}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -21,17 +21,14 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
 
     def list = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.CACHE_TOKEN_USER_ID).getOrElse("0")
-        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
 
-        for {
-            authorizedUserOpt <- db.run(authorizedUserDBIO)
-            shoppingCenters <- db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)
-            result = authorizedUserOpt match {
-                case Some(_) =>
-                    Ok(Json.toJson(shoppingCenters))
-                case None => Unauthorized(Json.toJson(ErrorResponse(Constants.FAILURE, "Not yet logged in!")))
-            }
-        } yield result
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap{
+            case Some(_) =>
+                db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)
+                        .map(shoppingCenters => Ok(Json.toJson(shoppingCenters)))
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(ErrorResponse(Constants.FAILURE, "Not yet logged in!"))))
+        }
     }
 
     def get(shoppingCenterId: Int) = Action.async {implicit rs =>
