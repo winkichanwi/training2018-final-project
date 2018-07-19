@@ -13,10 +13,15 @@ const LOCAL_STORAGE_TOKEN = 'authenticated';
 })
 export class AppComponent implements OnInit {
   title = 'レストレ';
+  navbarOpen = false;
 
   constructor(public authService: AuthService, private router: Router) { }
 
   ngOnInit() {
+  }
+
+  toggleNavbar() {
+    this.navbarOpen = !this.navbarOpen;
   }
 
   logout() {
