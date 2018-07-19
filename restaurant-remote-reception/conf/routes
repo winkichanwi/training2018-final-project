@@ -17,7 +17,11 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET         /api/users              controllers.UserController.list
 POST        /api/users              controllers.UserController.create
 #DELETE      /api/users/:userId      controllers.UserController.remove(userId: Int)
+<<<<<<< HEAD
 GET         /api/me                 controllers.UserController.getCurrentUser
+=======
+GET         /api/me                  controllers.UserController.getCurrentUser
+>>>>>>> chan/feature/aws-config
 
 # User authentication
 POST        /api/users/authentication   controllers.LoginController.login
