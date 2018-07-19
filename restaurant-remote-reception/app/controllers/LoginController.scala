@@ -34,7 +34,7 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
                 case Some((user, userSecret)) =>
                     if (userSecret.password == loginPassword) {
                         Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
-                            .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
+                            .withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
                         BadRequest(Json.toJson(authenFailRes))
                     }
@@ -46,11 +46,9 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
         }
     }
 
-    def authorize = Action.async { implicit rs =>
-        val authorizedUserDBIO = for {
-            sessionUserId <- rs.session.get(Constants.CACHE_TOKEN_USER_ID)
-            userDBIO <- Users.filter(t => t.userId === sessionUserId.bind).result.headOption
-        } yield userDBIO
+    def authenticate = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
 
         for {
             authorizedUserOpt <- db.run(authorizedUserDBIO)

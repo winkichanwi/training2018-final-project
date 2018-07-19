@@ -52,16 +52,19 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         }
     }
 
-    def getMe = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.CACHE_TOKEN_USER_ID).getOrElse("0")
-        def userDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
-        def userFuture = db.run(userDBIO)
-        userFuture.map {
-            case Some(user) =>
-                Ok(Json.toJson(user))
-            case None =>
-                NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
-        }
+    def getCurrentUser = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
+
+        for {
+            authorizedUserOpt <- db.run(authorizedUserDBIO)
+            result = authorizedUserOpt match {
+                case Some(user) =>
+                    Ok(Json.toJson(user))
+                case None =>
+                    Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
+            }
+        } yield result
     }
 
     /**

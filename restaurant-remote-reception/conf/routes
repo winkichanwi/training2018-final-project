@@ -17,7 +17,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET         /api/users              controllers.UserController.list
 POST        /api/users              controllers.UserController.create
 #DELETE      /api/users/:userId      controllers.UserController.remove(userId: Int)
-GET         /api/me                 controllers.UserController.getMe
+GET         /api/me                 controllers.UserController.getCurrentUser
 
 # User authentication
 POST        /api/users/authentication   controllers.LoginController.login

@@ -20,7 +20,7 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     import RestaurantController._
 
     def list(shoppingCenterId: Int) = Action.async { implicit rs =>
-        val sessionUserIdOpt = rs.session.get(Constants.CACHE_TOKEN_USER_ID)
+        val sessionUserIdOpt = rs.session.get(Constants.SESSION_TOKEN_USER_ID)
         val queryRestaurantsByShoppingCenterId =
             Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
         for {
