@@ -50,15 +50,12 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
 
-        for {
-            authorizedUserOpt <- db.run(authorizedUserDBIO)
-            result = authorizedUserOpt match {
-                case Some(_) =>
-                    Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
-                case None =>
-                    Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
-            }
-        } yield result
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
+            case Some(_) =>
+                Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+            case None =>
+                Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
+        }
     }
 
     def logout = Action.async { implicit rs =>
