@@ -19,7 +19,7 @@ class Filters @Inject() (
   corsFilter: CORSFilter
 ) extends DefaultHttpFilters(
   csrfFilter,
-  allowedHostsFilter, 
+  allowedHostsFilter,
   securityHeadersFilter,
   corsFilter
 )

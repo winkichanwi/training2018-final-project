@@ -1,7 +1,7 @@
 name := """restaurant-remote-reception"""
 organization := "com.example"
 
-version := "1.0-SNAPSHOT"
+version := "latest"
 
 lazy val root = (project in file("."))
     .enablePlugins(PlayScala, JavaAppPackaging, DockerPlugin)
@@ -9,7 +9,7 @@ lazy val root = (project in file("."))
         name := "restaurant-remote-reception",
         packageName in Docker := "restaurant-remote-reception",
         dockerBaseImage := "openjdk:8",
-        dockerExposedPorts := Seq(9000, 9443)
+        dockerExposedPorts := Seq(9000, 9000)
     )
 
 scalaVersion := "2.11.11"
