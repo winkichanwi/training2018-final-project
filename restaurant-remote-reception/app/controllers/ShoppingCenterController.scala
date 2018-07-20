@@ -8,9 +8,9 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
 import models.ErrorResponse._
-import models.{ErrorResponse, Constants}
+import models.{Constants, ErrorResponse}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -20,8 +20,14 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     import ShoppingCenterController._
 
     def list = Action.async { implicit rs =>
-        db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result).map { shoppingCenters =>
-            Ok(Json.toJson(shoppingCenters))
+        val sessionUserId = rs.session.get(Constants.CACHE_TOKEN_USER_ID).getOrElse("0")
+
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap{
+            case Some(_) =>
+                db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)
+                        .map(shoppingCenters => Ok(Json.toJson(shoppingCenters)))
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(ErrorResponse(Constants.FAILURE, "Not yet logged in!"))))
         }
     }
 

@@ -1,7 +1,6 @@
 package controllers
 
 import javax.inject._
-import play.api._
 import play.api.mvc._
 
 /**
@@ -19,6 +18,6 @@ class HomeController @Inject() extends Controller {
    * a path of `/`.
    */
   def index = Action { implicit request =>
-    Ok(views.html.index())
+      Ok(views.html.index())
   }
 }

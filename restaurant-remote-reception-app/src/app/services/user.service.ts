@@ -1,12 +1,11 @@
 import {Injectable} from '@angular/core';
-import {environment} from '../../environments/environment';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 const USERS_API_ENDPOINT = '/api/users';
 const CURRENT_USER_API_ENDPOINT = '/api/me';
 const USER_AUTHENTICATION_API_ENDPOINT = '/api/users/authentication';
 
-const httpOptions = {
+const HTTP_OPTIONS = {
   headers: new HttpHeaders({
     'Content-Type':  'application/json',
   })
@@ -19,11 +18,11 @@ export class UserService {
   constructor(private http: HttpClient) { }
 
   public create(signupForm: any) {
-    return this.http.post(USERS_API_ENDPOINT, signupForm, httpOptions);
+    return this.http.post(USERS_API_ENDPOINT, signupForm, HTTP_OPTIONS);
   }
 
   public login(loginForm: any) {
-    return this.http.post(USER_AUTHENTICATION_API_ENDPOINT, loginForm, httpOptions);
+    return this.http.post(USER_AUTHENTICATION_API_ENDPOINT, loginForm, HTTP_OPTIONS);
   }
 
   public getCurrentUserInfo() {

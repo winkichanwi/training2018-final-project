@@ -62,8 +62,8 @@ trait Tables {
     /** Database column IMAGE_URL SqlType(VARCHAR), Length(300,true), Default(None) */
     val imageUrl: Rep[Option[String]] = column[Option[String]]("IMAGE_URL", O.Length(300,varying=true), O.Default(None))
 
-    /** Foreign key referencing ShoppingCenters (database name restaurants_ibfk_1) */
-    lazy val shoppingCentersFk = foreignKey("restaurants_ibfk_1", shoppingCenterId, ShoppingCenters)(r => r.shoppingCenterId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing ShoppingCenters (database name RESTAURANTS_ibfk_1) */
+    lazy val shoppingCentersFk = foreignKey("RESTAURANTS_ibfk_1", shoppingCenterId, ShoppingCenters)(r => r.shoppingCenterId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
 
     /** Uniqueness Index over (phoneNo) (database name PHONE_NO) */
     val index1 = index("PHONE_NO", phoneNo, unique=true)
@@ -106,22 +106,22 @@ trait Tables {
    *  @param ticketId Database column TICKET_ID SqlType(INT), AutoInc, PrimaryKey
    *  @param ticketNo Database column TICKET_NO SqlType(INT)
    *  @param restaurantId Database column RESTAURANT_ID SqlType(INT)
+   *  @param createdAt Database column CREATED_AT SqlType(DATETIME)
    *  @param createdById Database column CREATED_BY_ID SqlType(INT)
    *  @param ticketSeatNo Database column TICKET_SEAT_NO SqlType(INT)
    *  @param ticketType Database column TICKET_TYPE SqlType(VARCHAR), Length(20,true)
-   *  @param ticketStatus Database column TICKET_STATUS SqlType(VARCHAR), Length(20,true), Default(Active)
-   *  @param createdAt Database column CREATED_AT SqlType(DATETIME) */
-  case class TicketsRow(ticketId: Int, ticketNo: Int, restaurantId: Int, createdById: Int, ticketSeatNo: Int, ticketType: String, ticketStatus: String = "Active", createdAt: java.sql.Timestamp)
+   *  @param ticketStatus Database column TICKET_STATUS SqlType(VARCHAR), Length(20,true), Default(Active) */
+  case class TicketsRow(ticketId: Int, ticketNo: Int, restaurantId: Int, createdAt: java.sql.Timestamp, createdById: Int, ticketSeatNo: Int, ticketType: String, ticketStatus: String = "Active")
   /** GetResult implicit for fetching TicketsRow objects using plain SQL queries */
-  implicit def GetResultTicketsRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp]): GR[TicketsRow] = GR{
+  implicit def GetResultTicketsRow(implicit e0: GR[Int], e1: GR[java.sql.Timestamp], e2: GR[String]): GR[TicketsRow] = GR{
     prs => import prs._
-    TicketsRow.tupled((<<[Int], <<[Int], <<[Int], <<[Int], <<[Int], <<[String], <<[String], <<[java.sql.Timestamp]))
+    TicketsRow.tupled((<<[Int], <<[Int], <<[Int], <<[java.sql.Timestamp], <<[Int], <<[Int], <<[String], <<[String]))
   }
   /** Table description of table TICKETS. Objects of this class serve as prototypes for rows in queries. */
   class Tickets(_tableTag: Tag) extends Table[TicketsRow](_tableTag, "TICKETS") {
-    def * = (ticketId, ticketNo, restaurantId, createdById, ticketSeatNo, ticketType, ticketStatus, createdAt) <> (TicketsRow.tupled, TicketsRow.unapply)
+    def * = (ticketId, ticketNo, restaurantId, createdAt, createdById, ticketSeatNo, ticketType, ticketStatus) <> (TicketsRow.tupled, TicketsRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(ticketId), Rep.Some(ticketNo), Rep.Some(restaurantId), Rep.Some(createdById), Rep.Some(ticketSeatNo), Rep.Some(ticketType), Rep.Some(ticketStatus), Rep.Some(createdAt)).shaped.<>({r=>import r._; _1.map(_=> TicketsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(ticketId), Rep.Some(ticketNo), Rep.Some(restaurantId), Rep.Some(createdAt), Rep.Some(createdById), Rep.Some(ticketSeatNo), Rep.Some(ticketType), Rep.Some(ticketStatus)).shaped.<>({r=>import r._; _1.map(_=> TicketsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column TICKET_ID SqlType(INT), AutoInc, PrimaryKey */
     val ticketId: Rep[Int] = column[Int]("TICKET_ID", O.AutoInc, O.PrimaryKey)
@@ -129,6 +129,8 @@ trait Tables {
     val ticketNo: Rep[Int] = column[Int]("TICKET_NO")
     /** Database column RESTAURANT_ID SqlType(INT) */
     val restaurantId: Rep[Int] = column[Int]("RESTAURANT_ID")
+    /** Database column CREATED_AT SqlType(DATETIME) */
+    val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_AT")
     /** Database column CREATED_BY_ID SqlType(INT) */
     val createdById: Rep[Int] = column[Int]("CREATED_BY_ID")
     /** Database column TICKET_SEAT_NO SqlType(INT) */
@@ -137,16 +139,14 @@ trait Tables {
     val ticketType: Rep[String] = column[String]("TICKET_TYPE", O.Length(20,varying=true))
     /** Database column TICKET_STATUS SqlType(VARCHAR), Length(20,true), Default(Active) */
     val ticketStatus: Rep[String] = column[String]("TICKET_STATUS", O.Length(20,varying=true), O.Default("Active"))
-    /** Database column CREATED_AT SqlType(DATETIME) */
-    val createdAt: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("CREATED_AT")
 
-    /** Foreign key referencing Restaurants (database name tickets_ibfk_1) */
-    lazy val restaurantsFk = foreignKey("tickets_ibfk_1", restaurantId, Restaurants)(r => r.restaurantId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
-    /** Foreign key referencing Users (database name tickets_ibfk_2) */
-    lazy val usersFk = foreignKey("tickets_ibfk_2", createdById, Users)(r => r.userId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Restaurants (database name TICKETS_ibfk_1) */
+    lazy val restaurantsFk = foreignKey("TICKETS_ibfk_1", restaurantId, Restaurants)(r => r.restaurantId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Users (database name TICKETS_ibfk_2) */
+    lazy val usersFk = foreignKey("TICKETS_ibfk_2", createdById, Users)(r => r.userId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
 
-    /** Uniqueness Index over (restaurantId,createdById,ticketStatus) (database name restaurant_user_ticket_status_UNIQUE) */
-    val index1 = index("restaurant_user_ticket_status_UNIQUE", (restaurantId, createdById, ticketStatus), unique=true)
+    /** Uniqueness Index over (restaurantId,createdById,ticketStatus,ticketSeatNo) (database name restaurant_user_ticket_status__seat_UNIQUE) */
+    val index1 = index("restaurant_user_ticket_status__seat_UNIQUE", (restaurantId, createdById, ticketStatus, ticketSeatNo), unique=true)
   }
   /** Collection-like TableQuery object for table Tickets */
   lazy val Tickets = new TableQuery(tag => new Tickets(tag))
@@ -200,8 +200,8 @@ trait Tables {
     /** Database column PASSWORD SqlType(VARCHAR), Length(300,true) */
     val password: Rep[String] = column[String]("PASSWORD", O.Length(300,varying=true))
 
-    /** Foreign key referencing Users (database name user_secret_ibfk_1) */
-    lazy val usersFk = foreignKey("user_secret_ibfk_1", userId, Users)(r => r.userId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
+    /** Foreign key referencing Users (database name USER_SECRET_ibfk_1) */
+    lazy val usersFk = foreignKey("USER_SECRET_ibfk_1", userId, Users)(r => r.userId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
   }
   /** Collection-like TableQuery object for table UserSecret */
   lazy val UserSecret = new TableQuery(tag => new UserSecret(tag))

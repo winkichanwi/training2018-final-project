@@ -1,4 +1,3 @@
-
 package models
 
 object TicketStatus extends Enumeration {
