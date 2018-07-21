@@ -4,22 +4,23 @@ import {HttpClientModule, HttpClientXsrfModule} from '@angular/common/http';
 import { FormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
 
-import { SignupComponent } from './signup/signup.component';
+import { SignupComponent } from './components/signup/signup.component';
 import { AppRoutingModule} from './app-routing.module';
-import { UserLoginComponent } from './user-login/user-login.component';
-import { ShoppingCenterListComponent } from './shopping-center-list/shopping-center-list.component';
+import { UserLoginComponent } from './components/user-login/user-login.component';
+import { ShoppingCenterListComponent } from './components/shopping-center-list/shopping-center-list.component';
 import { ShoppingCenterService } from './services/shopping-center.service';
 
-import { RestaurantListComponent } from './restaurant-list/restaurant-list.component';
+import { RestaurantListComponent } from './components/restaurant-list/restaurant-list.component';
 import { RestaurantService } from './services/restaurant.service';
-import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-display-panel.component';
-import { TicketReservationComponent } from './ticket-reservation/ticket-reservation.component';
+import { TicketDisplayPanelComponent } from './components/ticket-display-panel/ticket-display-panel.component';
+import { TicketReservationComponent } from './components/ticket-reservation/ticket-reservation.component';
 import { TicketService } from './services/ticket.service';
 
 import { UserService } from './services/user.service';
 import { AuthService } from './auth/auth.service';
 import { AuthGuard } from './auth/auth.guard';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { AlertComponent } from './components/alert/alert.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     ShoppingCenterListComponent,
     RestaurantListComponent,
     TicketDisplayPanelComponent,
-    TicketReservationComponent
+    TicketReservationComponent,
+    AlertComponent
   ],
   imports: [
     BrowserModule,

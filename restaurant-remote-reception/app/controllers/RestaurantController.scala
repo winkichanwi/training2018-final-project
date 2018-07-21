@@ -26,7 +26,12 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 db.run(queryRestaurantsByShoppingCenterId)
-                    .map(restaurants => Ok(Json.toJson(restaurants)))
+                    .map{
+                        case restaurants if restaurants.nonEmpty =>
+                            Ok(Json.toJson(restaurants))
+                        case restaurants if restaurants.isEmpty =>
+                            NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                    }
             case None =>
                 Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }

@@ -36,10 +36,10 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
                         Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
                             .withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
-                        BadRequest(Json.toJson(authenFailRes))
+                        Unauthorized(Json.toJson(authenFailRes))
                     }
                 case None =>
-                    BadRequest(Json.toJson(authenFailRes))
+                    Unauthorized(Json.toJson(authenFailRes))
             }
         }.recoverTotal { e =>
             Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}

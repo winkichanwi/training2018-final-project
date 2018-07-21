@@ -3,6 +3,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {IStatus} from '../models/status.model';
 import {tap} from 'rxjs/internal/operators';
 import {Router} from '@angular/router';
+import {AlertService} from '../services/alert.service';
 
 const USER_LOGIN_API_ENDPOINT = '/api/users/login';
 const USER_LOGOUT_API_ENDPOINT = '/api/users/logout';
@@ -20,7 +21,9 @@ const HTTP_OPTIONS = {
 })
 export class AuthService {
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private http: HttpClient,
+              private router: Router,
+              private alertService: AlertService) {
     this.authenticate();
   }
 
@@ -39,14 +42,10 @@ export class AuthService {
 
   login(loginForm: any) {
     return this.http.post(USER_LOGIN_API_ENDPOINT, loginForm, HTTP_OPTIONS);
-      // .pipe(
-      //   tap (_ =>  localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true)))
-      //   );
   }
 
   logout() {
     return this.http.post(USER_LOGOUT_API_ENDPOINT, JSON.stringify('logout'), HTTP_OPTIONS);
-      // .pipe(tap(_ => localStorage.removeItem(LOCAL_STORAGE_TOKEN)));
   }
 
 

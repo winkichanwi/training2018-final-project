@@ -18,6 +18,7 @@ object StatusCode extends Enumeration {
     val FORBIDDEN = Val(4030, "Forbidden")
     val RESOURCE_NOT_FOUND = Val(4040, "Resource Not Found")
     val INTERNAL_SERVER_ERROR = Val(5000, "Internal Server Error")
+    val DUPLICATED_ENTRY = Val(5001, "Duplicated Entry")
 }
 
 case class StatusResponse(status_code: Int, message: String)

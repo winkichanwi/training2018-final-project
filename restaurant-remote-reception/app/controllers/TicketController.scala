@@ -79,6 +79,10 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 rs.body.validate[TicketForm].map { form =>
+                    if (form.createdById != sessionUserId.toInt) {
+                        Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                    }
+
                     val ticketType = TicketType.values
                         .filter(ticketType =>
                             ticketType.minSeatNo <= form.ticketSeatNo && ticketType.maxSeatNo >= form.ticketSeatNo)
@@ -92,9 +96,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                     val now = Timestamp.valueOf(LocalDateTime.now())
                     val newTicket = db.run(queryTicketLastTakenNo.result).map{
                         case Some(ticketNo) =>
-                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, form.ticketStatus)
+                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
                         case None =>
-                            TicketsRow(0, 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, form.ticketStatus)
+                            TicketsRow(0, 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
                     }
 
                     newTicket.flatMap { newTicketRow =>
@@ -137,7 +141,7 @@ object TicketForm {
     implicit val ticketFormReads: Reads[TicketForm] = (
         (__ \ "restaurant_id").read[Int] and
         (__ \ "created_by_id").read[Int] and
-        (__ \ "seat_no").read[Int](min(1)) and
+        (__ \ "seat_no").read[Int](min(1) keepAnd max(12)) and
         (__ \ "ticket_status").read[String]
     )(TicketForm.apply _)
 }

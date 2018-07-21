@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { AppUtils} from '../app-common';
+import { AppUtils} from '../../app-common';
 import {ActivatedRoute, Router} from '@angular/router';
-import {UserLogin} from '../models/user.model';
-import {IStatus} from '../models/status.model';
-import {AuthService} from '../auth/auth.service';
+import {UserLogin} from '../../models/user.model';
+import {IStatus} from '../../models/status.model';
+import {AuthService} from '../../auth/auth.service';
+import {AlertService} from '../../services/alert.service';
 
 const LOCAL_STORAGE_TOKEN = 'authenticated';
 
@@ -20,7 +21,8 @@ export class UserLoginComponent implements OnInit {
 
   constructor (private router: Router,
                private authService: AuthService,
-               private route: ActivatedRoute) { }
+               private route: ActivatedRoute,
+               private alertService: AlertService) { }
 
   ngOnInit() {
     // this.authService.logout();
@@ -37,6 +39,7 @@ export class UserLoginComponent implements OnInit {
     this.authService.login(loginJson)
       .subscribe(
         (res: IStatus) => {
+          console.log('is status');
           if (res.status_code === 2000) {
             // this.authService.authenticate();
             localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true));
@@ -44,7 +47,17 @@ export class UserLoginComponent implements OnInit {
           }
         },
         err => {
-          AppUtils.handleError(err);
+          if (err.error instanceof Error) { // browser error
+            this.alertService.error(0, err.error.message);
+          } else if (err.error.message == null) { // non-customised error
+            this.alertService.error(err.status, err.statusText);
+          } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+            this.alertService.error(err.error.status_code, err.statusText);
+          } else if (err.error.status_code === 4010) { // credentials rejected
+            this.alertService.error(err.error.status_code, 'Email address or password incorrect.');
+          } else {
+            this.alertService.error(err.error.status_code, err.error.message);
+          }
           this.isLoading = false;
         }
       );
