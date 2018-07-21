@@ -12,11 +12,11 @@ object StatusCode extends Enumeration {
     implicit def valueToTicketStatusVal(x: Value): Val = x.asInstanceOf[Val]
 
     val OK = Val(2000, "OK")
-    val UNSUPPORTED_FORMAT = Val(4000, "Unsupported Format")
-    val AUTHENTICATION_FAILURE = Val(4010, "Authentication Failure")
-    val UNAUTHORIZED = Val(4011, "Unauthorized")
+    val UNSUPPORTED_FORMAT = Val(4001, "Unsupported Format")
+    val UNAUTHORIZED = Val(4010, "Unauthorized")
+    val AUTHENTICATION_FAILURE = Val(4011, "Authentication Failure")
     val FORBIDDEN = Val(4030, "Forbidden")
-    val RESOURCE_NOT_FOUND = Val(4040, "Resource Not Found")
+    val RESOURCE_NOT_FOUND = Val(4041, "Resource Not Found")
     val INTERNAL_SERVER_ERROR = Val(5000, "Internal Server Error")
     val DUPLICATED_ENTRY = Val(5001, "Duplicated Entry")
 }

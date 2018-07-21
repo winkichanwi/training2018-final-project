@@ -6,6 +6,7 @@ import {Ticket} from '../../models/ticket.model';
 import {TicketService} from '../../services/ticket.service';
 import {UserService} from '../../services/user.service';
 import {AlertService} from '../../services/alert.service';
+import {STATUS} from '../../models/status.model';
 
 @Component({
   selector: 'app-ticker-reservation',
@@ -16,6 +17,7 @@ export class TicketReservationComponent implements OnInit {
   restaurant: IRestaurant;
   user: IUser;
   ticket = new Ticket(0, 0, 1, 'Active');
+  seatNoIsInvalid = false;
   isLoading = false;
 
   constructor(
@@ -34,8 +36,15 @@ export class TicketReservationComponent implements OnInit {
   }
 
   onSubmit() {
-    this.isLoading = true;
-    this.reserveTicket();
+    if(this.validateSeatNo()) {
+      this.isLoading = true;
+      this.reserveTicket();
+    }
+  }
+
+  private validateSeatNo() {
+    this.seatNoIsInvalid = !(this.ticket.seat_no >= 1 && this.ticket.seat_no <= 12);
+    return !this.seatNoIsInvalid;
   }
 
   private reserveTicket() {
@@ -49,11 +58,11 @@ export class TicketReservationComponent implements OnInit {
           this.alertService.error(0, err.error.message);
         } else if (err.error.message == null) { // non-customised error
           this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === 4011) {
+        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
           this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === 4000) {
+        } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
           this.alertService.error(err.error.status_code, 'Invalid input');
         } else {
           this.alertService.error(err.error.status_code, err.error.message);
@@ -74,9 +83,9 @@ export class TicketReservationComponent implements OnInit {
             this.alertService.error(0, err.error.message);
           } else if (err.error.message == null) { // non-customised error
             this.alertService.error(err.status, err.statusText);
-          } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+          } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
             this.alertService.error(err.error.status_code, err.statusText);
-          } else if (err.error.status_code === 4011) {
+          } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
             this.alertService.error(err.error.status_code, 'Please login');
           } else {
             this.alertService.error(err.error.status_code, err.error.message);
@@ -95,11 +104,11 @@ export class TicketReservationComponent implements OnInit {
           this.alertService.error(0, err.error.message);
         } else if (err.error.message == null) { // non-customised error
           this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === 4011) {
+        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
           this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === 4040) {
+        } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
           this.alertService.error(err.error.status_code, 'Restaurant not found');
         } else {
           this.alertService.error(err.error.status_code, err.error.message);

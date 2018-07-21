@@ -14,9 +14,9 @@
       </div>
       <div class="form-group">
         <label for="inputPassword">パスワード</label>
-        <input type="password" [ngClass]="{'form-control': true, 'is-invalid': inputPassword.invalid}" id="inputPassword" name="inputPassword" aria-describedby="passwordHelp" placeholder="パスワード" [(ngModel)]="user.password" #inputPassword="ngModel" required minlength="6">
+        <input type="password" [ngClass]="{'form-control': true, 'is-invalid': inputPassword.invalid}" id="inputPassword" name="inputPassword" aria-describedby="passwordHelp" placeholder="パスワード" [(ngModel)]="user.password" #inputPassword="ngModel" required minlength="8" maxlength="20">
         <div *ngIf="signupForm.submitted && inputPassword.invalid" class="invalid-feedback">パスワードの入力は必要です。</div>
-        <small id="passwordHelp" class="form-text text-muted">6文字以上で入力してください。</small>
+        <small id="passwordHelp" class="form-text text-muted">8-20文字で入力してください。</small>
       </div>
       <button type="submit" class="btn btn-primary">登録</button> <img *ngIf="isLoading" src="../../../assets/icon_loader.gif">
     </form>

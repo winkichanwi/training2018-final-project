@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {IStatus} from '../models/status.model';
-import {tap} from 'rxjs/internal/operators';
 import {Router} from '@angular/router';
 import {AlertService} from '../services/alert.service';
 

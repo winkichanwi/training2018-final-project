@@ -1,14 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router} from '@angular/router';
-import { AppUtils} from '../../app-common';
 import { UserService} from '../../services/user.service';
 import {UserSignup} from '../../models/user.model';
-import {IStatus} from '../../models/status.model';
+import {IStatus, STATUS} from '../../models/status.model';
 import {AlertService} from '../../services/alert.service';
-
-interface ISignupResponse {
-  result: String;
-}
 
 @Component({
   selector: 'app-signup',
@@ -36,7 +31,7 @@ export class SignupComponent implements OnInit {
     this.userService.create(signupJson)
       .subscribe(
         (res: IStatus) => {
-          if (res.status_code === 2000) {
+          if (res.status_code === STATUS['OK']) {
             this.router.navigate(['/login']);
           }
         },
@@ -45,10 +40,12 @@ export class SignupComponent implements OnInit {
             this.alertService.error(0, err.error.message);
           } else if (err.error.message == null) { // non-customised error
             this.alertService.error(err.status, err.statusText);
-          } else if (err.error.status_code === 5001 ) { // server error with message not to be shown on UI
-            this.alertService.error(err.error.status_code,  ' Email address (' + this.user.email + ') has already been registered.');
-          } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+          } else if (err.error.status_code === STATUS['DUPLICATED_ENTRY']) { // server error with message not to be shown on UI
+            this.alertService.error(err.error.status_code,  'Email address (' + this.user.email + ') has already been registered.');
+          } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
             this.alertService.error(err.error.status_code, err.statusText);
+          } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
+            this.alertService.error(err.error.status_code, 'Invalid input');
           } else {
             this.alertService.error(err.error.status_code, err.error.message);
           }

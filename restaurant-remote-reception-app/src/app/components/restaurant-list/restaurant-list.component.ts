@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {IShoppingCenter, ShoppingCenterService} from '../../services/shopping-center.service';
 import {IRestaurant, RestaurantService} from '../../services/restaurant.service';
-import {AppUtils} from '../../app-common';
 import {AlertService} from '../../services/alert.service';
+import {STATUS} from '../../models/status.model';
 
 @Component({
   selector: 'app-restaurant-list',
@@ -39,11 +39,11 @@ export class RestaurantListComponent implements OnInit {
           console.log('Client-side error occured: ' + err.error.message);
         } else if (err.error.message == null) { // non-customised error
           this.alertService.error(err.error.status, err.statusText);
-        } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === 4011) {
+        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
             this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === 4040) {
+        } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
           this.alertService.error(err.error.status_code, 'Shopping center not found');
         } else {
           this.alertService.error(err.error.status_code, err.error.message);
@@ -62,11 +62,11 @@ export class RestaurantListComponent implements OnInit {
           this.alertService.error(0, err.error.message);
         } else if (err.error.message == null) { // non-customised error
           this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR'] ) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === 4011) {
+        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
           this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === 4040) {
+        } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
           this.alertService.error(err.error.status_code, 'List of restaurants not found');
         } else {
           this.alertService.error(err.error.status_code, err.error.message);

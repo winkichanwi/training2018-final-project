@@ -14,11 +14,11 @@
         <label for="inputSeatNo">人数</label>
         <div class="input-group">
 
-          <input type="number" [ngClass]="{'form-control': true, 'is-invalid': inputSeatNo.invalid}" id="inputSeatNo" name="inputSeatNo" [(ngModel)]="ticket.seat_no" #inputSeatNo="ngModel" required min="1">
+          <input type="number" [ngClass]="{'form-control': true, 'is-invalid': inputSeatNo.invalid || seatNoIsInvalid}" id="inputSeatNo" name="inputSeatNo" [(ngModel)]="ticket.seat_no" #inputSeatNo="ngModel" required min="1" max="12">
           <div class="input-group-append">
             <span class="input-group-text">人</span>
           </div>
-          <div *ngIf="ticketReserveForm.submitted && inputSeatNo.invalid" class="invalid-feedback">人数を入力してください</div>
+          <div *ngIf="ticketReserveForm.submitted && (inputSeatNo.invalid || seatNoIsInvalid)" class="invalid-feedback">1人から12人までの人数を入力してください</div>
         </div>
 
       </div>

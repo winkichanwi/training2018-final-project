@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { TicketService} from '../../services/ticket.service';
-import { AppUtils} from '../../app-common';
 import {interval} from 'rxjs';
 import {ITicketCurrentCount, TICKET_TYPES} from '../../models/ticket.model';
 import {AlertService} from '../../services/alert.service';
+import {STATUS} from '../../models/status.model';
 
 const intervalCounter = interval(10000);
 
@@ -49,9 +49,9 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
           this.alertService.error(0, err.error.message);
         } else if (err.error.message == null) { // non-customised error
           this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === 4011) {
+        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
           this.alertService.error(err.error.status_code, 'Please login');
         } else {
           this.alertService.error(err.error.status_code, err.error.message);

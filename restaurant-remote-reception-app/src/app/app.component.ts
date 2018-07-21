@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {AuthService} from './auth/auth.service';
-import {AppUtils} from './app-common';
-import {IStatus} from './models/status.model';
+import {IStatus, STATUS} from './models/status.model';
 import {Router} from '@angular/router';
 
 const LOCAL_STORAGE_TOKEN = 'authenticated';
@@ -27,7 +26,7 @@ export class AppComponent implements OnInit {
   logout() {
     this.authService.logout().subscribe(
       (res: IStatus) => {
-        if (res.status_code === 2000) {
+        if (res.status_code === STATUS['OK']) {
           localStorage.removeItem(LOCAL_STORAGE_TOKEN);
           this.router.navigate(['/login']);
         }

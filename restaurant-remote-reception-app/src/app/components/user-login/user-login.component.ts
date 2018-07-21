@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AppUtils} from '../../app-common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {UserLogin} from '../../models/user.model';
-import {IStatus} from '../../models/status.model';
+import {IStatus, STATUS} from '../../models/status.model';
 import {AuthService} from '../../auth/auth.service';
 import {AlertService} from '../../services/alert.service';
 
@@ -40,7 +39,7 @@ export class UserLoginComponent implements OnInit {
       .subscribe(
         (res: IStatus) => {
           console.log('is status');
-          if (res.status_code === 2000) {
+          if (res.status_code === STATUS['OK']) {
             // this.authService.authenticate();
             localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true));
             this.router.navigate([this.returnUrl]);
@@ -51,9 +50,9 @@ export class UserLoginComponent implements OnInit {
             this.alertService.error(0, err.error.message);
           } else if (err.error.message == null) { // non-customised error
             this.alertService.error(err.status, err.statusText);
-          } else if (err.error.status_code >= 5000 ) { // server error with message not to be shown on UI
+          } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
             this.alertService.error(err.error.status_code, err.statusText);
-          } else if (err.error.status_code === 4010) { // credentials rejected
+          } else if (err.error.status_code === STATUS['AUTHENTICATION_FAILURE']) { // credentials rejected
             this.alertService.error(err.error.status_code, 'Email address or password incorrect.');
           } else {
             this.alertService.error(err.error.status_code, err.error.message);

@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import com.github.t3hnar.bcrypt._
 
 class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
@@ -32,7 +33,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             val authenFailRes = StatusResponse(StatusCode.AUTHENTICATION_FAILURE.code, StatusCode.AUTHENTICATION_FAILURE.message)
             db.run(queryUserInfoSecretDBIO).map {
                 case Some((user, userSecret)) =>
-                    if (userSecret.password == loginPassword) {
+                    if (loginPassword.isBcrypted(userSecret.password)) {
                         Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
                             .withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
