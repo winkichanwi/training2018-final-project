@@ -17,7 +17,7 @@ export class TicketReservationComponent implements OnInit {
   restaurant: IRestaurant;
   user: IUser;
   ticket = new Ticket(0, 0, 1, 'Active');
-  seatNoIsInvalid = false;
+  isSeatNoInvalid = false;
   isLoading = false;
 
   constructor(
@@ -43,14 +43,15 @@ export class TicketReservationComponent implements OnInit {
   }
 
   private validateSeatNo() {
-    this.seatNoIsInvalid = !(this.ticket.seat_no >= 1 && this.ticket.seat_no <= 12);
-    return !this.seatNoIsInvalid;
+    this.isSeatNoInvalid = !(this.ticket.seat_no >= 1 && this.ticket.seat_no <= 12);
+    return !this.isSeatNoInvalid;
   }
 
   private reserveTicket() {
     const ticketForm = JSON.stringify(this.ticket);
     this.ticketService.create(ticketForm).subscribe(
       (res: Response) => {
+        this.alertService.success(this.restaurant.name + ' の整理券を取りました！', true);
         this.router.navigate(['/shopping-centers', this.restaurant.shopping_center_id]);
       },
       err => {

@@ -14,6 +14,7 @@ import {AlertService} from '../../services/alert.service';
 export class SignupComponent implements OnInit {
   isLoading = false;
   user = new UserSignup('', '', '');
+  isPwdLenInvalid = false;
 
   constructor (private router: Router,
                private userService: UserService,
@@ -22,8 +23,14 @@ export class SignupComponent implements OnInit {
   ngOnInit() {}
 
   onSubmit() {
-    this.isLoading = true;
-    this.signUp();
+    if(!this.invalidPwdLen()) {
+      this.isLoading = true;
+      this.signUp();
+    }
+  }
+
+  private invalidPwdLen() {
+    return this.isPwdLenInvalid = !(this.user.password.length >= 8 && this.user.password.length <= 20);
   }
 
   private signUp() {
@@ -32,6 +39,7 @@ export class SignupComponent implements OnInit {
       .subscribe(
         (res: IStatus) => {
           if (res.status_code === STATUS['OK']) {
+            this.alertService.success('登録成功！ログインしてください。', true);
             this.router.navigate(['/login']);
           }
         },

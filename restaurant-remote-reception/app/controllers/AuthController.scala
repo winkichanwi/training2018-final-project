@@ -70,6 +70,6 @@ object AuthController {
 
     implicit val loginFormReads: Reads[LoginForm] = (
         (__ \ "email").read[String](email) and
-        (__ \ "password").read[String](minLength[String](6))
+        (__ \ "password").read[String](minLength[String](8) keepAnd maxLength[String](20))
     )(LoginForm)
 }

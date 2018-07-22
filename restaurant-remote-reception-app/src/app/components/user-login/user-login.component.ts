@@ -17,6 +17,7 @@ export class UserLoginComponent implements OnInit {
   isLoading = false;
   user = new UserLogin('', '');
   returnUrl: String;
+  isPwdLenInvalid = false;
 
   constructor (private router: Router,
                private authService: AuthService,
@@ -29,8 +30,14 @@ export class UserLoginComponent implements OnInit {
   }
 
   onSubmit() {
-    this.isLoading = true;
-    this.login();
+    if (!this.invalidPwdLen()) {
+      this.isLoading = true;
+      this.login();
+    }
+  }
+
+  private invalidPwdLen() {
+    return this.isPwdLenInvalid = !(this.user.password.length >= 8 && this.user.password.length <= 20);
   }
 
   private login() {
@@ -54,6 +61,8 @@ export class UserLoginComponent implements OnInit {
             this.alertService.error(err.error.status_code, err.statusText);
           } else if (err.error.status_code === STATUS['AUTHENTICATION_FAILURE']) { // credentials rejected
             this.alertService.error(err.error.status_code, 'Email address or password incorrect.');
+          } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
+            this.alertService.error(err.error.status_code, 'Invalid email address or password.');
           } else {
             this.alertService.error(err.error.status_code, err.error.message);
           }

@@ -7,19 +7,19 @@
   </nav>
   <div class="restaurant-rows">
      <div class="row" *ngFor="let restaurant of restaurants">
-          <div class="col-md-3 restaurant-image">
-            <img class="img-fluid rounded mb-3 mb-md-0" src="http://placehold.it/300x200" alt="">
-          </div>
-          <div class="col-md-4">
-            <h4>{{restaurant.name}} <span class="badge badge-cuisine">{{restaurant.cuisine}}</span></h4>
+          <!--<div class="col-md-3 restaurant-image">-->
+            <!--<img class="img-fluid rounded mb-3 mb-md-0" src="http://placehold.it/300x200" alt="">-->
+          <!--</div>-->
+          <div class="col-md-6">
+            <h5>{{restaurant.name}} <span class="badge badge-cuisine">{{restaurant.cuisine}}</span></h5>
             <dl class="row">
               <dt class="col-sm-4">フロア：</dt><dd class="col-sm-8">{{restaurant.floor}}</dd>
-              <dt class="col-sm-4">席数：</dt><dd class="col-sm-8">{{restaurant.seat_no}}</dd>
+              <dt class="col-sm-4" *ngIf="restaurant.seat_no > 0">席数：</dt><dd class="col-sm-8" *ngIf="restaurant.seat_no > 0">{{restaurant.seat_no}}</dd>
               <dt class="col-sm-4">電話：</dt><dd class="col-sm-8">{{restaurant.phone_no}}</dd>
               <dt class="col-sm-4">営業時間：</dt><dd class="col-sm-8">{{restaurant.opening_hour}}</dd>
             </dl>
           </div>
-          <div class="col-md-5">
+          <div class="col-md-6">
             <app-ticket-display-panel [restaurantId]="restaurant.id"></app-ticket-display-panel>
             <div class="row ticket-button-row">
               <div class="col-lg-5 offset-lg-7 col-sm-12">
