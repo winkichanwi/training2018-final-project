@@ -1,4 +1,4 @@
-export class Ticket {
+export class TicketReserve {
   constructor(
     public restaurant_id: number,
     public created_by_id: number,
@@ -17,6 +17,15 @@ export interface ITicketLastNo {
   ticket_type: string;
   last_called: number;
   last_taken: number;
+}
+
+export interface IReservedTicket {
+  ticket_id: number;
+  restaurant_id: number;
+  ticket_type: string;
+  seat_no: number;
+  ticket_no: number;
+  last_called: number;
 }
 //
 // export interface ITicketStatus {

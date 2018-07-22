@@ -9,10 +9,10 @@ const intervalCounter = interval(10000);
 
 @Component({
   selector: 'app-ticket-display-panel',
-  templateUrl: './ticket-display-panel.component.html',
-  styleUrls: ['./ticket-display-panel.component.css']
+  templateUrl: './restaurant-ticket-display-panel.component.html',
+  styleUrls: ['./restaurant-ticket-display-panel.component.css']
 })
-export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
+export class RestaurantTicketDisplayPanelComponent implements OnInit, OnDestroy {
   @Input() restaurantId: number;
   ticketCurrentCounts: ITicketCurrentCount[];
   alive: boolean;

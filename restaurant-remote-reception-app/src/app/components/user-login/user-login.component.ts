@@ -36,7 +36,7 @@ export class UserLoginComponent implements OnInit {
     }
   }
 
-  private invalidPwdLen() {
+  invalidPwdLen() {
     return this.isPwdLenInvalid = !(this.user.password.length >= 8 && this.user.password.length <= 20);
   }
 

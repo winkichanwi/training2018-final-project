@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import { IRestaurant, RestaurantService } from '../../services/restaurant.service';
 import {IUser} from '../../models/user.model';
-import {Ticket} from '../../models/ticket.model';
+import {TicketReserve} from '../../models/ticket.model';
 import {TicketService} from '../../services/ticket.service';
 import {UserService} from '../../services/user.service';
 import {AlertService} from '../../services/alert.service';
@@ -16,7 +16,7 @@ import {STATUS} from '../../models/status.model';
 export class TicketReservationComponent implements OnInit {
   restaurant: IRestaurant;
   user: IUser;
-  ticket = new Ticket(0, 0, 1, 'Active');
+  ticket = new TicketReserve(0, 0, 1, 'Active');
   isSeatNoInvalid = false;
   isLoading = false;
 

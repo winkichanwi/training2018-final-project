@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 
 const TICKETS_API_ENDPOINT = '/api/tickets';
+const RESERVED_TICKETS_API_ENDPOINT = '/api/me/tickets';
 
 const HTTP_OPTIONS = {
   headers: new HttpHeaders({
@@ -25,5 +26,9 @@ export class TicketService {
 
   public create(ticketForm: any) {
     return this.http.post(TICKETS_API_ENDPOINT, ticketForm, HTTP_OPTIONS);
+  }
+
+  public getReservedTickets() {
+    return this.http.get(RESERVED_TICKETS_API_ENDPOINT);
   }
 }

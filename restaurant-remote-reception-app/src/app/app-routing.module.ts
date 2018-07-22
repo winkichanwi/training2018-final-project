@@ -8,6 +8,7 @@ import {RestaurantListComponent} from './components/restaurant-list/restaurant-l
 import {TicketReservationComponent} from './components/ticket-reservation/ticket-reservation.component';
 import {AuthGuard} from './auth/auth.guard';
 import {AuthService} from './auth/auth.service';
+import {UserTicketListComponent} from './components/user-ticket-list/user-ticket-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'shopping-centers', pathMatch: 'full'},
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'shopping-centers', component: ShoppingCenterListComponent, canActivate: [AuthGuard]},
   { path: 'shopping-centers/:shoppingCenterId', component: RestaurantListComponent, canActivate: [AuthGuard]},
   { path: 'restaurants/:restaurantId/ticket-reservation', component: TicketReservationComponent, canActivate: [AuthGuard]},
+  { path: 'tickets', component: UserTicketListComponent, canActivate: [AuthGuard]},
   // otherwise redirect to home
   { path: '**', redirectTo: ''}
   ];
