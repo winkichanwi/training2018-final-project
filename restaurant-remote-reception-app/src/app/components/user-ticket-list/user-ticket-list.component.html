@@ -1,8 +1,8 @@
 <div class="container">
   <h1 class="my-4">整理券一覧</h1>
-
+  <h5 *ngIf="reservedTickets.length == 0">整理券は取っていません。</h5>
  <div class="row">
-   <div class="col-lg-4 col-sm-6" *ngFor="let reservedTicket of reservedTickets">
+   <div class="col-lg-4 col-sm-6 mb-2" *ngFor="let reservedTicket of reservedTickets">
     <app-user-ticket-item [reservedTicket]="reservedTicket"></app-user-ticket-item>
    </div>
  </div>

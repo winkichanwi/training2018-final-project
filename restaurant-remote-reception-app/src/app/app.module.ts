@@ -22,7 +22,10 @@ import { AuthGuard } from './auth/auth.guard';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { AlertComponent } from './components/alert/alert.component';
 import { UserTicketListComponent } from './components/user-ticket-list/user-ticket-list.component';
+
 import { UserTicketItemComponent } from './components/user-ticket-item/user-ticket-item.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RestaurantTicketItemComponent } from './components/restaurant-ticket-item/restaurant-ticket-item.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +38,8 @@ import { UserTicketItemComponent } from './components/user-ticket-item/user-tick
     TicketReservationComponent,
     AlertComponent,
     UserTicketListComponent,
-    UserTicketItemComponent
+    UserTicketItemComponent,
+    RestaurantTicketItemComponent
   ],
   imports: [
     BrowserModule,
@@ -46,7 +50,8 @@ import { UserTicketItemComponent } from './components/user-ticket-item/user-tick
     }),
     FormsModule,
     AppRoutingModule,
-    CollapseModule.forRoot()
+    CollapseModule.forRoot(),
+    BrowserAnimationsModule
   ],
   providers: [
     ShoppingCenterService,

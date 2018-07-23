@@ -14,9 +14,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 # JSON API
 # User CRUD
-#GET         /api/users              controllers.UserController.list
 POST        /api/users              controllers.UserController.create
-#DELETE      /api/users/:userId      controllers.UserController.remove(userId: Int)
 GET         /api/me                 controllers.UserController.getCurrentUser
 
 # User authentication
@@ -33,6 +31,9 @@ GET         /api/shopping-centers/:shoppingCenterId/restaurants controllers.Rest
 GET         /api/restaurants/:restaurantId                      controllers.RestaurantController.get(restaurantId: Int)
 
 # Tickets
-GET         /api/restaurants/:restaurantId/tickets  controllers.TicketController.countTickets(restaurantId: Int)
-#GET         /api/restaurants/:restaurantId/tickets controllers.TicketController.getLastTicket(restaurantId: Int)
+GET         /api/restaurants/:restaurantId/tickets/count  controllers.TicketController.countTickets(restaurantId: Int)
+GET         /api/restaurants/:restaurantId/tickets/:ticketType/last-called  controllers.TicketController.getLastCalled(restaurantId: Int, ticketType: String)
 POST        /api/tickets                            controllers.TicketController.create
+PUT         /api/tickets                            controllers.TicketController.update
+GET         /api/tickets/me                         controllers.TicketController.getReservedTickets
+GET         /api/restaurants/:restaurantId/tickets/me   controllers.TicketController.getRestaurantReservedTickets(restaurantId: Int)

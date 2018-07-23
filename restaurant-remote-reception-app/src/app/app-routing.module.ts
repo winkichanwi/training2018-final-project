@@ -14,10 +14,23 @@ const routes: Routes = [
   { path: '', redirectTo: 'shopping-centers', pathMatch: 'full'},
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: UserLoginComponent },
-  { path: 'shopping-centers', component: ShoppingCenterListComponent, canActivate: [AuthGuard]},
-  { path: 'shopping-centers/:shoppingCenterId', component: RestaurantListComponent, canActivate: [AuthGuard]},
-  { path: 'restaurants/:restaurantId/ticket-reservation', component: TicketReservationComponent, canActivate: [AuthGuard]},
-  { path: 'tickets', component: UserTicketListComponent, canActivate: [AuthGuard]},
+  { path: 'shopping-centers',
+    component: ShoppingCenterListComponent,
+    canActivate: [AuthGuard]
+  },
+  { path: 'shopping-centers/:shoppingCenterId',
+    component: RestaurantListComponent,
+    canActivate: [AuthGuard],
+  },
+  { path: 'restaurants/:restaurantId/ticket-reservation',
+    component: TicketReservationComponent,
+    canActivate: [AuthGuard],
+  },
+  { path: 'tickets',
+    component: UserTicketListComponent,
+    canActivate: [AuthGuard],
+    runGuardsAndResolvers: 'always'
+  },
   // otherwise redirect to home
   { path: '**', redirectTo: ''}
   ];
@@ -25,7 +38,7 @@ const routes: Routes = [
 @NgModule({
   exports: [ RouterModule ],
   imports: [
-    RouterModule.forRoot(routes)
+    RouterModule.forRoot(routes, {onSameUrlNavigation: 'reload'})
   ],
   providers: [AuthGuard, AuthService]
 })

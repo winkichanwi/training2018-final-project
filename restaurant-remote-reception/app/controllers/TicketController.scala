@@ -20,12 +20,71 @@ import scala.concurrent.{ExecutionContext, Future}
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
+    def create = Action.async(parse.json) { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                rs.body.validate[TicketForm].map { form =>
+                    val ticketType = TicketType.values
+                        .filter(ticketType =>
+                            ticketType.minSeatNo <= form.ticketSeatNo && ticketType.maxSeatNo >= form.ticketSeatNo)
+                        .map(_.typeName).head
+
+                    val queryTicketLastTakenNo = Tickets.filter(t =>
+                        (t.restaurantId === form.restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status) && (t.ticketType === ticketType.bind))
+                        .sortBy(_.ticketNo.desc)
+                        .map(_.ticketNo).max
+                        .result
+
+                    val now = Timestamp.valueOf(LocalDateTime.now())
+                    val newTicket = db.run(queryTicketLastTakenNo).map {
+                        case Some(ticketNo) =>
+                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
+                        case None =>
+                            TicketsRow(0, 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
+                    }
+
+                    newTicket.flatMap { newTicketRow =>
+                        db.run(Tickets += newTicketRow).map(_ =>
+                            Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+                        )
+                    }
+                }.recoverTotal { e =>
+                    Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                }
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+        }
+    }
+
+    def update = Action.async(parse.json) { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                rs.body.validate[TicketStatusUpdateForm].map { form =>
+                    if (TicketStatus.values.map(_.toString).contains(form.ticketStatus)) {
+                        val updateTicketStatus = Tickets.filter(t => t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
+                            .map(t => t.ticketStatus)
+                            .update(form.ticketStatus)
+                        db.run(updateTicketStatus).map(_ =>
+                            Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+                        )
+                    } else {
+                        Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                    }
+                }.recoverTotal { e =>
+                    Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                }
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+        }
+    }
+
     def countTickets(restaurantId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
 
-        val activeTicketStatusSeq: Seq[String] = Seq(TicketStatus.ACTIVE, TicketStatus.CALLED).map(_.toString)
         val groupTicketTypes = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) && (t.ticketStatus inSet activeTicketStatusSeq))
+            (t.restaurantId === restaurantId.bind) && (t.ticketStatus === TicketStatus.ACTIVE.status))
             .groupBy(_.ticketType)
             .map { case (ticketType, rows) => (ticketType, rows.length) }
             .result
@@ -40,75 +99,56 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         }
     }
 
-    def getLastTicket(restaurantId: Int) = Action.async { implicit rs =>
-        val queryTicketLastCalled = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) && (t.ticketStatus === TicketStatus.CALLED.status))
-            .sortBy(_.ticketNo.desc)
-            .groupBy(_.ticketType)
-            .map { case (ticketType, ticketRows) =>
-                (ticketType, ticketRows.map(_.ticketNo).max)
-            }
-
-        val queryTicketLastTaken = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status))
-            .sortBy(_.ticketNo.desc)
-            .groupBy(_.ticketType)
-            .map { case (ticketType, ticketRows) =>
-                (ticketType, ticketRows.map(_.ticketNo).max)
-            }
-
-        val joinLastCalledLastTaken =
-            queryTicketLastCalled.joinFull(queryTicketLastTaken).on(_._1 === _._1)
-            .map { case (t1, t2) =>
-                (t1.flatMap(_._1.?), t1.flatMap(_._2), t2.flatMap(_._1.?), t2.flatMap(_._2))
-            }
-
-        for {
-            ticketLastNoRows: Seq[(Option[String], Option[Int], Option[String], Option[Int])] <- db.run(joinLastCalledLastTaken.result)
-            ticketLastNo = ticketLastNoRows.map { row =>
-                val ticketType = row._1.getOrElse(row._3.get)
-                val lastCalled = row._2.getOrElse(0)
-                val lastTaken = row._4.getOrElse(0)
-                RestaurantTicketLastNo(ticketType, lastCalled, lastTaken)
-            }
-        } yield Ok(Json.toJson(ticketLastNo))
-    }
-
-    def create = Action.async(parse.json) { implicit rs =>
+    def getLastCalled(restaurantId: Int, ticketType: String) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+
+        val lastCalledTicketStatusSeq: Seq[String] = Seq(TicketStatus.ACCEPTED, TicketStatus.CANCELLED).map(_.toString)
+        val queryTicketLastCalled = Tickets.filter(t =>
+            (t.restaurantId === restaurantId.bind) && (t.ticketStatus inSet lastCalledTicketStatusSeq) && (t.ticketType === ticketType))
+            .sortBy(_.ticketNo.desc)
+            .map(_.ticketNo).max
+            .result
+
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
-                rs.body.validate[TicketForm].map { form =>
-                    if (form.createdById != sessionUserId.toInt) {
-                        Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
-                    }
-
-                    val ticketType = TicketType.values
-                        .filter(ticketType =>
-                            ticketType.minSeatNo <= form.ticketSeatNo && ticketType.maxSeatNo >= form.ticketSeatNo)
-                        .map(_.typeName).head
-
-                    val queryTicketLastTakenNo = Tickets.filter(t =>
-                        (t.restaurantId === form.restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status) && (t.ticketType === ticketType.bind))
-                        .sortBy(_.ticketNo.desc)
-                        .map(_.ticketNo).max
-
-                    val now = Timestamp.valueOf(LocalDateTime.now())
-                    val newTicket = db.run(queryTicketLastTakenNo.result).map{
-                        case Some(ticketNo) =>
-                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
-                        case None =>
-                            TicketsRow(0, 1, form.restaurantId, now, form.createdById, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
-                    }
-
-                    newTicket.flatMap { newTicketRow =>
-                        db.run(Tickets += newTicketRow).map(_ =>
-                            Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
-                        )
-                    }
-                }.recoverTotal { e =>
-                    Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                db.run(queryTicketLastCalled).map {
+                    case Some(lastCalledNo) =>
+                        Ok(Json.toJson(RestaurantLastCalled(ticketType, lastCalledNo)))
+                    case None =>
+                        NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
                 }
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+        }
+    }
+
+
+    def getReservedTickets = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val queryUserActiveTicket = Tickets.filter(t =>
+            t.createdById === sessionUserId.toInt && t.ticketStatus === TicketStatus.ACTIVE.status)
+            .sortBy(_.createdAt desc)
+            .result
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                db.run(queryUserActiveTicket)
+                    .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketSeatNo, row.ticketNo)))
+                    .map(userTickets => Ok(Json.toJson(userTickets)))
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+        }
+    }
+
+    def getRestaurantReservedTickets(restaurantId: Int) = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val queryUserRestaurantActiveTicket = Tickets.filter(t =>
+            t.restaurantId === restaurantId.bind && t.createdById === sessionUserId.toInt && t.ticketStatus === TicketStatus.ACTIVE.status)
+            .result
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                db.run(queryUserRestaurantActiveTicket)
+                    .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketSeatNo, row.ticketNo)))
+                    .map(userTickets => Ok(Json.toJson(userTickets)))
             case None =>
                 Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
@@ -124,24 +164,41 @@ object RestaurantTicketCounts {
     )(unlift(RestaurantTicketCounts.unapply))
 }
 
+case class RestaurantLastCalled(ticketType: String, lastCalled: Int)
 
-case class RestaurantTicketLastNo(ticketType: String, lastCalled: Int, lastTaken: Int)
-
-object RestaurantTicketLastNo {
-    implicit val restaurantTicketLastNoWrites: Writes[RestaurantTicketLastNo] = (
+object RestaurantLastCalled {
+    implicit val restaurantLastCalledWrites: Writes[RestaurantLastCalled] = (
         (__ \ "ticket_type").write[String] and
-            (__ \ "last_called").write[Int] and
-            (__ \ "last_taken").write[Int]
-        ) (unlift(RestaurantTicketLastNo.unapply))
+            (__ \ "last_called").write[Int]
+        )(unlift(RestaurantLastCalled.unapply))
 }
 
-case class TicketForm(restaurantId: Int, createdById: Int, ticketSeatNo: Int, ticketStatus: String)
+case class TicketForm(restaurantId: Int, ticketSeatNo: Int)
 
 object TicketForm {
     implicit val ticketFormReads: Reads[TicketForm] = (
         (__ \ "restaurant_id").read[Int] and
-        (__ \ "created_by_id").read[Int] and
-        (__ \ "seat_no").read[Int](min(1) keepAnd max(12)) and
+            (__ \ "seat_no").read[Int](min(1) keepAnd max(12))
+        )(TicketForm.apply _)
+}
+
+case class TicketStatusUpdateForm(ticketId: Int, ticketStatus: String)
+
+object TicketStatusUpdateForm {
+    implicit val ticketStatusUpdateFormReads: Reads[TicketStatusUpdateForm] = (
+        (__ \ "ticket_id").read[Int] and
         (__ \ "ticket_status").read[String]
-    )(TicketForm.apply _)
+        )(TicketStatusUpdateForm.apply _)
+}
+
+case class UserTickets(ticketId: Int, restaurantId: Int, ticketType: String, seatNo: Int, ticketNo: Int)
+
+object UserTickets {
+    implicit val userTicketsWrites: Writes[UserTickets] = (
+        (__ \ "ticket_id").write[Int] and
+        (__ \ "restaurant_id").write[Int] and
+        (__ \ "ticket_type").write[String] and
+        (__ \ "seat_no").write[Int] and
+        (__ \ "ticket_no").write[Int]
+    )(unlift(UserTickets.unapply))
 }

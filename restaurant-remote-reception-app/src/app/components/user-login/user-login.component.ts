@@ -22,7 +22,9 @@ export class UserLoginComponent implements OnInit {
   constructor (private router: Router,
                private authService: AuthService,
                private route: ActivatedRoute,
-               private alertService: AlertService) { }
+               private alertService: AlertService) {
+    this.logout();
+  }
 
   ngOnInit() {
     // this.authService.logout();
@@ -69,6 +71,16 @@ export class UserLoginComponent implements OnInit {
           this.isLoading = false;
         }
       );
+  }
+
+  private logout() {
+    this.authService.logout().subscribe(
+      (res: IStatus) => {
+        if (res.status_code === STATUS['OK']) {
+          localStorage.removeItem(LOCAL_STORAGE_TOKEN);
+        }
+      }
+    );
   }
 }
 

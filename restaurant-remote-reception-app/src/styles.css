@@ -1,9 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~bootstrap/dist/css/bootstrap.min.css';
 
-.btn-outline-primary,.btn-primary:hover  {
+.btn-outline-primary {
   color: #004F8B;
-  background-color: transparent;
+  background-color: white;
+  background-image: none;
+  border-color: #004F8B;
+}
+
+.btn-primary:hover  {
+  background-color: #508DBB;
   background-image: none;
   border-color: #004F8B;
 }

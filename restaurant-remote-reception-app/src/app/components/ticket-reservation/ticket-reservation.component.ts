@@ -16,7 +16,7 @@ import {STATUS} from '../../models/status.model';
 export class TicketReservationComponent implements OnInit {
   restaurant: IRestaurant;
   user: IUser;
-  ticket = new TicketReserve(0, 0, 1, 'Active');
+  ticket = new TicketReserve(0, 1);
   isSeatNoInvalid = false;
   isLoading = false;
 
@@ -50,15 +50,17 @@ export class TicketReservationComponent implements OnInit {
   private reserveTicket() {
     const ticketForm = JSON.stringify(this.ticket);
     this.ticketService.create(ticketForm).subscribe(
-      (res: Response) => {
+      res => {
         this.alertService.success(this.restaurant.name + ' の整理券を取りました！', true);
-        this.router.navigate(['/shopping-centers', this.restaurant.shopping_center_id]);
+        this.router.navigate(['/tickets']);
       },
       err => {
         if (err.error instanceof Error) { // browser error
           this.alertService.error(0, err.error.message);
         } else if (err.error.message == null) { // non-customised error
           this.alertService.error(err.status, err.statusText);
+        } else if (err.error.status_code === STATUS['DUPLICATED_ENTRY']) { // server error with message not to be shown on UI
+          this.alertService.error(err.error.status_code, 'You have already reserved ticket with the same ticket type for this restaurant');
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
         } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
@@ -77,7 +79,6 @@ export class TicketReservationComponent implements OnInit {
       this.userService.getCurrentUserInfo().subscribe(
         (res: IUser) => {
           this.user = res;
-          this.ticket.created_by_id = this.user.id;
         },
         err => {
           if (err.error instanceof Error) { // browser error

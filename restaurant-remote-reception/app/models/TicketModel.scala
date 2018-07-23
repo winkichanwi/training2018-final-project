@@ -8,7 +8,7 @@ object TicketStatus extends Enumeration {
     implicit def valueToTicketStatusVal(x: Value): Val = x.asInstanceOf[Val]
 
     val ACTIVE = Val("Active", true)
-    val CALLED = Val("Called", true)
+    // val CALLED = Val("Called", true) // not implemented
     val CANCELLED = Val("Cancelled", false) // cancelled by either customer or restaurant
     val ACCEPTED = Val("Accepted", false) // accepted by restaurant
     val ARCHIVED = Val("Archived", false) // archive when restaurant closes
