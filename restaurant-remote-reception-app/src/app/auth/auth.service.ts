@@ -26,10 +26,8 @@ export class AuthService {
 
   authenticate() {
     this.http.get(USER_AUTHENTICATION_API_ENDPOINT).subscribe(
-      (status: IStatus) => {
-        if (status.status_code === 2000) {
+      res => {
           localStorage.setItem('authenticated', JSON.stringify(true));
-        }
       },
       err => {
         localStorage.removeItem('authenticated');
@@ -39,14 +37,10 @@ export class AuthService {
 
   login(loginForm: any) {
     return this.http.post(USER_LOGIN_API_ENDPOINT, loginForm, HTTP_OPTIONS);
-      // .pipe(
-      //   tap (_ =>  localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true)))
-      //   );
   }
 
   logout() {
     return this.http.post(USER_LOGOUT_API_ENDPOINT, JSON.stringify('logout'), HTTP_OPTIONS);
-      // .pipe(tap(_ => localStorage.removeItem(LOCAL_STORAGE_TOKEN)));
   }
 
 

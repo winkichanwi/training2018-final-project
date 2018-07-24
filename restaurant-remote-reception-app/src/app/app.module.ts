@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import {HttpClientModule, HttpClientXsrfModule} from '@angular/common/http';
+import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { FormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
 
@@ -14,6 +14,7 @@ import { RestaurantListComponent } from './restaurant-list/restaurant-list.compo
 import { RestaurantService } from './services/restaurant.service';
 import { TicketDisplayPanelComponent } from './ticket-display-panel/ticket-display-panel.component';
 import { TicketReservationComponent } from './ticket-reservation/ticket-reservation.component';
+
 import { TicketService } from './services/ticket.service';
 
 import { UserService } from './services/user.service';
@@ -52,4 +53,5 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
   ],
   bootstrap: [AppComponent]
 })
+
 export class AppModule { }

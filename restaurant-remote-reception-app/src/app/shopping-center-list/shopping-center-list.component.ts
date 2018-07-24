@@ -1,7 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from '@angular/router';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../../environments/environment';
 import {IShoppingCenter, ShoppingCenterService} from '../services/shopping-center.service';
 import {AppUtils} from '../app-common';
 
