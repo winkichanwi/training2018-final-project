@@ -48,5 +48,5 @@ $ docker image build -t restaurant-remote-reception-app .
 ```
 **2. Run docker container**
 ```
-$ docker run -p 4200:80 --rm restaurant-remote-reception-app
+$ docker run -p 4200:4200 --rm restaurant-remote-reception-app
 ```

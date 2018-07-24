@@ -10,10 +10,9 @@ import slick.driver.MySQLDriver.api._
 import models.Tables._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import models.ErrorResponse._
-import models.{ErrorResponse, Constants}
+import models.{Constants, StatusCode, StatusResponse}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
@@ -21,22 +20,32 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     import RestaurantController._
 
     def list(shoppingCenterId: Int) = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryRestaurantsByShoppingCenterId =
             Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
-        db.run(queryRestaurantsByShoppingCenterId).map { restaurants =>
-            Ok(Json.toJson(restaurants))
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                db.run(queryRestaurantsByShoppingCenterId)
+                    .map(restaurants => Ok(Json.toJson(restaurants)))
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
     }
 
     def get(restaurantId: Int) = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryRestaurantById =
             Restaurants.filter(t => t.restaurantId === restaurantId.bind).result.headOption
-        db.run(queryRestaurantById).map {
-            case Some(restaurant) => Ok(Json.toJson(restaurant))
-            case None => {
-                val errorResponse = ErrorResponse(Constants.FAILURE, "Restaurant is not found.")
-                NotFound(Json.toJson(errorResponse))
-            }
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                db.run(queryRestaurantById).map {
+                    case Some(restaurant) =>
+                        Ok(Json.toJson(restaurant))
+                    case None =>
+                        NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                }
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
     }
 

@@ -1,6 +1,8 @@
 package controllers
 
 import javax.inject._
+import models.StatusResponse
+import models.StatusCode
 import play.api.libs.json.Json
 import play.api.mvc._
 
@@ -11,6 +13,6 @@ import play.api.mvc._
 class HealthCheckController @Inject() extends Controller {
 
     def healthCheck = Action { implicit request =>
-        Ok(Json.obj("message" -> "Request is received successfully."))
+        Ok
     }
 }

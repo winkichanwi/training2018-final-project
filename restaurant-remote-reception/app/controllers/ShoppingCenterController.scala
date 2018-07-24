@@ -7,8 +7,7 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.ErrorResponse._
-import models.{Constants, ErrorResponse}
+import models.{Constants, StatusCode, StatusResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
@@ -20,26 +19,31 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     import ShoppingCenterController._
 
     def list = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.CACHE_TOKEN_USER_ID).getOrElse("0")
-
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap{
             case Some(_) =>
                 db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)
                         .map(shoppingCenters => Ok(Json.toJson(shoppingCenters)))
             case None =>
-                Future.successful(Unauthorized(Json.toJson(ErrorResponse(Constants.FAILURE, "Not yet logged in!"))))
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
     }
 
     def get(shoppingCenterId: Int) = Action.async {implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryShoppingCenterById =
             ShoppingCenters.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result.headOption
-        db.run(queryShoppingCenterById).map {
-            case Some(shoppingCenter) => Ok(Json.toJson(shoppingCenter))
-            case None => {
-                val errorResponse = ErrorResponse(Constants.FAILURE, "Shopping center (id: " + shoppingCenterId + ") is not found.")
-                NotFound(Json.toJson(errorResponse))
-            }
+
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                db.run(queryShoppingCenterById).map {
+                    case Some(shoppingCenter) =>
+                        Ok(Json.toJson(shoppingCenter))
+                    case None =>
+                        NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                }
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
     }
 }

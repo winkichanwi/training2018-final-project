@@ -1,22 +1,22 @@
 <div class="container">
   <div class="col-md-6 offset-md-3">
-  <h2>登録</h2>
+    <h2>登録</h2>
     <form (ngSubmit)="signupForm.form.valid && onSubmit()" #signupForm="ngForm">
       <div class="form-group">
-        <label for="inputFullname">Full name</label>
-        <input type="text" [ngClass]="{'form-control': true, 'is-invalid': inputFullname.invalid}" id="inputFullname" name="inputFullname" placeholder="Enter full name" [(ngModel)]="user.full_name" #inputFullname="ngModel" required>
-        <div *ngIf="signupForm.submitted && inputFullname.invalid" class="invalid-feedback">Full name is required.</div>
+        <label for="inputFullname">氏名</label>
+        <input type="text" [ngClass]="{'form-control': true, 'is-invalid': inputFullname.invalid}" id="inputFullname" name="inputFullname" placeholder="氏名" [(ngModel)]="user.full_name" #inputFullname="ngModel" required>
+        <div *ngIf="signupForm.submitted && inputFullname.invalid" class="invalid-feedback">氏名の入力は必要です。</div>
       </div>
       <div class="form-group">
-        <label for="inputEmail">Email address</label>
-        <input type="email" [ngClass]="{'form-control': true, 'is-invalid': inputEmail.invalid}" id="inputEmail" name="inputEmail" placeholder="Enter email" [(ngModel)]="user.email" #inputEmail="ngModel" required email>
-        <div *ngIf="signupForm.submitted && inputEmail.invalid" class="invalid-feedback">Email address is required.</div>
+        <label for="inputEmail">メールアドレス</label>
+        <input type="email" [ngClass]="{'form-control': true, 'is-invalid': inputEmail.invalid}" id="inputEmail" name="inputEmail" placeholder="メールアドレス" [(ngModel)]="user.email" #inputEmail="ngModel" required email>
+        <div *ngIf="signupForm.submitted && inputEmail.invalid" class="invalid-feedback">メールアドレスフォーマットで入力は必要です。</div>
       </div>
       <div class="form-group">
-        <label for="inputPassword">Password</label>
-        <input type="password" [ngClass]="{'form-control': true, 'is-invalid': inputPassword.invalid}" id="inputPassword" name="inputPassword" aria-describedby="passwordHelp" placeholder="Enter password" [(ngModel)]="user.password" #inputPassword="ngModel" required minlength="6">
-        <div *ngIf="signupForm.submitted && inputPassword.invalid" class="invalid-feedback">Password is invalid.</div>
-        <small id="passwordHelp" class="form-text text-muted">Please enter at least 6 characters or numbers.</small>
+        <label for="inputPassword">パスワード</label>
+        <input type="password" [ngClass]="{'form-control': true, 'is-invalid': inputPassword.invalid}" id="inputPassword" name="inputPassword" aria-describedby="passwordHelp" placeholder="パスワード" [(ngModel)]="user.password" #inputPassword="ngModel" required minlength="6">
+        <div *ngIf="signupForm.submitted && inputPassword.invalid" class="invalid-feedback">6文字以上で入力してください。</div>
+        <small id="passwordHelp" class="form-text text-muted">パスワードの入力は必要です。</small>
       </div>
       <button type="submit" class="btn btn-primary">登録</button> <img *ngIf="isLoading" src="../../assets/icon_loader.gif">
     </form>

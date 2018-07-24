@@ -7,19 +7,17 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.ErrorResponse._
-import models.Utils._
-import models.{Constants, ErrorResponse}
+import models.{Constants, StatusCode, StatusResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
-    import LoginController._
+    import AuthController._
 
     def login = Action.async(parse.json) { implicit rs =>
         rs.body.validate[LoginForm].map { form =>
@@ -31,27 +29,41 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
                     t1.email === loginEmail
                 }.result.headOption
 
+            val authenFailRes = StatusResponse(StatusCode.AUTHENTICATION_FAILURE.code, StatusCode.AUTHENTICATION_FAILURE.message)
             db.run(queryUserInfoSecretDBIO).map {
                 case Some((user, userSecret)) =>
                     if (userSecret.password == loginPassword) {
-                        Ok(Json.obj("result" -> Constants.SUCCESS))
-                            .withSession(Constants.CACHE_TOKEN_USER_ID -> user.userId.toString())
+                        Ok.withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
-                        val pwdIncorrectRes = ErrorResponse(Constants.FAILURE, "Password incorrect. ")
-                        BadRequest(Json.toJson(pwdIncorrectRes))
+                        BadRequest(Json.toJson(authenFailRes))
                     }
                 case None =>
-                    val emailIncorrectRes = ErrorResponse(Constants.FAILURE, "Email address (" + loginEmail + ") incorrect. ")
-                    BadRequest(Json.toJson(emailIncorrectRes))
+                    BadRequest(Json.toJson(authenFailRes))
             }
         }.recoverTotal { e =>
-            Future { resForBadRequest(e) }
+            Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
         }
+    }
+
+    def authenticate = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
+
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
+            case Some(_) =>
+                Ok
+            case None =>
+                Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
+        }
+    }
+
+    def logout = Action.async { implicit rs =>
+        Future { Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message))).withNewSession }
     }
 
 }
 
-object LoginController {
+object AuthController {
     case class LoginForm(email : String, password : String )
 
     implicit val loginFormReads: Reads[LoginForm] = (

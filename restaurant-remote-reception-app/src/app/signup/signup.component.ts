@@ -4,10 +4,6 @@ import { AppUtils} from '../app-common';
 import { UserService} from '../services/user.service';
 import {UserSignup} from '../models/user.model';
 
-interface ISignupResponse {
-  result: String;
-}
-
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
@@ -32,10 +28,8 @@ export class SignupComponent implements OnInit {
     const signupJson = JSON.stringify(this.user);
     this.userService.create(signupJson)
       .subscribe(
-        (res: ISignupResponse) => {
-          if (res.result === 'success') {
+        res => {
             this.router.navigate(['/login']);
-          }
         },
         err => {
           AppUtils.handleError(err);

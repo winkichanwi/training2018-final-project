@@ -20,9 +20,12 @@
     "@angular/platform-browser": "^6.0.3",
     "@angular/platform-browser-dynamic": "^6.0.3",
     "@angular/router": "^6.0.3",
-    "boostrap": "^2.0.0",
+    "bootstrap": "^4.1.2",
     "core-js": "^2.5.4",
+    "jquery": "^3.3.1",
+    "ngx-bootstrap": "^3.0.1",
     "ngx-cookie-service": "^1.0.10",
+    "popper.js": "^1.14.3",
     "rxjs": "^6.0.0",
     "zone.js": "^0.8.26"
   },

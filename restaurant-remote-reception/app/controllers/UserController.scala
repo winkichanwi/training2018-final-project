@@ -7,9 +7,8 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.ErrorResponse._
-import models.Utils._
-import models.{Constants, ErrorResponse}
+import models.{Constants, StatusCode, StatusResponse}
+
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
@@ -46,30 +45,20 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             } yield result
 
             db.run(addUserDBIO).map { _ =>
-                Ok(Constants.SUCCESS_JSON)
+                Ok
             }
         }.recoverTotal { e =>
-            Future { resForBadRequest(e) }
-        }
-    }
-
-    def get(userId: Int) = Action.async { implicit rs =>
-        val queryUserById = Users.filter(t => t.userId === userId.bind).result.headOption
-        db.run(queryUserById).map{
-            case Some(user) => Ok(Json.toJson(user))
-            case None =>
-                val errorResponse = ErrorResponse(Constants.FAILURE, "User is not found.")
-                NotFound(Json.toJson(errorResponse))
+            Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
         }
     }
 
     def getCurrentUser = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.CACHE_TOKEN_USER_ID).getOrElse("0")
-        def userDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
-        def userFuture = db.run(userDBIO)
-        userFuture.map {
-            case Some(user) => Ok(Json.toJson(user))
-            case None => NotFound(Json.toJson(ErrorResponse(Constants.FAILURE, "User not found")))
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
+            case Some(user) =>
+                Ok(Json.toJson(user))
+            case None =>
+                Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
         }
     }
 
@@ -114,7 +103,7 @@ object UserController {
     case class UserForm(userId: Option[Int], userFullname : String, email : String, password : String )
 
     implicit val userFormReads: Reads[UserForm] = (
-    (__ \ "id").readNullable[Int] and
+        (__ \ "id").readNullable[Int] and
         (__ \ "full_name").read[String] and
         (__ \ "email").read[String](email) and
         (__ \ "password").read[String](minLength[String](6))
