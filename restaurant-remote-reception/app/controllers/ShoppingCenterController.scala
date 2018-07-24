@@ -20,7 +20,6 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
 
     def list = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap{
             case Some(_) =>
                 db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)

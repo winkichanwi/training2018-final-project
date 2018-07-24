@@ -14,10 +14,10 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
-    import LoginController._
+    import AuthController._
 
     def login = Action.async(parse.json) { implicit rs =>
         rs.body.validate[LoginForm].map { form =>
@@ -57,9 +57,13 @@ class LoginController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(im
         }
     }
 
+    def logout = Action.async { implicit rs =>
+        Future { Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message))).withNewSession }
+    }
+
 }
 
-object LoginController {
+object AuthController {
     case class LoginForm(email : String, password : String )
 
     implicit val loginFormReads: Reads[LoginForm] = (

@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AppUtils} from '../app-common';
-import { Router } from '@angular/router';
-import { UserService} from '../services/user.service';
+import {ActivatedRoute, Router} from '@angular/router';
 import {UserLogin} from '../models/user.model';
+import {AuthService} from '../auth/auth.service';
 
+const LOCAL_STORAGE_TOKEN = 'authenticated';
 
 @Component({
   selector: 'app-user-login',
@@ -14,11 +15,15 @@ import {UserLogin} from '../models/user.model';
 export class UserLoginComponent implements OnInit {
   isLoading = false;
   user = new UserLogin('', '');
+  returnUrl: String;
 
   constructor (private router: Router,
-               private userService: UserService) { }
+               private authService: AuthService,
+               private route: ActivatedRoute) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+  }
 
   onSubmit() {
     this.isLoading = true;
@@ -27,10 +32,11 @@ export class UserLoginComponent implements OnInit {
 
   private login() {
     const loginJson = JSON.stringify(this.user);
-    this.userService.login(loginJson)
+    this.authService.login(loginJson)
       .subscribe(
         res => {
-            this.router.navigate(['/shopping-centers']);
+            localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true));
+            this.router.navigate([this.returnUrl]);
         },
         err => {
           AppUtils.handleError(err);
