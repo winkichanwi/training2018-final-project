@@ -36,7 +36,7 @@ export class TicketReservationComponent implements OnInit {
   }
 
   onSubmit() {
-    if(this.validateSeatNo()) {
+    if (this.validateSeatNo()) {
       this.isLoading = true;
       this.reserveTicket();
     }
@@ -64,7 +64,9 @@ export class TicketReservationComponent implements OnInit {
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
         } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
+          localStorage.removeItem('authenticated');
+          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
+          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
         } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
           this.alertService.error(err.error.status_code, 'Invalid input');
         } else {
@@ -88,7 +90,9 @@ export class TicketReservationComponent implements OnInit {
           } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
             this.alertService.error(err.error.status_code, err.statusText);
           } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-            this.alertService.error(err.error.status_code, 'Please login');
+            localStorage.removeItem('authenticated');
+            this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
+            this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
           } else {
             this.alertService.error(err.error.status_code, err.error.message);
           }
@@ -109,7 +113,9 @@ export class TicketReservationComponent implements OnInit {
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
         } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
+          localStorage.removeItem('authenticated');
+          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
+          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
         } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
           this.alertService.error(err.error.status_code, 'Restaurant not found');
         } else {

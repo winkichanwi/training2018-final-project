@@ -44,7 +44,9 @@ export class UserTicketListComponent implements OnInit, OnDestroy {
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
         } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
+          localStorage.removeItem('authenticated');
+          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
+          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
         } else {
           this.alertService.error(err.error.status_code, err.error.message);
         }

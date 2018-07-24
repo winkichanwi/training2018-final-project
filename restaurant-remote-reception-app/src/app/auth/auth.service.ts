@@ -20,10 +20,7 @@ const HTTP_OPTIONS = {
 })
 export class AuthService {
 
-  constructor(private http: HttpClient,
-              private router: Router,
-              private alertService: AlertService,
-              private route: ActivatedRoute) {
+  constructor(private http: HttpClient) {
     this.authenticate();
   }
 
@@ -31,7 +28,6 @@ export class AuthService {
     this.http.get(USER_AUTHENTICATION_API_ENDPOINT).subscribe(
       res => {
         localStorage.setItem('authenticated', JSON.stringify(true));
-        this.router.navigate([this.route.snapshot.queryParams['returnUrl'] || '/']);
       },
       err => {
         localStorage.removeItem('authenticated');

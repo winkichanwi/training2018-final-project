@@ -66,7 +66,9 @@ export class RestaurantTicketItemComponent implements OnInit, OnDestroy {
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
         } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
+          localStorage.removeItem('authenticated');
+          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
+          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
         } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
           this.restaurantLastCalled = { ticket_type: this.reservedTicket.ticket_type, last_called: 0 };
         } else {

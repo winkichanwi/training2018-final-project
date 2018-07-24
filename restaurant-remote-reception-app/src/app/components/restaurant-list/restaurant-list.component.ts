@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {IShoppingCenter, ShoppingCenterService} from '../../services/shopping-center.service';
 import {IRestaurant, RestaurantService} from '../../services/restaurant.service';
 import {AlertService} from '../../services/alert.service';
@@ -20,7 +20,8 @@ export class RestaurantListComponent implements OnInit {
     private route: ActivatedRoute,
     private shoppingCenterService: ShoppingCenterService,
     private restaurantService: RestaurantService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -42,7 +43,9 @@ export class RestaurantListComponent implements OnInit {
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
         } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-            this.alertService.error(err.error.status_code, 'Please login');
+          localStorage.removeItem('authenticated');
+          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
+          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
         } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
           this.alertService.error(err.error.status_code, 'Shopping center not found');
         } else {
@@ -65,7 +68,9 @@ export class RestaurantListComponent implements OnInit {
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR'] ) { // server error with message not to be shown on UI
           this.alertService.error(err.error.status_code, err.statusText);
         } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
+          localStorage.removeItem('authenticated');
+          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
+          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
         } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
           this.alertService.error(err.error.status_code, 'List of restaurants not found');
         } else {
