@@ -9,7 +9,6 @@ import {AppUtils} from '../app-common';
   templateUrl: './restaurant-list.component.html',
   styleUrls: ['./restaurant-list.component.css']
 })
-
 export class RestaurantListComponent implements OnInit {
   shoppingCenterId: string;
   shoppingCenter: IShoppingCenter;

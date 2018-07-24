@@ -3,7 +3,6 @@ import { AppUtils} from '../app-common';
 import { Router } from '@angular/router';
 import { UserService} from '../services/user.service';
 import {UserLogin} from '../models/user.model';
-import {IStatus} from '../models/status.model';
 
 
 @Component({
@@ -30,10 +29,8 @@ export class UserLoginComponent implements OnInit {
     const loginJson = JSON.stringify(this.user);
     this.userService.login(loginJson)
       .subscribe(
-        (res: IStatus) => {
-          if (res.status_code === 2000) {
+        res => {
             this.router.navigate(['/shopping-centers']);
-          }
         },
         err => {
           AppUtils.handleError(err);

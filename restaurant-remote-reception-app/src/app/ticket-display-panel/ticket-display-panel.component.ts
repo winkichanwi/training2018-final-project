@@ -29,7 +29,7 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  private ticketTypeSeatLabel(type: String): String {
+  ticketTypeSeatLabel(type: String): String {
     for (const typeEntry of TICKET_TYPES) {
       if (typeEntry.type === type) {
         return typeEntry.min_seat_no + '-' + typeEntry.max_seat_no;
