@@ -27,7 +27,6 @@ export class UserLoginComponent implements OnInit {
   }
 
   ngOnInit() {
-    // this.authService.logout();
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
@@ -46,13 +45,9 @@ export class UserLoginComponent implements OnInit {
     const loginJson = JSON.stringify(this.user);
     this.authService.login(loginJson)
       .subscribe(
-        (res: IStatus) => {
-          console.log('is status');
-          if (res.status_code === STATUS['OK']) {
-            // this.authService.authenticate();
+        res => {
             localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true));
             this.router.navigate([this.returnUrl]);
-          }
         },
         err => {
           if (err.error instanceof Error) { // browser error

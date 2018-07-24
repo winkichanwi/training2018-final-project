@@ -46,7 +46,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
 
                     newTicket.flatMap { newTicketRow =>
                         db.run(Tickets += newTicketRow).map(_ =>
-                            Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+                            Ok
                         )
                     }
                 }.recoverTotal { e =>

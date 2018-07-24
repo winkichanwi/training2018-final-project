@@ -13,6 +13,6 @@ import play.api.mvc._
 class HealthCheckController @Inject() extends Controller {
 
     def healthCheck = Action { implicit request =>
-        Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+        Ok
     }
 }

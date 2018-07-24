@@ -34,8 +34,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             db.run(queryUserInfoSecretDBIO).map {
                 case Some((user, userSecret)) =>
                     if (loginPassword.isBcrypted(userSecret.password)) {
-                        Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
-                            .withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
+                        Ok.withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
                         Unauthorized(Json.toJson(authenFailRes))
                     }
@@ -53,7 +52,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
 
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
             case Some(_) =>
-                Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+                Ok
             case None =>
                 Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
         }

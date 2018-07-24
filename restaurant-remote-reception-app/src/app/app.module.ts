@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import {HttpClientModule, HttpClientXsrfModule} from '@angular/common/http';
+import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { FormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
 
@@ -63,4 +63,5 @@ import { RestaurantTicketItemComponent } from './components/restaurant-ticket-it
   ],
   bootstrap: [AppComponent]
 })
+
 export class AppModule { }

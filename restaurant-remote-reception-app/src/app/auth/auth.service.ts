@@ -28,10 +28,8 @@ export class AuthService {
 
   authenticate() {
     this.http.get(USER_AUTHENTICATION_API_ENDPOINT).subscribe(
-      (status: IStatus) => {
-        if (status.status_code === 2000) {
+      res => {
           localStorage.setItem('authenticated', JSON.stringify(true));
-        }
       },
       err => {
         localStorage.removeItem('authenticated');
