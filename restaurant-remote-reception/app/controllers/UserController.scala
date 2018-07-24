@@ -46,7 +46,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             } yield result
 
             db.run(addUserDBIO).map { _ =>
-                Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+                Ok
             }
         }.recoverTotal { e =>
             Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}

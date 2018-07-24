@@ -36,7 +36,7 @@ export class RestaurantListComponent implements OnInit {
       },
       err => {
         if (err.error instanceof Error) { // browser error
-          console.log('Client-side error occured: ' + err.error.message);
+          this.alertService.error(0, err.error.message);
         } else if (err.error.message == null) { // non-customised error
           this.alertService.error(err.error.status, err.statusText);
         } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI

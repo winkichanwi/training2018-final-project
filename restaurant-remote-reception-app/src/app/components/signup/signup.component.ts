@@ -37,11 +37,9 @@ export class SignupComponent implements OnInit {
     const signupJson = JSON.stringify(this.user);
     this.userService.create(signupJson)
       .subscribe(
-        (res: IStatus) => {
-          if (res.status_code === STATUS['OK']) {
+        res => {
             this.alertService.success('登録成功！ログインしてください。', true);
             this.router.navigate(['/login']);
-          }
         },
         err => {
           if (err.error instanceof Error) { // browser error

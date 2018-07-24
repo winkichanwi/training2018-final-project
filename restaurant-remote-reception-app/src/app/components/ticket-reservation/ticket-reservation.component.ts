@@ -50,7 +50,7 @@ export class TicketReservationComponent implements OnInit {
   private reserveTicket() {
     const ticketForm = JSON.stringify(this.ticket);
     this.ticketService.create(ticketForm).subscribe(
-      (res: Response) => {
+      res => {
         this.alertService.success(this.restaurant.name + ' の整理券を取りました！', true);
         this.router.navigate(['/shopping-centers', this.restaurant.shopping_center_id]);
       },
