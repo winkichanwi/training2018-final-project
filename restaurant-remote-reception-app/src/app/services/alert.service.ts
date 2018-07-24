@@ -31,9 +31,9 @@ export class AlertService {
   error(code = 0, message: string, keepAfterNavigationChange = false) {
     this.keepAfterNavigationChange = keepAfterNavigationChange;
     if (code > 0) {
-      this.subject.next({type: 'error', text: 'Error (' + code + ') ' + message});
+      this.subject.next({type: 'error', text: 'Error (' + code + '): ' + message});
     } else {
-      this.subject.next({type: 'error', text: 'Error ' + message});
+      this.subject.next({type: 'error', text: 'Error: ' + message});
     }
   }
 

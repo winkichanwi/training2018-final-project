@@ -22,12 +22,14 @@ export class UserLoginComponent implements OnInit {
   constructor (private router: Router,
                private authService: AuthService,
                private route: ActivatedRoute,
-               private alertService: AlertService) {
-    this.logout();
-  }
+               private alertService: AlertService) { }
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    if (this.authService.isLoggedIn) {
+      this.alertService.success('You have already logged in.', true);
+      this.router.navigate([this.returnUrl]);
+    }
   }
 
   onSubmit() {
@@ -66,16 +68,6 @@ export class UserLoginComponent implements OnInit {
           this.isLoading = false;
         }
       );
-  }
-
-  private logout() {
-    this.authService.logout().subscribe(
-      (res: IStatus) => {
-        if (res.status_code === STATUS['OK']) {
-          localStorage.removeItem(LOCAL_STORAGE_TOKEN);
-        }
-      }
-    );
   }
 }
 

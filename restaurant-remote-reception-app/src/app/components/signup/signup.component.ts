@@ -23,7 +23,7 @@ export class SignupComponent implements OnInit {
   ngOnInit() {}
 
   onSubmit() {
-    if(!this.invalidPwdLen()) {
+    if (!this.invalidPwdLen()) {
       this.isLoading = true;
       this.signUp();
     }
