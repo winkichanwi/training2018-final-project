@@ -10,8 +10,7 @@ import {STATUS} from '../../models/status.model';
 
 @Component({
   selector: 'app-ticker-reservation',
-  templateUrl: './ticket-reservation.component.html',
-  styleUrls: ['./ticket-reservation.component.css']
+  templateUrl: './ticket-reservation.component.html'
 })
 export class TicketReservationComponent implements OnInit {
   restaurant: IRestaurant;

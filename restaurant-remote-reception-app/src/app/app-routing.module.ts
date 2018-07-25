@@ -9,9 +9,10 @@ import {TicketReservationComponent} from './components/ticket-reservation/ticket
 import {AuthGuard} from './auth/auth.guard';
 import {AuthService} from './auth/auth.service';
 import {UserTicketListComponent} from './components/user-ticket-list/user-ticket-list.component';
+import {HomeComponent} from './components/home/home.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'shopping-centers', pathMatch: 'full'},
+  { path: '', component: HomeComponent},
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: UserLoginComponent },
   { path: 'shopping-centers',

@@ -26,6 +26,7 @@ import { UserTicketListComponent } from './components/user-ticket-list/user-tick
 import { UserTicketItemComponent } from './components/user-ticket-item/user-ticket-item.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RestaurantTicketItemComponent } from './components/restaurant-ticket-item/restaurant-ticket-item.component';
+import { HomeComponent } from './components/home/home.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { RestaurantTicketItemComponent } from './components/restaurant-ticket-it
     AlertComponent,
     UserTicketListComponent,
     UserTicketItemComponent,
-    RestaurantTicketItemComponent
+    RestaurantTicketItemComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,

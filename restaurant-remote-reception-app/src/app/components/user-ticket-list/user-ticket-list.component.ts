@@ -7,8 +7,7 @@ import {NavigationEnd, Router} from '@angular/router';
 
 @Component({
   selector: 'app-user-ticket-list',
-  templateUrl: './user-ticket-list.component.html',
-  styleUrls: ['./user-ticket-list.component.css']
+  templateUrl: './user-ticket-list.component.html'
 })
 export class UserTicketListComponent implements OnInit, OnDestroy {
   reservedTickets: IReservedTicket[];
