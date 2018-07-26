@@ -30,7 +30,7 @@ const animationIntervalCounter = interval(500);
 })
 export class RestaurantTicketItemComponent implements OnInit, OnDestroy {
   @Input() reservedTicket: IReservedTicket;
-  restaurantLastCalled: IRestaurantLastCalled;
+  restaurantLastCalled: IRestaurantLastCalled = {ticket_type: '', last_called: 0};
   alive: boolean;
   flashState = 'inactive';
 

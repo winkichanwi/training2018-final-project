@@ -13,8 +13,8 @@ import {STATUS} from '../../models/status.model';
 
 export class RestaurantListComponent implements OnInit {
   shoppingCenterId: string;
-  shoppingCenter: IShoppingCenter;
-  restaurants: IRestaurant[];
+  shoppingCenter: IShoppingCenter = {id: 0, name: '', branch: ''};
+  restaurants: IRestaurant[] = [];
 
   constructor(
     private route: ActivatedRoute,

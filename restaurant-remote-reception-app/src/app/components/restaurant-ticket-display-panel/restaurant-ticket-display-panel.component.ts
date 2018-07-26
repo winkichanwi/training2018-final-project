@@ -15,9 +15,9 @@ const intervalCounter = interval(5000);
 })
 export class RestaurantTicketDisplayPanelComponent implements OnInit, OnDestroy {
   @Input() restaurantId: number;
-  ticketCurrentCounts: IRestaurantTicketCount[];
+  ticketCurrentCounts: IRestaurantTicketCount[] = [];
   hasReservedTickets = false;
-  reservedTickets: IReservedTicket[];
+  reservedTickets: IReservedTicket[] = [];
   alive: boolean;
 
   constructor(private ticketService: TicketService,
