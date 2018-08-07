@@ -26,9 +26,8 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             val loginPassword = form.password
 
             val queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
-                .filter { case (t1, t2) =>
-                    t1.email === loginEmail
-                }.result.headOption
+                .filter { case (t1, t2) => t1.email === loginEmail }
+                .result.headOption
 
             val authenFailRes = StatusResponse(StatusCode.AUTHENTICATION_FAILURE.code, StatusCode.AUTHENTICATION_FAILURE.message)
             db.run(queryUserInfoSecretDBIO).map {
