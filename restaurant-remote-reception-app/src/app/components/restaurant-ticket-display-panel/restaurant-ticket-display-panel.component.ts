@@ -5,6 +5,7 @@ import {IReservedTicket, IRestaurantTicketCount, TICKET_TYPES} from '../../model
 import {AlertService} from '../../services/alert.service';
 import {STATUS} from '../../models/status.model';
 import {Router} from '@angular/router';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 const intervalCounter = interval(5000);
 
@@ -22,7 +23,8 @@ export class RestaurantTicketDisplayPanelComponent implements OnInit, OnDestroy 
 
   constructor(private ticketService: TicketService,
               private alertService: AlertService,
-              private router: Router) {
+              private router: Router,
+              private errorHandler: CustomErrorHandlerService) {
     this.alive = true;
   }
 
@@ -58,19 +60,7 @@ export class RestaurantTicketDisplayPanelComponent implements OnInit, OnDestroy 
         this.ticketCurrentCounts = res;
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          localStorage.removeItem('authenticated');
-          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
-          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', '', this.router.url);
       }
     );
   }
@@ -82,19 +72,7 @@ export class RestaurantTicketDisplayPanelComponent implements OnInit, OnDestroy 
         this.reservedTickets = res;
       },
     err => {
-      if (err.error instanceof Error) { // browser error
-        this.alertService.error(0, err.error.message);
-      } else if (err.error.message == null) { // non-customised error
-        this.alertService.error(err.status, err.statusText);
-      } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-        this.alertService.error(err.error.status_code, err.statusText);
-      } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-        localStorage.removeItem('authenticated');
-        this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
-        this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
-      } else {
-        this.alertService.error(err.error.status_code, err.error.message);
-      }
+      this.errorHandler.handleError(err, '', '', '', this.router.url);
     }
     );
   }

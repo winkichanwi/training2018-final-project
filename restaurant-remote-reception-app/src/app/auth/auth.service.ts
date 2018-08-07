@@ -27,10 +27,10 @@ export class AuthService {
   authenticate() {
     this.http.get(USER_AUTHENTICATION_API_ENDPOINT).subscribe(
       res => {
-        localStorage.setItem('authenticated', JSON.stringify(true));
+        localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true));
       },
       err => {
-        localStorage.removeItem('authenticated');
+        localStorage.removeItem(LOCAL_STORAGE_TOKEN);
       }
     );
   }

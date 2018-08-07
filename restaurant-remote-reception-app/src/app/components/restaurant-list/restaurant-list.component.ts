@@ -4,6 +4,7 @@ import {IShoppingCenter, ShoppingCenterService} from '../../services/shopping-ce
 import {IRestaurant, RestaurantService} from '../../services/restaurant.service';
 import {AlertService} from '../../services/alert.service';
 import {STATUS} from '../../models/status.model';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 @Component({
   selector: 'app-restaurant-list',
@@ -21,7 +22,8 @@ export class RestaurantListComponent implements OnInit {
     private shoppingCenterService: ShoppingCenterService,
     private restaurantService: RestaurantService,
     private alertService: AlertService,
-    private router: Router
+    private router: Router,
+    private errorHandler: CustomErrorHandlerService
   ) {}
 
   ngOnInit() {
@@ -36,21 +38,7 @@ export class RestaurantListComponent implements OnInit {
         this.shoppingCenter = res;
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.error.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          localStorage.removeItem('authenticated');
-          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
-          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
-        } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
-          this.alertService.error(err.error.status_code, 'Shopping center not found');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', 'Shopping center', this.router.url);
       }
     );
   }
@@ -61,21 +49,7 @@ export class RestaurantListComponent implements OnInit {
       this.restaurants = res;
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR'] ) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          localStorage.removeItem('authenticated');
-          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
-          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
-        } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
-          this.alertService.error(err.error.status_code, 'List of restaurants not found');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', 'List of restaurants', this.router.url);
       }
     );
   }
