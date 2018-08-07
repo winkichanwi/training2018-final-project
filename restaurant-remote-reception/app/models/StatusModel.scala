@@ -3,22 +3,17 @@ package models
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Writes, __}
 
-object StatusCode extends Enumeration {
-    protected case class Val(code : Int, message: String) extends super.Val {
-        override def toString = message
+sealed abstract class StatusCode(val code: Int, val message: String)
 
-    }
-
-    implicit def valueToTicketStatusVal(x: Value): Val = x.asInstanceOf[Val]
-
-    val OK = Val(2000, "OK")
-    val UNSUPPORTED_FORMAT = Val(4001, "Unsupported Format")
-    val UNAUTHORIZED = Val(4010, "Unauthorized")
-    val AUTHENTICATION_FAILURE = Val(4011, "Authentication Failure")
-    val FORBIDDEN = Val(4030, "Forbidden")
-    val RESOURCE_NOT_FOUND = Val(4041, "Resource Not Found")
-    val INTERNAL_SERVER_ERROR = Val(5000, "Internal Server Error")
-    val DUPLICATED_ENTRY = Val(5001, "Duplicated Entry")
+object StatusCode {
+    case object OK extends StatusCode(2000, "OK")
+    case object UNSUPPORTED_FORMAT extends StatusCode(4001, "Unsupported Format")
+    case object UNAUTHORIZED extends StatusCode(4010, "Unauthorized")
+    case object AUTHENTICATION_FAILURE extends StatusCode(4011, "Authentication Failure")
+    case object FORBIDDEN extends StatusCode(4030, "Forbidden")
+    case object RESOURCE_NOT_FOUND extends StatusCode(4041, "Resource Not Found")
+    case object INTERNAL_SERVER_ERROR extends StatusCode(5000, "Internal Server Error")
+    case object DUPLICATED_ENTRY extends StatusCode(5001, "Duplicated Entry")
 }
 
 case class StatusResponse(status_code: Int, message: String)
