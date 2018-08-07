@@ -28,6 +28,7 @@ import { UserTicketItemComponent } from './components/user-ticket-item/user-tick
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RestaurantTicketItemComponent } from './components/restaurant-ticket-item/restaurant-ticket-item.component';
 import { CustomErrorHandlerService } from './services/custom-error-handler.service';
+import {HomeComponent} from './components/home/home.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { CustomErrorHandlerService } from './services/custom-error-handler.servi
     AlertComponent,
     UserTicketListComponent,
     UserTicketItemComponent,
-    RestaurantTicketItemComponent
+    RestaurantTicketItemComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
