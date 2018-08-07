@@ -12,6 +12,7 @@ import {
   state,
   style,
 } from '@angular/animations';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 const intervalCounter = interval(10000);
 const animationIntervalCounter = interval(500);
@@ -43,7 +44,8 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
               private restaurantService: RestaurantService,
               private ticketService: TicketService,
               private alertService: AlertService,
-              private router: Router) {
+              private router: Router,
+              private errorHandler: CustomErrorHandlerService) {
     this.alive = true;
   }
 
@@ -64,21 +66,7 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
         this.getRestaurantLastCalled();
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          localStorage.removeItem('authenticated');
-          this.alertService.error(err.error.status_code, 'Please login before continue browsing.', true);
-          this.router.navigate(['/login'], { queryParams: {returnUrl: this.router.url} });
-        } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
-          this.alertService.error(err.error.status_code, 'Restaurant not found');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', 'Restaurant', this.router.url);
       }
     );
   }
@@ -89,19 +77,7 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
         this.shoppingCenter = res;
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.error.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
-          this.alertService.error(err.error.status_code, 'Shopping center not found');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', 'Shopping center', this.router.url);
       }
     );
   }
@@ -115,19 +91,10 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
         }
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.error.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
-          this.restaurantLastCalled = { ticket_type: this.reservedTicket.ticket_type, last_called: 0 };
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', '', this.router.url);
+        // TODO: initialise as 0 at API side
+        // } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
+        //   this.restaurantLastCalled = { ticket_type: this.reservedTicket.ticket_type, last_called: 0 };
       }
     );
   }
@@ -154,19 +121,7 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
         this.router.navigate(['/tickets']);
     },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
-          this.alertService.error(err.error.status_code, 'Invalid input');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', '', this.router.url);
       }
     );
   }
@@ -181,19 +136,7 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
         this.router.navigate(['/tickets']);
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
-          this.alertService.error(err.error.status_code, 'Invalid input');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', '', this.router.url);
       }
     );
   }
