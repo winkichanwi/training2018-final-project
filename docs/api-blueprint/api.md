@@ -85,8 +85,8 @@
 + Response 401 (application/json)
 
         {
-            "status_code": 4010
-            "message": "Unauthorized"
+            "status_code": 4011
+            "message": "Authentication Failure"
         }
 
 ##  ログアウトエンドポイント [/api/users/logout]
