@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import {ErrorHandler, NgModule} from '@angular/core';
+import { NgModule} from '@angular/core';
 import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { FormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
@@ -12,7 +12,8 @@ import { ShoppingCenterService } from './services/shopping-center.service';
 
 import { RestaurantListComponent } from './components/restaurant-list/restaurant-list.component';
 import { RestaurantService } from './services/restaurant.service';
-import { RestaurantTicketDisplayPanelComponent } from './components/restaurant-ticket-display-panel/restaurant-ticket-display-panel.component';
+import { RestaurantTicketDisplayPanelComponent
+} from './components/restaurant-ticket-display-panel/restaurant-ticket-display-panel.component';
 import { TicketReservationComponent } from './components/ticket-reservation/ticket-reservation.component';
 import { TicketService } from './services/ticket.service';
 
