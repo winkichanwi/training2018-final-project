@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {ErrorHandler, NgModule} from '@angular/core';
 import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { FormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
@@ -21,11 +21,15 @@ import { AuthService } from './auth/auth.service';
 import { AuthGuard } from './auth/auth.guard';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { AlertComponent } from './components/alert/alert.component';
+<<<<<<< HEAD
 import { UserTicketListComponent } from './components/user-ticket-list/user-ticket-list.component';
 
 import { UserTicketItemComponent } from './components/user-ticket-item/user-ticket-item.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RestaurantTicketItemComponent } from './components/restaurant-ticket-item/restaurant-ticket-item.component';
+=======
+import { CustomErrorHandlerService } from './services/custom-error-handler.service';
+>>>>>>> chan/feature/error-handling-cont
 
 @NgModule({
   declarations: [
@@ -54,6 +58,7 @@ import { RestaurantTicketItemComponent } from './components/restaurant-ticket-it
     BrowserAnimationsModule
   ],
   providers: [
+    CustomErrorHandlerService,
     ShoppingCenterService,
     RestaurantService,
     TicketService,
