@@ -10,6 +10,7 @@ import {
   style
 } from '@angular/animations';
 import {Router} from '@angular/router';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 const intervalCounter = interval(5000);
 const animationIntervalCounter = interval(500);
@@ -37,7 +38,7 @@ export class RestaurantTicketItemComponent implements OnInit, OnDestroy {
 
   constructor(private ticketService: TicketService,
               private router: Router,
-              private alertService: AlertService) {
+              private errorHandler: CustomErrorHandlerService) {
     this.alive = true;
   }
 
