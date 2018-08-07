@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {ErrorHandler, NgModule} from '@angular/core';
 import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { FormsModule} from '@angular/forms';
 import { AppComponent } from './app.component';
@@ -21,6 +21,7 @@ import { AuthService } from './auth/auth.service';
 import { AuthGuard } from './auth/auth.guard';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { AlertComponent } from './components/alert/alert.component';
+import { CustomErrorHandlerService } from './services/custom-error-handler.service';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { AlertComponent } from './components/alert/alert.component';
     CollapseModule.forRoot()
   ],
   providers: [
+    CustomErrorHandlerService,
     ShoppingCenterService,
     RestaurantService,
     TicketService,

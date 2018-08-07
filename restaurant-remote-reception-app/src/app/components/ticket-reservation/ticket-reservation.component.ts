@@ -7,6 +7,7 @@ import {TicketService} from '../../services/ticket.service';
 import {UserService} from '../../services/user.service';
 import {AlertService} from '../../services/alert.service';
 import {STATUS} from '../../models/status.model';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 @Component({
   selector: 'app-ticker-reservation',
@@ -26,7 +27,8 @@ export class TicketReservationComponent implements OnInit {
     private restaurantService: RestaurantService,
     private userService: UserService,
     private ticketService: TicketService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private errorHandler: CustomErrorHandlerService
   ) { }
 
   ngOnInit() {
@@ -36,7 +38,7 @@ export class TicketReservationComponent implements OnInit {
   }
 
   onSubmit() {
-    if(this.validateSeatNo()) {
+    if (this.validateSeatNo()) {
       this.isLoading = true;
       this.reserveTicket();
     }
@@ -55,19 +57,7 @@ export class TicketReservationComponent implements OnInit {
         this.router.navigate(['/shopping-centers', this.restaurant.shopping_center_id]);
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
-          this.alertService.error(err.error.status_code, 'Invalid input');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '同じ種類の整理券はもう取りましたよ！');
         this.isLoading = false;
       }
     );
@@ -80,17 +70,7 @@ export class TicketReservationComponent implements OnInit {
           this.ticket.created_by_id = this.user.id;
         },
         err => {
-          if (err.error instanceof Error) { // browser error
-            this.alertService.error(0, err.error.message);
-          } else if (err.error.message == null) { // non-customised error
-            this.alertService.error(err.status, err.statusText);
-          } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-            this.alertService.error(err.error.status_code, err.statusText);
-          } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-            this.alertService.error(err.error.status_code, 'Please login');
-          } else {
-            this.alertService.error(err.error.status_code, err.error.message);
-          }
+          this.errorHandler.handleError(err);
         }
       );
     }
@@ -101,6 +81,7 @@ export class TicketReservationComponent implements OnInit {
         this.restaurant = res;
       },
       err => {
+        this.errorHandler.handleError(err, '', '', 'Restaurant');
         if (err.error instanceof Error) { // browser error
           this.alertService.error(0, err.error.message);
         } else if (err.error.message == null) { // non-customised error

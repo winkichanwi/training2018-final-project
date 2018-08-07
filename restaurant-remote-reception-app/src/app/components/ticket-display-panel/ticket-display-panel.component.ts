@@ -3,7 +3,7 @@ import { TicketService} from '../../services/ticket.service';
 import {interval} from 'rxjs';
 import {ITicketCurrentCount, TICKET_TYPES} from '../../models/ticket.model';
 import {AlertService} from '../../services/alert.service';
-import {STATUS} from '../../models/status.model';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 const intervalCounter = interval(10000);
 
@@ -18,7 +18,8 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
   alive: boolean;
 
   constructor(private ticketService: TicketService,
-              private alertService: AlertService) {
+              private alertService: AlertService,
+              private errorHandler: CustomErrorHandlerService) {
     this.alive = true;
   }
 
@@ -45,17 +46,7 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
         this.ticketCurrentCounts = res;
       },
       err => {
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err);
       }
     );
   }

@@ -20,9 +20,7 @@ const HTTP_OPTIONS = {
 })
 export class AuthService {
 
-  constructor(private http: HttpClient,
-              private router: Router,
-              private alertService: AlertService) {
+  constructor(private http: HttpClient) {
     this.authenticate();
   }
 
