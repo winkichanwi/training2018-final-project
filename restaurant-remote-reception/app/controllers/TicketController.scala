@@ -175,8 +175,8 @@ case class RestaurantLastCalled(ticketType: String, lastCalled: Int)
 object RestaurantLastCalled {
     implicit val restaurantLastCalledWrites: Writes[RestaurantLastCalled] = (
         (__ \ "ticket_type").write[String] and
-            (__ \ "last_called").write[Int]
-        )(unlift(RestaurantLastCalled.unapply))
+        (__ \ "last_called").write[Int]
+    )(unlift(RestaurantLastCalled.unapply))
 }
 
 case class TicketForm(restaurantId: Int, ticketSeatNo: Int)
@@ -184,8 +184,8 @@ case class TicketForm(restaurantId: Int, ticketSeatNo: Int)
 object TicketForm {
     implicit val ticketFormReads: Reads[TicketForm] = (
         (__ \ "restaurant_id").read[Int] and
-            (__ \ "seat_no").read[Int](min(1) keepAnd max(12))
-        )(TicketForm.apply _)
+        (__ \ "seat_no").read[Int](min(1) keepAnd max(12))
+    )(TicketForm.apply _)
 }
 
 case class TicketStatusUpdateForm(ticketId: Int, ticketStatus: String)
@@ -194,7 +194,7 @@ object TicketStatusUpdateForm {
     implicit val ticketStatusUpdateFormReads: Reads[TicketStatusUpdateForm] = (
         (__ \ "ticket_id").read[Int] and
         (__ \ "ticket_status").read[String]
-        )(TicketStatusUpdateForm.apply _)
+    )(TicketStatusUpdateForm.apply _)
 }
 
 case class UserTickets(ticketId: Int, restaurantId: Int, ticketType: String, seatNo: Int, ticketNo: Int)

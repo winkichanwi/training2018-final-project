@@ -23,7 +23,6 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
     /**
       * 一覧表示
       */
-
     def list = Action.async { implicit rs =>
         // IDの昇順にすべてのユーザ情報を取得
         db.run(Users.sortBy(t => t.userId).result).map { users =>
