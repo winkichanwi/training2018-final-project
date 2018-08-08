@@ -23,10 +23,10 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
 
     /**
       * User login: authenticate user login information by comparing the password
-      * @return Future[Result] Http Response regarding to the authentication result
+      * @return Future[Result] Result for authentication result and set session if user is successfully logged in
       */
     def login = Action.async(parse.json) { implicit rs =>
-        rs.body.validate[LoginForm].map { form =>
+        rs.body.validate[UserLoginForm].map { form =>
             val queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
                 .filter { case (t1, t2) => t1.email === form.email }
                 .result.headOption
@@ -48,12 +48,10 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
 
     /**
       * User authentication: determine whether a user has been authenticated or not
-      * @return Future[Result] Http Response regarding to the authentication result
+      * @return Future[Result] Result for authentication result
       */
     def authenticate = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        val authorizedUserDBIO = Users.filter(t => t.userId === sessionUserId.toInt).result.headOption
-
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
             case Some(_) =>
                 Ok
@@ -64,7 +62,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
 
     /**
       * User logout: renew user login session to logout the user
-      * @return Future[Result] Http Response representing action succeeded
+      * @return Future[Result] Result representing logout succeeded
       */
     def logout = Action.async { implicit rs =>
         Future { Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message))).withNewSession }
@@ -77,11 +75,11 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
   * @param email user email for logging in and retrieving information from user table
   * @param password user password for authentication
   */
-case class LoginForm(email : String, password : String )
+case class UserLoginForm(email : String, password : String )
 
-object LoginForm {
-    implicit val loginFormReads: Reads[LoginForm] = (
+object UserLoginForm {
+    implicit val loginFormReads: Reads[UserLoginForm] = (
         (__ \ "email").read[String](email) and
         (__ \ "password").read[String](minLength[String](8) keepAnd maxLength[String](20))
-    )(LoginForm.apply _)
+    )(UserLoginForm.apply _)
 }
