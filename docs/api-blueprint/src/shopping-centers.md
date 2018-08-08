@@ -44,9 +44,9 @@ FORMAT: 1A
 
 + Response 200
     + Attributes
-            + id: 1 (number)
-            + name: ルミネ (string) - ショッピングセンター名
-            + branch: 新宿 (string) - ショッピングセンター支店名
+        + id: 1 (number)
+        + name: ルミネ (string) - ショッピングセンター名
+        + branch: 新宿 (string) - ショッピングセンター支店名
 
 + Response 401 (application/json)
 
