@@ -13,11 +13,18 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
+/**
+  * Controller for shopping center
+  */
 class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
 
     import ShoppingCenterController._
 
+    /**
+      * Getting list of shopping centers
+      * @return Future[Result] Body containing list of shopping centers
+      */
     def list = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
@@ -34,6 +41,11 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
         }
     }
 
+    /**
+      * Getting shopping center information by id
+      * @param shoppingCenterId ID of a shopping center
+      * @return Future[Result] Body containing information of queried shopping center
+      */
     def get(shoppingCenterId: Int) = Action.async {implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryShoppingCenterById =
