@@ -101,6 +101,12 @@ object UserController {
         (__ \ "full_name").write[String] and
         (__ \ "email").write[String]
     )(unlift(UsersRow.unapply))
+
+    implicit val userReads: Reads[UsersRow] = (
+        (__ \ "id").read[Int]   and
+        (__ \ "full_name").read[String] and
+        (__ \ "email").read[String]
+    )(UsersRow)
 }
 
 /**
@@ -114,9 +120,9 @@ case class UserSignUpForm(userId: Option[Int], userFullname : String, email : St
 
 object UserSignUpForm {
     implicit val userFormReads: Reads[UserSignUpForm] = (
-    (__ \ "id").readNullable[Int] and
-    (__ \ "full_name").read[String] and
-    (__ \ "email").read[String](email) and
-    (__ \ "password").read[String](minLength[String](8) keepAnd maxLength[String](20))
-    )(UserSignUpForm)
+        (__ \ "id").readNullable[Int] and
+        (__ \ "full_name").read[String] and
+        (__ \ "email").read[String](email) and
+        (__ \ "password").read[String](minLength[String](8) keepAnd maxLength[String](20))
+    )(UserSignUpForm.apply _)
 }
