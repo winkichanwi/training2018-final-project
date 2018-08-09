@@ -10,7 +10,7 @@ export class Ticket {
 
 export interface ITicketCurrentCount {
   ticket_type: string;
-  ticket_count: string;
+  ticket_count: number;
 }
 
 export interface ITicketLastNo {

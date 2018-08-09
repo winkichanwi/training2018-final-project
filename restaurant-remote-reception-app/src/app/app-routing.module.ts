@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { SignupComponent} from './signup/signup.component';
-import { UserLoginComponent } from './user-login/user-login.component';
-import {ShoppingCenterListComponent} from './shopping-center-list/shopping-center-list.component';
-import {RestaurantListComponent} from './restaurant-list/restaurant-list.component';
-import {TicketReservationComponent} from './ticket-reservation/ticket-reservation.component';
+import { SignupComponent} from './components/signup/signup.component';
+import { UserLoginComponent } from './components/user-login/user-login.component';
+import {ShoppingCenterListComponent} from './components/shopping-center-list/shopping-center-list.component';
+import {RestaurantListComponent} from './components/restaurant-list/restaurant-list.component';
+import {TicketReservationComponent} from './components/ticket-reservation/ticket-reservation.component';
 import {AuthGuard} from './auth/auth.guard';
 import {AuthService} from './auth/auth.service';
 

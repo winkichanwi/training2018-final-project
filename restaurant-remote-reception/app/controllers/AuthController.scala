@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import com.github.t3hnar.bcrypt._
 
 class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
@@ -32,13 +33,13 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             val authenFailRes = StatusResponse(StatusCode.AUTHENTICATION_FAILURE.code, StatusCode.AUTHENTICATION_FAILURE.message)
             db.run(queryUserInfoSecretDBIO).map {
                 case Some((user, userSecret)) =>
-                    if (userSecret.password == loginPassword) {
+                    if (loginPassword.isBcrypted(userSecret.password)) {
                         Ok.withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
-                        BadRequest(Json.toJson(authenFailRes))
+                        Unauthorized(Json.toJson(authenFailRes))
                     }
                 case None =>
-                    BadRequest(Json.toJson(authenFailRes))
+                    Unauthorized(Json.toJson(authenFailRes))
             }
         }.recoverTotal { e =>
             Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
@@ -68,6 +69,6 @@ object AuthController {
 
     implicit val loginFormReads: Reads[LoginForm] = (
         (__ \ "email").read[String](email) and
-        (__ \ "password").read[String](minLength[String](6))
+        (__ \ "password").read[String](minLength[String](8) keepAnd maxLength[String](20))
     )(LoginForm)
 }

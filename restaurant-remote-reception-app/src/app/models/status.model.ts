@@ -2,3 +2,14 @@ export interface IStatus {
   status_code: number;
   message: string;
 }
+
+export enum STATUS {
+  OK = 2000,
+  UNSUPPORTED_FORMAT = 4001,
+  UNAUTHORIZED = 4010,
+  AUTHENTICATION_FAILURE = 4011,
+  FORBIDDEN = 4030,
+  RESOURCE_NOT_FOUND = 4041,
+  INTERNAL_SERVER_ERROR = 5000,
+  DUPLICATED_ENTRY = 5001
+}

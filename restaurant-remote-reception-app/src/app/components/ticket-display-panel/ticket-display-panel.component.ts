@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { TicketService} from '../services/ticket.service';
-import { AppUtils} from '../app-common';
+import { TicketService} from '../../services/ticket.service';
 import {interval} from 'rxjs';
-import {ITicketCurrentCount, TICKET_TYPES} from '../models/ticket.model';
+import {ITicketCurrentCount, TICKET_TYPES} from '../../models/ticket.model';
+import {AlertService} from '../../services/alert.service';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 const intervalCounter = interval(10000);
 
@@ -16,7 +17,9 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
   ticketCurrentCounts: ITicketCurrentCount[];
   alive: boolean;
 
-  constructor(private ticketService: TicketService) {
+  constructor(private ticketService: TicketService,
+              private alertService: AlertService,
+              private errorHandler: CustomErrorHandlerService) {
     this.alive = true;
   }
 
@@ -43,7 +46,7 @@ export class TicketDisplayPanelComponent implements OnInit, OnDestroy {
         this.ticketCurrentCounts = res;
       },
       err => {
-        AppUtils.handleError(err);
+        this.errorHandler.handleError(err);
       }
     );
   }

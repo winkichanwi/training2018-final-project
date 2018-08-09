@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {IShoppingCenter, ShoppingCenterService} from '../services/shopping-center.service';
-import {AppUtils} from '../app-common';
+import {IShoppingCenter, ShoppingCenterService} from '../../services/shopping-center.service';
+import {AlertService} from '../../services/alert.service';
+import {STATUS} from '../../models/status.model';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 @Component({
   selector: 'app-shopping-centers',
@@ -11,7 +13,9 @@ import {AppUtils} from '../app-common';
 export class ShoppingCenterListComponent implements OnInit {
   shoppingCenters: IShoppingCenter[];
 
-  constructor (private shoppingCenterService: ShoppingCenterService) {}
+  constructor (private shoppingCenterService: ShoppingCenterService,
+               private alertService: AlertService,
+               private errorHandler: CustomErrorHandlerService) {}
 
   ngOnInit() {
     this.getListOfShoppingCenters();
@@ -23,7 +27,7 @@ export class ShoppingCenterListComponent implements OnInit {
         this.shoppingCenters = res;
       },
       err => {
-        AppUtils.handleError(err);
+        this.errorHandler.handleError(err, '', '', 'List of shoppjng centers');
       }
     );
   }

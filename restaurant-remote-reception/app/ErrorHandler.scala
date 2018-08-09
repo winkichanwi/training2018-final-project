@@ -6,6 +6,7 @@ import scala.concurrent._
 import javax.inject.Singleton
 import models.{StatusCode, StatusResponse}
 import play.api.libs.json.Json;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException
 
 @Singleton
 class ErrorHandler extends HttpErrorHandler {
@@ -17,8 +18,15 @@ class ErrorHandler extends HttpErrorHandler {
     }
 
     def onServerError(request: RequestHeader, exception: Throwable) = {
-        Future.successful(
-            InternalServerError(Json.toJson(StatusResponse(StatusCode.INTERNAL_SERVER_ERROR.code, exception.getMessage)))
-        )
+        exception match {
+            case e: MySQLIntegrityConstraintViolationException =>
+                Future.successful(
+                    InternalServerError(Json.toJson(StatusResponse(StatusCode.DUPLICATED_ENTRY.code, StatusCode.DUPLICATED_ENTRY.message)))
+                )
+            case e =>
+                Future.successful(
+                    InternalServerError(Json.toJson(StatusResponse(StatusCode.INTERNAL_SERVER_ERROR.code, e.getMessage)))
+                )
+        }
     }
 }

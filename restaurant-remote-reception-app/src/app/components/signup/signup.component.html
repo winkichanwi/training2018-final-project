@@ -10,15 +10,15 @@
       <div class="form-group">
         <label for="inputEmail">メールアドレス</label>
         <input type="email" [ngClass]="{'form-control': true, 'is-invalid': inputEmail.invalid}" id="inputEmail" name="inputEmail" placeholder="メールアドレス" [(ngModel)]="user.email" #inputEmail="ngModel" required email>
-        <div *ngIf="signupForm.submitted && inputEmail.invalid" class="invalid-feedback">メールアドレスフォーマットで入力は必要です。</div>
+        <div *ngIf="signupForm.submitted && inputEmail.invalid" class="invalid-feedback">メールアドレスのフォーマットで入力は必要です。</div>
       </div>
       <div class="form-group">
         <label for="inputPassword">パスワード</label>
-        <input type="password" [ngClass]="{'form-control': true, 'is-invalid': inputPassword.invalid}" id="inputPassword" name="inputPassword" aria-describedby="passwordHelp" placeholder="パスワード" [(ngModel)]="user.password" #inputPassword="ngModel" required minlength="6">
-        <div *ngIf="signupForm.submitted && inputPassword.invalid" class="invalid-feedback">6文字以上で入力してください。</div>
-        <small id="passwordHelp" class="form-text text-muted">パスワードの入力は必要です。</small>
+        <input type="password" [ngClass]="{'form-control': true, 'is-invalid': inputPassword.invalid || invalidPwdLen()}" id="inputPassword" name="inputPassword" aria-describedby="passwordHelp" placeholder="パスワード" [(ngModel)]="user.password" #inputPassword="ngModel" required>
+        <div *ngIf="signupForm.submitted && (inputPassword.invalid || invalidPwdLen())" class="invalid-feedback">8-20文字のパスワードの入力は必要です。</div>
+        <small [hidden]="signupForm.submitted && (inputPassword.invalid || invalidPwdLen())" id="passwordHelp" class="form-text text-muted">8-20文字で入力してください。</small>
       </div>
-      <button type="submit" class="btn btn-primary">登録</button> <img *ngIf="isLoading" src="../../assets/icon_loader.gif">
+      <button type="submit" class="btn btn-primary">登録</button> <img *ngIf="isLoading" src="../../../assets/icon_loader.gif">
     </form>
   </div>
 </div>

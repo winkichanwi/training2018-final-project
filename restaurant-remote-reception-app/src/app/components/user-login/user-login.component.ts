@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { AppUtils} from '../app-common';
 import {ActivatedRoute, Router} from '@angular/router';
-import {UserLogin} from '../models/user.model';
-import {AuthService} from '../auth/auth.service';
+import {UserLogin} from '../../models/user.model';
+import {IStatus, STATUS} from '../../models/status.model';
+import {AuthService} from '../../auth/auth.service';
+import {AlertService} from '../../services/alert.service';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 const LOCAL_STORAGE_TOKEN = 'authenticated';
 
@@ -16,18 +18,27 @@ export class UserLoginComponent implements OnInit {
   isLoading = false;
   user = new UserLogin('', '');
   returnUrl: String;
+  isPwdLenInvalid = false;
 
   constructor (private router: Router,
                private authService: AuthService,
-               private route: ActivatedRoute) { }
+               private route: ActivatedRoute,
+               private alertService: AlertService,
+               private errorHandler: CustomErrorHandlerService) { }
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
   onSubmit() {
-    this.isLoading = true;
-    this.login();
+    if (!this.invalidPwdLen()) {
+      this.isLoading = true;
+      this.login();
+    }
+  }
+
+  private invalidPwdLen() {
+    return this.isPwdLenInvalid = !(this.user.password.length >= 8 && this.user.password.length <= 20);
   }
 
   private login() {
@@ -39,7 +50,7 @@ export class UserLoginComponent implements OnInit {
             this.router.navigate([this.returnUrl]);
         },
         err => {
-          AppUtils.handleError(err);
+          this.errorHandler.handleError(err, '', 'email address or password.');
           this.isLoading = false;
         }
       );

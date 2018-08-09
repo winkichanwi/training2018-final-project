@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import com.github.t3hnar.bcrypt._
 
 class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
@@ -40,7 +41,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             val newUser = UsersRow(0, form.userFullname, form.email)
             val addUserDBIO = for {
                 userId <- (Users returning Users.map(_.userId)) += newUser
-                userAcc = UserSecretRow(userId, form.password)
+                userAcc = UserSecretRow(userId, form.password.bcrypt)
                 result <- UserSecret += userAcc
             } yield result
 
@@ -106,6 +107,6 @@ object UserController {
         (__ \ "id").readNullable[Int] and
         (__ \ "full_name").read[String] and
         (__ \ "email").read[String](email) and
-        (__ \ "password").read[String](minLength[String](6))
+        (__ \ "password").read[String](minLength[String](8) keepAnd maxLength[String](20))
     )(UserForm)
 }

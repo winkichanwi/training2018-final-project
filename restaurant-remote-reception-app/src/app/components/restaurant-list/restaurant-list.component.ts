@@ -1,14 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {IShoppingCenter, ShoppingCenterService} from '../services/shopping-center.service';
-import {IRestaurant, RestaurantService} from '../services/restaurant.service';
-import {AppUtils} from '../app-common';
+import {IShoppingCenter, ShoppingCenterService} from '../../services/shopping-center.service';
+import {IRestaurant, RestaurantService} from '../../services/restaurant.service';
+import {AlertService} from '../../services/alert.service';
+import {STATUS} from '../../models/status.model';
+import {CustomErrorHandlerService} from '../../services/custom-error-handler.service';
 
 @Component({
   selector: 'app-restaurant-list',
   templateUrl: './restaurant-list.component.html',
   styleUrls: ['./restaurant-list.component.css']
 })
+
 export class RestaurantListComponent implements OnInit {
   shoppingCenterId: string;
   shoppingCenter: IShoppingCenter;
@@ -17,7 +20,9 @@ export class RestaurantListComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private shoppingCenterService: ShoppingCenterService,
-    private restaurantService: RestaurantService
+    private restaurantService: RestaurantService,
+    private alertService: AlertService,
+    private errorHandler: CustomErrorHandlerService
   ) {}
 
   ngOnInit() {
@@ -32,7 +37,7 @@ export class RestaurantListComponent implements OnInit {
         this.shoppingCenter = res;
       },
       err => {
-        AppUtils.handleError(err);
+        this.errorHandler.handleError(err, '', '', 'Shopping center');
       }
     );
   }
@@ -43,7 +48,7 @@ export class RestaurantListComponent implements OnInit {
       this.restaurants = res;
       },
       err => {
-        AppUtils.handleError(err);
+        this.errorHandler.handleError(err, '', '', 'List of restaurants');
       }
     );
   }
