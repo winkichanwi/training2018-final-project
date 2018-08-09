@@ -14,11 +14,20 @@ import models.{Constants, StatusCode, StatusResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * Controller for restaurants
+  */
 class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
 
     import RestaurantController._
 
+    /**
+      * [Authentication required]
+      * Get list of restaurants of specified shopping center
+      * @param shoppingCenterId ID of specified shopping center
+      * @return Future[Result] Body containing list of restaurants
+      */
     def list(shoppingCenterId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryRestaurantsByShoppingCenterId =
@@ -37,6 +46,12 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
         }
     }
 
+    /**
+      * [Authentication required]
+      * Get information of specified restaurant
+      * @param restaurantId ID of specified restaurant
+      * @return Future[Result] Body containing information of restaurant
+      */
     def get(restaurantId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryRestaurantById =

@@ -22,6 +22,7 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     import ShoppingCenterController._
 
     /**
+      * [Authentication required]
       * Getting list of shopping centers
       * @return Future[Result] Body containing list of shopping centers
       */
@@ -42,6 +43,7 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
     }
 
     /**
+      * [Authentication required]
       * Getting shopping center information by id
       * @param shoppingCenterId ID of a shopping center
       * @return Future[Result] Body containing information of queried shopping center

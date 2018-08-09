@@ -41,18 +41,19 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       */
     def create = Action.async(parse.json) { implicit rs =>
         rs.body.validate[UserSignUpForm].map { form =>
-            val addUserDBIO = for {
+            val addUser = for {
                 userId <- (Users returning Users.map(_.userId)) += UsersRow(0, form.userFullname, form.email)
                 result <- UserSecret += UserSecretRow(userId, form.password.bcrypt)
             } yield result
 
-            db.run(addUserDBIO).map(_ => Ok)
+            db.run(addUser).map(_ => Ok)
         }.recoverTotal { e =>
             Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
         }
     }
 
     /**
+      * [Authentication required]
       * User information: get logged in user information
       * @return Future[Result] Body containing logged in user information
       */
@@ -67,6 +68,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
     }
 
     /**
+      * [Authentication required]
       * User information update: update user information
       * @return Future[Result] Result of updating user information
       */
