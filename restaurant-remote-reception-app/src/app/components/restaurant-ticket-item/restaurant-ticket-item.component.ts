@@ -59,7 +59,7 @@ export class RestaurantTicketItemComponent implements OnInit, OnDestroy {
         }
       },
       err => {
-        this.errorHandler.handleError(err, '', '', '', this.router.url);
+        this.errorHandler.handleError(err, '', '', 'Last called ticket number', this.router.url);
       }
     );
   }

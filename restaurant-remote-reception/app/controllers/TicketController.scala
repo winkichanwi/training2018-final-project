@@ -63,8 +63,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     }
 
     /**
-      *
-      * @return
+      * [Authentication required]
+      * Update ticket status. Archived all non active tickets before updating status to avoid constraint conflict
+      * @return Future[Result] Result of update
       */
     def update = Action.async(parse.json) { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
@@ -76,14 +77,19 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                             t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && t.ticketStatus =!= TicketStatus.ACTIVE.toString)
                             .map(_.ticketStatus)
                             .update(TicketStatus.NULL.status)
-                        db.run(updateDoneTickets).flatMap{_ =>
-                            val updateTicketStatus = Tickets.filter(t => t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
-                                .map(_.ticketStatus)
-                                .update(Some(form.ticketStatus))
-                            db.run(updateTicketStatus).map(_ =>
-                                Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
-                            )
-                        }
+
+                        val updateTicketStatus = Tickets.filter(t => t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
+                            .map(_.ticketStatus)
+                            .update(Some(form.ticketStatus))
+
+                        val updateTicketTransaction = (
+                            for {
+                                _ <- updateDoneTickets
+                                _ <- updateTicketStatus
+                            } yield ()
+                            ).transactionally
+
+                        db.run(updateTicketTransaction).map( _ => Ok)
                     } else {
                         Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
                     }
@@ -162,32 +168,19 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 db.run(queryUserRestaurantActiveTicket)
-                    .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketSeatNo, row.ticketNo)))
-                    .map(userTickets => Ok(Json.toJson(userTickets)))
+            .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketSeatNo, row.ticketNo)))
+            .map(userTickets => Ok(Json.toJson(userTickets)))
             case None =>
                 Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
     }
 }
 
-case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
-
-object RestaurantTicketCounts {
-    implicit val restaurantTicketCountWrites: Writes[RestaurantTicketCounts] = (
-        (__ \ "ticket_type").write[String] and
-        (__ \ "ticket_count").write[Int]
-    )(unlift(RestaurantTicketCounts.unapply))
-}
-
-case class RestaurantLastCalled(ticketType: String, lastCalled: Int)
-
-object RestaurantLastCalled {
-    implicit val restaurantLastCalledWrites: Writes[RestaurantLastCalled] = (
-        (__ \ "ticket_type").write[String] and
-        (__ \ "last_called").write[Int]
-    )(unlift(RestaurantLastCalled.unapply))
-}
-
+/**
+  * Template for reading user ticket reservation form, used in create()
+  * @param restaurantId ID of reserved restaurant
+  * @param ticketSeatNo Number of seat to be reserved
+  */
 case class TicketForm(restaurantId: Int, ticketSeatNo: Int)
 
 object TicketForm {
@@ -197,12 +190,17 @@ object TicketForm {
     )(TicketForm.apply _)
 }
 
+/**
+  * Template for reading ticket status update form
+  * @param ticketId ID of ticket to be updated
+  * @param ticketStatus Status to be updated
+  */
 case class TicketStatusUpdateForm(ticketId: Int, ticketStatus: String)
 
 object TicketStatusUpdateForm {
     implicit val ticketStatusUpdateFormReads: Reads[TicketStatusUpdateForm] = (
-        (__ \ "ticket_id").read[Int] and
-        (__ \ "ticket_status").read[String]
+    (__ \ "ticket_id").read[Int] and
+    (__ \ "ticket_status").read[String]
     )(TicketStatusUpdateForm.apply _)
 }
 
@@ -210,10 +208,31 @@ case class UserTickets(ticketId: Int, restaurantId: Int, ticketType: String, sea
 
 object UserTickets {
     implicit val userTicketsWrites: Writes[UserTickets] = (
-        (__ \ "ticket_id").write[Int] and
-        (__ \ "restaurant_id").write[Int] and
-        (__ \ "ticket_type").write[String] and
-        (__ \ "seat_no").write[Int] and
-        (__ \ "ticket_no").write[Int]
+    (__ \ "ticket_id").write[Int] and
+    (__ \ "restaurant_id").write[Int] and
+    (__ \ "ticket_type").write[String] and
+    (__ \ "seat_no").write[Int] and
+    (__ \ "ticket_no").write[Int]
     )(unlift(UserTickets.unapply))
 }
+
+case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
+
+object RestaurantTicketCounts {
+    implicit val restaurantTicketCountWrites: Writes[RestaurantTicketCounts] = (
+    (__ \ "ticket_type").write[String] and
+    (__ \ "ticket_count").write[Int]
+    )(unlift(RestaurantTicketCounts.unapply))
+}
+
+case class RestaurantLastCalled(ticketType: String, lastCalled: Int)
+
+object RestaurantLastCalled {
+    implicit val restaurantLastCalledWrites: Writes[RestaurantLastCalled] = (
+    (__ \ "ticket_type").write[String] and
+    (__ \ "last_called").write[Int]
+    )(unlift(RestaurantLastCalled.unapply))
+}
+
+
+
