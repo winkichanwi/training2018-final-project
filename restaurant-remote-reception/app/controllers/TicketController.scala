@@ -2,24 +2,32 @@ package controllers
 
 import java.sql.Timestamp
 import java.time.LocalDateTime
-
 import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json.Writes
+
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Action, Controller}
 import slick.driver.JdbcProfile
+
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import models._
-
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * Controller for tickets
+  */
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
 
+    /**
+      * [Authentication required]
+      * Create ticket record with status set as active, ticket number based on last non-archived ticket number
+      * @return Future[Result] Result of creating ticket
+      */
     def create = Action.async(parse.json) { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
@@ -36,18 +44,15 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                         .map(_.ticketNo).max
                         .result
 
-                    val now = Timestamp.valueOf(LocalDateTime.now())
-                    val newTicket = db.run(queryTicketLastTakenNo).map {
+                    db.run(queryTicketLastTakenNo).map {
                         case Some(ticketNo) =>
-                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                            Tickets += TicketsRow(0, ticketNo + 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
                         case None =>
-                            TicketsRow(0, 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
-                    }
-
-                    newTicket.flatMap { newTicketRow =>
-                        db.run(Tickets += newTicketRow).map(_ =>
-                            Ok
-                        )
+                            Tickets += TicketsRow(0, 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                    }.flatMap { addTicketDBIO =>
+                        db.run(addTicketDBIO).map( _ => Ok )
                     }
                 }.recoverTotal { e =>
                     Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
@@ -57,6 +62,10 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         }
     }
 
+    /**
+      *
+      * @return
+      */
     def update = Action.async(parse.json) { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
