@@ -49,16 +49,19 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                         .map(_.ticketNo).max
                         .result
 
-                    db.run(queryTicketLastTakenNo).map {
-                        case Some(ticketNo) =>
-                            Tickets += TicketsRow(0, ticketNo + 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
-                                sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
-                        case None =>
-                            Tickets += TicketsRow(0, 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
-                                sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
-                    }.flatMap { addTicketDBIO =>
-                        db.run(addTicketDBIO).map( _ => Ok )
-                    }
+                    val addTicketRowDBIO = for {
+                        ticketNo <- queryTicketLastTakenNo
+                        addTicketRow <- ticketNo match {
+                            case Some(ticketNo) =>
+                                Tickets += TicketsRow(0, ticketNo + 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                            case None =>
+                                Tickets += TicketsRow(0, 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                        }
+                    } yield addTicketRow
+
+                    db.run(addTicketRowDBIO).map( _ => Ok )
                 }.recoverTotal { e =>
                     Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
                 }
@@ -127,7 +130,12 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         }
     }
 
-    def countTickets(restaurantId: Int) = Action.async { implicit rs =>
+    /**
+      *
+      * @param restaurantId
+      * @return
+      */
+    def countTicketQueue(restaurantId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
 
         val groupTicketTypes = Tickets.filter(t =>
@@ -139,8 +147,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 db.run(groupTicketTypes)
-                    .map(_.map(row => RestaurantTicketCounts(row._1, row._2)))
-                    .map(counts => Ok(Json.toJson(counts)))
+                    .map(_.map(row => RestaurantTicketQueue(row._1, row._2)))
+                    .map(queues => Ok(Json.toJson(queues)))
+//                    .map(queues => Ok(Json.obj("restaurant_id" -> restaurantId, "ticket_counts" -> Json.toJson(queues))))
             case None =>
                 Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
@@ -243,13 +252,18 @@ object UserTickets {
     )(unlift(UserTickets.unapply))
 }
 
-case class RestaurantTicketCounts(ticketType: String, ticketCount: Int)
+/**
+  *
+  * @param ticketType
+  * @param count
+  */
+case class RestaurantTicketQueue(ticketType: String, count: Int)
 
-object RestaurantTicketCounts {
-    implicit val restaurantTicketCountWrites: Writes[RestaurantTicketCounts] = (
+object RestaurantTicketQueue {
+    implicit val restaurantTicketCountWrites: Writes[RestaurantTicketQueue] = (
     (__ \ "ticket_type").write[String] and
     (__ \ "ticket_count").write[Int]
-    )(unlift(RestaurantTicketCounts.unapply))
+    )(unlift(RestaurantTicketQueue.unapply))
 }
 
 case class RestaurantLastCalled(ticketType: String, lastCalled: Int)
