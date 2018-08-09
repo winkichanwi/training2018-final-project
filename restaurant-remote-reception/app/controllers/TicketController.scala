@@ -1,20 +1,25 @@
 package controllers
 
 import java.sql.Timestamp
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
 import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.json.Writes
-
 import play.api.libs.json.Reads._
 import play.api.libs.json._
+import play.api.libs.json.Json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Action, Controller}
 import slick.driver.JdbcProfile
-
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import models._
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -101,11 +106,32 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         }
     }
 
+    /**
+      * [Authentication required]
+      * Get logged in user reserved ticket's information
+      * @return Future[Result] List of reserved tickets and related information
+      */
+    def getReservedTickets = Action.async { implicit rs =>
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        val queryUserActiveTicket = Tickets.filter(t =>
+            t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
+            .sortBy(_.createdAt desc)
+            .result
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
+            case Some(_) =>
+                db.run(queryUserActiveTicket)
+                    .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketNo, row.ticketSeatNo, row.createdAt)))
+                    .map(userTickets => Ok(Json.toJson(userTickets)))
+            case None =>
+                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+        }
+    }
+
     def countTickets(restaurantId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
 
         val groupTicketTypes = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
+        (t.restaurantId === restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
             .groupBy(_.ticketType)
             .map { case (ticketType, rows) => (ticketType, rows.length) }
             .result
@@ -124,9 +150,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
 
         val queryTicketLastCalled = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) &&
-                ((!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.ACCEPTED.toString) || (!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.CANCELLED.toString)) &&
-                (t.ticketType === ticketType))
+        (t.restaurantId === restaurantId.bind) &&
+        ((!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.ACCEPTED.toString) || (!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.CANCELLED.toString)) &&
+        (t.ticketType === ticketType))
             .sortBy(_.ticketNo.desc)
             .map(_.ticketNo).max
             .result
@@ -144,21 +170,6 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         }
     }
 
-    def getReservedTickets = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        val queryUserActiveTicket = Tickets.filter(t =>
-            t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
-            .sortBy(_.createdAt desc)
-            .result
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                db.run(queryUserActiveTicket)
-                    .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketSeatNo, row.ticketNo)))
-                    .map(userTickets => Ok(Json.toJson(userTickets)))
-            case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
-        }
-    }
 
     def getRestaurantReservedTickets(restaurantId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
@@ -168,13 +179,15 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 db.run(queryUserRestaurantActiveTicket)
-            .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketSeatNo, row.ticketNo)))
+            .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketNo, row.ticketSeatNo, row.createdAt)))
             .map(userTickets => Ok(Json.toJson(userTickets)))
             case None =>
                 Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
     }
 }
+
+
 
 /**
   * Template for reading user ticket reservation form, used in create()
@@ -204,15 +217,29 @@ object TicketStatusUpdateForm {
     )(TicketStatusUpdateForm.apply _)
 }
 
-case class UserTickets(ticketId: Int, restaurantId: Int, ticketType: String, seatNo: Int, ticketNo: Int)
+/**
+  * Template for writing ticket information
+  * @param ticketId ID of ticket
+  * @param restaurantId ID of reserved restaurant
+  * @param ticketType Ticket type of ticket (A-D)
+  * @param ticketNo Ticket number
+  * @param seatNo Number of reserved seats
+  * @param createdAt Creation time of ticket
+  */
+case class UserTickets(ticketId: Int, restaurantId: Int, ticketType: String, ticketNo: Int, seatNo: Int, createdAt: Timestamp)
 
 object UserTickets {
+    implicit val timestampWriter = new Writes[Timestamp] {
+        override def writes(t: Timestamp): JsValue = JsString(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(t))
+    }
+
     implicit val userTicketsWrites: Writes[UserTickets] = (
-    (__ \ "ticket_id").write[Int] and
-    (__ \ "restaurant_id").write[Int] and
-    (__ \ "ticket_type").write[String] and
-    (__ \ "seat_no").write[Int] and
-    (__ \ "ticket_no").write[Int]
+        (__ \ "ticket_id").write[Int] and
+        (__ \ "restaurant_id").write[Int] and
+        (__ \ "ticket_type").write[String] and
+        (__ \ "ticket_no").write[Int] and
+        (__ \ "seat_no").write[Int] and
+        (__ \ "created_at").write[Timestamp]
     )(unlift(UserTickets.unapply))
 }
 
