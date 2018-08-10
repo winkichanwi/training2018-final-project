@@ -48,10 +48,10 @@ import {HomeComponent} from './components/home/home.component';
   imports: [
     BrowserModule,
     HttpClientModule,
-    HttpClientXsrfModule.withOptions({
-      cookieName: 'PLAY_SESSION_CSRF',
-      headerName: 'Csrf-Token'
-    }),
+    // HttpClientXsrfModule.withOptions({
+    //   cookieName: 'PLAY_SESSION_CSRF',
+    //   headerName: 'Csrf-Token'
+    // }),
     FormsModule,
     AppRoutingModule,
     CollapseModule.forRoot(),

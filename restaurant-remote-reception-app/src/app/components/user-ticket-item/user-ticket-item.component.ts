@@ -91,7 +91,7 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
         }
       },
       err => {
-        this.errorHandler.handleError(err, '', '', '', this.router.url);
+        this.errorHandler.handleError(err, '', '', 'Last called ticket number', this.router.url);
         // TODO: initialise as 0 at API side
         // } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
         //   this.restaurantLastCalled = { ticket_type: this.reservedTicket.ticket_type, last_called: 0 };
