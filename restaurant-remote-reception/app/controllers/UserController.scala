@@ -5,17 +5,16 @@ import play.api.db.slick._
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
-
 import models.Tables._
 import javax.inject.Inject
 import models.{Constants, StatusCode, StatusResponse}
+
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
-
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import com.github.t3hnar.bcrypt._
-import UserController._
+import controllers.Utils._
 
 /**
   * Controller for user related actions
@@ -58,12 +57,11 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * @return Future[Result] Body containing logged in user information
       */
     def getCurrentUser = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
+        db.run(getSessionUser(rs)).map {
             case Some(user) =>
                 Ok(Json.toJson(user))
             case None =>
-                Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
+            Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
         }
     }
 
