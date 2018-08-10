@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {IStatus} from '../models/status.model';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {AlertService} from '../services/alert.service';
 
 const USER_LOGIN_API_ENDPOINT = '/api/users/login';
@@ -11,7 +11,7 @@ const LOCAL_STORAGE_TOKEN = 'authenticated';
 
 const HTTP_OPTIONS = {
   headers: new HttpHeaders({
-    'Content-Type':  'application/json',
+    'Content-Type':  'application/json; charset=utf-8',
   })
 };
 
@@ -27,10 +27,10 @@ export class AuthService {
   authenticate() {
     this.http.get(USER_AUTHENTICATION_API_ENDPOINT).subscribe(
       res => {
-          localStorage.setItem('authenticated', JSON.stringify(true));
+        localStorage.setItem(LOCAL_STORAGE_TOKEN, JSON.stringify(true));
       },
       err => {
-        localStorage.removeItem('authenticated');
+        localStorage.removeItem(LOCAL_STORAGE_TOKEN);
       }
     );
   }

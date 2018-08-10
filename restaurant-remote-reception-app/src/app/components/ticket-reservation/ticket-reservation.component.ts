@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import { IRestaurant, RestaurantService } from '../../services/restaurant.service';
 import {IUser} from '../../models/user.model';
-import {Ticket} from '../../models/ticket.model';
+import {TicketReserve} from '../../models/ticket.model';
 import {TicketService} from '../../services/ticket.service';
 import {UserService} from '../../services/user.service';
 import {AlertService} from '../../services/alert.service';
@@ -11,13 +11,13 @@ import {CustomErrorHandlerService} from '../../services/custom-error-handler.ser
 
 @Component({
   selector: 'app-ticker-reservation',
-  templateUrl: './ticket-reservation.component.html',
-  styleUrls: ['./ticket-reservation.component.css']
+  templateUrl: './ticket-reservation.component.html'
 })
 export class TicketReservationComponent implements OnInit {
-  restaurant: IRestaurant;
-  user: IUser;
-  ticket = new Ticket(0, 0, 1, 'Active');
+  restaurant: IRestaurant = {id: 0, floor: '', name: '', opening_hour: '', cuisine: '', seat_no: 0,
+    phone_no: '', status: '', shopping_center_id: 0, image_url: ''};
+  user: IUser = {id: 0, full_name: '', email: ''};
+  ticket = new TicketReserve(0, 1);
   isSeatNoInvalid = false;
   isLoading = false;
 
@@ -54,7 +54,7 @@ export class TicketReservationComponent implements OnInit {
     this.ticketService.create(ticketForm).subscribe(
       res => {
         this.alertService.success(this.restaurant.name + ' の整理券を取りました！', true);
-        this.router.navigate(['/shopping-centers', this.restaurant.shopping_center_id]);
+        this.router.navigate(['/tickets']);
       },
       err => {
         this.errorHandler.handleError(err, '同じ種類の整理券はもう取りましたよ！');
@@ -67,9 +67,9 @@ export class TicketReservationComponent implements OnInit {
       this.userService.getCurrentUserInfo().subscribe(
         (res: IUser) => {
           this.user = res;
-          this.ticket.created_by_id = this.user.id;
         },
         err => {
+
           this.errorHandler.handleError(err);
         }
       );
@@ -81,20 +81,7 @@ export class TicketReservationComponent implements OnInit {
         this.restaurant = res;
       },
       err => {
-        this.errorHandler.handleError(err, '', '', 'Restaurant');
-        if (err.error instanceof Error) { // browser error
-          this.alertService.error(0, err.error.message);
-        } else if (err.error.message == null) { // non-customised error
-          this.alertService.error(err.status, err.statusText);
-        } else if (err.error.status_code >= STATUS['INTERNAL_SERVER_ERROR']) { // server error with message not to be shown on UI
-          this.alertService.error(err.error.status_code, err.statusText);
-        } else if (err.error.status_code === STATUS['UNAUTHORIZED']) {
-          this.alertService.error(err.error.status_code, 'Please login');
-        } else if (err.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
-          this.alertService.error(err.error.status_code, 'Restaurant not found');
-        } else {
-          this.alertService.error(err.error.status_code, err.error.message);
-        }
+        this.errorHandler.handleError(err, '', '', 'Restaurant', this.router.url);
       }
     );
   }

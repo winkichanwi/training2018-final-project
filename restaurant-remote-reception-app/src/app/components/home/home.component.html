@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="main">
+    <div class="mb-5 mt-5">
+      <div class="title">レストレ</div>
+      <div class="subtitle">〜レストランの整理券を手軽にトレ！〜</div>
+    </div>
+    <div class="panel">
+      <div id="user-authentication" *ngIf="!authService.isLoggedIn">
+        <button type="button" class="btn btn-primary" routerLink="/login">ログイン</button>
+        <button type="button" class="btn btn-link" routerLink="/signup">登録</button>
+      </div>
+      <div id="navigation" *ngIf="authService.isLoggedIn">
+        <button type="button" class="btn btn-primary mr-2 mb-2" routerLink="/shopping-centers">ショッピングセンター一覧</button>
+        <button type="button" class="btn btn-primary mb-2" routerLink="/tickets">取った整理券</button>
+      </div>
+    </div>
+  </div>
+</div>

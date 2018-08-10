@@ -1,0 +1,15 @@
+<div class="card ticket">
+  <div class="card-body">
+    <h3 class="card-title">{{reservedTicket.seat_no}}人</h3>
+    <div class="card-text mb-2">
+      <div class="ticket ticket-no-label mb-2">
+        <div class="ticket-no-title ticket">番号</div>
+        <div class="ticket-no ticket">{{reservedTicket.ticket_type}} {{reservedTicket.ticket_no}}</div>
+      </div>
+      <div class="ticket ticket-no-label" [@flashState]="flashState">
+        <div class="ticket-no-title ticket">受付中</div>
+        <div class="ticket-no ticket">{{restaurantLastCalled.ticket_type}} {{restaurantLastCalled.last_called}}</div>
+      </div>
+    </div>
+  </div>
+</div>

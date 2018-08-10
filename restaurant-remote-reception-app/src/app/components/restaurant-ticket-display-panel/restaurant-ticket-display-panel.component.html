@@ -1,4 +1,9 @@
-<div class="row ticket-display-panel">
+<div class="row " *ngIf="hasReservedTickets">
+  <div class="col-lg-4 col-sm-6 mb-2 ticket-display-panel" *ngFor="let reservedTicket of reservedTickets">
+    <app-restaurant-ticket-item [reservedTicket]="reservedTicket"></app-restaurant-ticket-item>
+  </div>
+</div>
+<div class="row ticket-display-panel" *ngIf="!hasReservedTickets">
   <div class="col-lg-3 ticket-display-panel" *ngFor="let ticketCurrentCount of ticketCurrentCounts">
     <div class="card ticket-display-panel">
       <div class="card-body ticket-display-panel">

@@ -6,7 +6,7 @@ const CURRENT_USER_API_ENDPOINT = '/api/me';
 
 const HTTP_OPTIONS = {
   headers: new HttpHeaders({
-    'Content-Type':  'application/json',
+    'Content-Type':  'application/json; charset=utf-8',
   })
 };
 

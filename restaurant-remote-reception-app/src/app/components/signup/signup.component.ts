@@ -9,7 +9,6 @@ import {CustomErrorHandlerService} from '../../services/custom-error-handler.ser
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css']
 })
 
 export class SignupComponent implements OnInit {
@@ -31,7 +30,7 @@ export class SignupComponent implements OnInit {
     }
   }
 
-  private invalidPwdLen() {
+  invalidPwdLen() {
     return this.isPwdLenInvalid = !(this.user.password.length >= 8 && this.user.password.length <= 20);
   }
 
@@ -44,7 +43,7 @@ export class SignupComponent implements OnInit {
             this.router.navigate(['/login']);
         },
         err => {
-          this.errorHandler.handleError(err, 'Email address (' + this.user.email + ') has already been registered.');
+          this.errorHandler.handleError(err, 'メールアドレス (' + this.user.email + ') はすでに登録されていました');
           this.isLoading = false;
         }
       );

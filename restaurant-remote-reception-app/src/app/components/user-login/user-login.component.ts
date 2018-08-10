@@ -10,8 +10,7 @@ const LOCAL_STORAGE_TOKEN = 'authenticated';
 
 @Component({
   selector: 'app-user-login',
-  templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.css']
+  templateUrl: './user-login.component.html'
 })
 
 export class UserLoginComponent implements OnInit {
@@ -28,6 +27,10 @@ export class UserLoginComponent implements OnInit {
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    if (this.authService.isLoggedIn) {
+      this.alertService.success('You have already logged in.', true);
+      this.router.navigate([this.returnUrl]);
+    }
   }
 
   onSubmit() {
@@ -37,7 +40,7 @@ export class UserLoginComponent implements OnInit {
     }
   }
 
-  private invalidPwdLen() {
+  invalidPwdLen() {
     return this.isPwdLenInvalid = !(this.user.password.length >= 8 && this.user.password.length <= 20);
   }
 

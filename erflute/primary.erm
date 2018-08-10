@@ -106,32 +106,6 @@
 	</tablespace_set>
 	<diagram_walkers>
 		<table>
-			<physical_name>FRIEND_RELATIONSHIP</physical_name>
-			<logical_name>友達関係</logical_name>
-			<description></description>
-			<height>75</height>
-			<width>247</width>
-			<font_name>.AppleSystemUIFont</font_name>
-			<font_size>9</font_size>
-			<x>-307</x>
-			<y>-97</y>
-			<color>
-				<r>128</r>
-				<g>128</g>
-				<b>192</b>
-			</color>
-			<connections>
-			</connections>
-			<columns>
-			</columns>
-			<indexes>
-			</indexes>
-			<compound_unique_key_list>
-			</compound_unique_key_list>
-			<table_properties>
-			</table_properties>
-		</table>
-		<table>
 			<physical_name>RESTAURANTS</physical_name>
 			<logical_name>レストラン</logical_name>
 			<description></description>
@@ -139,8 +113,8 @@
 			<width>279</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>26</x>
-			<y>237</y>
+			<x>182</x>
+			<y>40</y>
 			<color>
 				<r>0</r>
 				<g>142</g>
@@ -161,8 +135,10 @@
 					<reference_for_pk>true</reference_for_pk>
 					<on_delete_action>RESTRICT</on_delete_action>
 					<on_update_action>RESTRICT</on_update_action>
-					<source_xp>40</source_xp>
-					<source_yp>0</source_yp>
+					<source_xp>100</source_xp>
+					<source_yp>60</source_yp>
+					<target_xp>0</target_xp>
+					<target_yp>36</target_yp>
 				</relationship>
 			</connections>
 			<columns>
@@ -259,12 +235,12 @@
 			<physical_name>SHOPPING_CENTERS</physical_name>
 			<logical_name>ショッピングセンター</logical_name>
 			<description></description>
-			<height>89</height>
+			<height>101</height>
 			<width>348</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>-25</x>
-			<y>501</y>
+			<x>-274</x>
+			<y>58</y>
 			<color>
 				<r>0</r>
 				<g>143</g>
@@ -318,12 +294,12 @@
 			<physical_name>TICKETS</physical_name>
 			<logical_name>整理券</logical_name>
 			<description></description>
-			<height>179</height>
-			<width>221</width>
+			<height>186</height>
+			<width>244</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>83</x>
-			<y>23</y>
+			<x>202</x>
+			<y>-194</y>
 			<color>
 				<r>82</r>
 				<g>27</g>
@@ -344,12 +320,12 @@
 					<reference_for_pk>true</reference_for_pk>
 					<on_delete_action>RESTRICT</on_delete_action>
 					<on_update_action>RESTRICT</on_update_action>
-					<source_xp>37</source_xp>
+					<source_xp>51</source_xp>
 					<source_yp>0</source_yp>
 				</relationship>
 				<relationship>
 					<name>FK_TICKET_USER</name>
-					<source>table.USER</source>
+					<source>table.USERS</source>
 					<target>table.TICKETS</target>
 					<fk_columns>
 						<fk_column>
@@ -361,6 +337,8 @@
 					<reference_for_pk>true</reference_for_pk>
 					<on_delete_action>RESTRICT</on_delete_action>
 					<on_update_action>RESTRICT</on_update_action>
+					<target_xp>0</target_xp>
+					<target_yp>78</target_yp>
 				</relationship>
 			</connections>
 			<columns>
@@ -387,7 +365,7 @@
 				<normal_column>
 					<physical_name>CREATED_BY_ID</physical_name>
 					<logical_name>作成者ID</logical_name>
-					<referred_column>table.USER.USER_ID</referred_column>
+					<referred_column>table.USERS.USER_ID</referred_column>
 					<relationship>FK_TICKET_USER</relationship>
 					<not_null>true</not_null>
 				</normal_column>
@@ -440,15 +418,15 @@
 			</table_properties>
 		</table>
 		<table>
-			<physical_name>USER</physical_name>
+			<physical_name>USERS</physical_name>
 			<logical_name>ユーザー</logical_name>
 			<description></description>
 			<height>92</height>
 			<width>279</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>31</x>
-			<y>-192</y>
+			<x>-229</x>
+			<y>-96</y>
 			<color>
 				<r>117</r>
 				<g>213</g>
@@ -458,7 +436,7 @@
 				<relationship>
 					<name>FK_USER_USER_ACCOUNT</name>
 					<source>table.USER_SECRET</source>
-					<target>table.USER</target>
+					<target>table.USERS</target>
 					<fk_columns>
 						<fk_column>
 							<fk_column_name>USER_ID</fk_column_name>
@@ -508,11 +486,11 @@
 			<logical_name>ユーザーシクレクト</logical_name>
 			<description></description>
 			<height>73</height>
-			<width>269</width>
+			<width>279</width>
 			<font_name>.AppleSystemUIFont</font_name>
 			<font_size>9</font_size>
-			<x>-309</x>
-			<y>-189</y>
+			<x>-231</x>
+			<y>-188</y>
 			<color>
 				<r>117</r>
 				<g>213</g>
@@ -544,24 +522,6 @@
 			<table_properties>
 			</table_properties>
 		</table>
-		<walker_group>
-			<height>230</height>
-			<width>672</width>
-			<font_name></font_name>
-			<font_size>9</font_size>
-			<x>-327</x>
-			<y>-227</y>
-			<color>
-				<r>117</r>
-				<g>213</g>
-				<b>255</b>
-			</color>
-			<connections>
-			</connections>
-			<walker_group_name>Customer</walker_group_name>
-			<diagram_walker>table.USER</diagram_walker>
-			<diagram_walker>table.USER_SECRET</diagram_walker>
-		</walker_group>
 	</diagram_walkers>
 	<vdiagrams>
 	</vdiagrams>

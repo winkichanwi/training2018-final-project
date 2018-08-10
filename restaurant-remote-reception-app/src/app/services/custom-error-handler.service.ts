@@ -2,18 +2,20 @@ import {ErrorHandler, Injectable} from '@angular/core';
 import {AlertService} from './alert.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {STATUS} from '../models/status.model';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomErrorHandlerService implements ErrorHandler {
 
-  constructor(private alertService: AlertService) { }
+  constructor(private alertService: AlertService, private router: Router) { }
 
   handleError(error: any,
               duplicatedEntry: string = 'Duplicated entry',
               input: string = 'input',
-              resource: string = 'Resource') {
+              resource: string = 'Resource',
+              url: string = '') {
     if (error instanceof HttpErrorResponse) {
       if (error.error.message == null) { // non-customised error
         this.alertService.error(error.status, error.statusText);
@@ -24,7 +26,9 @@ export class CustomErrorHandlerService implements ErrorHandler {
       } else if (error.error.status_code === STATUS['AUTHENTICATION_FAILURE']) { // credentials rejected
         this.alertService.error(error.error.status_code, 'Email address or password incorrect.');
       } else if (error.error.status_code === STATUS['UNAUTHORIZED']) {
-        this.alertService.error(error.error.status_code, 'Please login before continue browsing.');
+        localStorage.removeItem('authenticated');
+        this.alertService.error(error.error.status_code, 'Please login before continue browsing.', true);
+        this.router.navigate(['/login'], { queryParams: {returnUrl: url} });
       } else if (error.error.status_code === STATUS['UNSUPPORTED_FORMAT']) {
         this.alertService.error(error.error.status_code, 'Invalid ' + input);
       } else if (error.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {IShoppingCenter, ShoppingCenterService} from '../../services/shopping-center.service';
 import {IRestaurant, RestaurantService} from '../../services/restaurant.service';
 import {AlertService} from '../../services/alert.service';
@@ -14,14 +14,15 @@ import {CustomErrorHandlerService} from '../../services/custom-error-handler.ser
 
 export class RestaurantListComponent implements OnInit {
   shoppingCenterId: string;
-  shoppingCenter: IShoppingCenter;
-  restaurants: IRestaurant[];
+  shoppingCenter: IShoppingCenter = {id: 0, name: '', branch: ''};
+  restaurants: IRestaurant[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private shoppingCenterService: ShoppingCenterService,
     private restaurantService: RestaurantService,
     private alertService: AlertService,
+    private router: Router,
     private errorHandler: CustomErrorHandlerService
   ) {}
 
@@ -37,7 +38,7 @@ export class RestaurantListComponent implements OnInit {
         this.shoppingCenter = res;
       },
       err => {
-        this.errorHandler.handleError(err, '', '', 'Shopping center');
+        this.errorHandler.handleError(err, '', '', 'Shopping center', this.router.url);
       }
     );
   }
@@ -48,7 +49,7 @@ export class RestaurantListComponent implements OnInit {
       this.restaurants = res;
       },
       err => {
-        this.errorHandler.handleError(err, '', '', 'List of restaurants');
+        this.errorHandler.handleError(err, '', '', 'List of restaurants', this.router.url);
       }
     );
   }
