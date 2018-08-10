@@ -79,22 +79,18 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
             case Some(_) =>
                 rs.body.validate[TicketStatusUpdateForm].map { form =>
                     if (TicketStatus.ACCEPTED.toString.equals(form.ticketStatus) || TicketStatus.CANCELLED.toString.equals(form.ticketStatus)) {
-                        val updateDoneTickets = Tickets.filter(t =>
-                            t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && t.ticketStatus =!= TicketStatus.ACTIVE.toString)
-                            .map(_.ticketStatus)
-                            .update(TicketStatus.NULL.status)
-
-                        val updateTicketStatus = Tickets.filter(t => t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
-                            .map(_.ticketStatus)
-                            .update(Some(form.ticketStatus))
-
                         val updateTicketTransaction = (
                             for {
-                                _ <- updateDoneTickets
-                                _ <- updateTicketStatus
+                                _ <- Tickets.filter(t =>
+                                        t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && t.ticketStatus =!= TicketStatus.ACTIVE.toString)
+                                        .map(_.ticketStatus)
+                                        .update(TicketStatus.NULL.status)
+                                _ <- Tickets.filter(t =>
+                                        t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
+                                        .map(_.ticketStatus)
+                                        .update(Some(form.ticketStatus))
                             } yield ()
                             ).transactionally
-
                         db.run(updateTicketTransaction).map( _ => Ok)
                     } else {
                         Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
