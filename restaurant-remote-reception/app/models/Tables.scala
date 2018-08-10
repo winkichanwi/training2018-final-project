@@ -110,18 +110,18 @@ trait Tables {
    *  @param createdById Database column CREATED_BY_ID SqlType(INT)
    *  @param ticketSeatNo Database column TICKET_SEAT_NO SqlType(INT)
    *  @param ticketType Database column TICKET_TYPE SqlType(VARCHAR), Length(20,true)
-   *  @param ticketStatus Database column TICKET_STATUS SqlType(VARCHAR), Length(20,true), Default(Active) */
-  case class TicketsRow(ticketId: Int, ticketNo: Int, restaurantId: Int, createdAt: java.sql.Timestamp, createdById: Int, ticketSeatNo: Int, ticketType: String, ticketStatus: String = "Active")
+   *  @param ticketStatus Database column TICKET_STATUS SqlType(VARCHAR), Length(20,true), Default(Some(Active)) */
+  case class TicketsRow(ticketId: Int, ticketNo: Int, restaurantId: Int, createdAt: java.sql.Timestamp, createdById: Int, ticketSeatNo: Int, ticketType: String, ticketStatus: Option[String] = Some("Active"))
   /** GetResult implicit for fetching TicketsRow objects using plain SQL queries */
-  implicit def GetResultTicketsRow(implicit e0: GR[Int], e1: GR[java.sql.Timestamp], e2: GR[String]): GR[TicketsRow] = GR{
+  implicit def GetResultTicketsRow(implicit e0: GR[Int], e1: GR[java.sql.Timestamp], e2: GR[String], e3: GR[Option[String]]): GR[TicketsRow] = GR{
     prs => import prs._
-    TicketsRow.tupled((<<[Int], <<[Int], <<[Int], <<[java.sql.Timestamp], <<[Int], <<[Int], <<[String], <<[String]))
+    TicketsRow.tupled((<<[Int], <<[Int], <<[Int], <<[java.sql.Timestamp], <<[Int], <<[Int], <<[String], <<?[String]))
   }
   /** Table description of table TICKETS. Objects of this class serve as prototypes for rows in queries. */
   class Tickets(_tableTag: Tag) extends Table[TicketsRow](_tableTag, "TICKETS") {
     def * = (ticketId, ticketNo, restaurantId, createdAt, createdById, ticketSeatNo, ticketType, ticketStatus) <> (TicketsRow.tupled, TicketsRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(ticketId), Rep.Some(ticketNo), Rep.Some(restaurantId), Rep.Some(createdAt), Rep.Some(createdById), Rep.Some(ticketSeatNo), Rep.Some(ticketType), Rep.Some(ticketStatus)).shaped.<>({r=>import r._; _1.map(_=> TicketsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(ticketId), Rep.Some(ticketNo), Rep.Some(restaurantId), Rep.Some(createdAt), Rep.Some(createdById), Rep.Some(ticketSeatNo), Rep.Some(ticketType), ticketStatus).shaped.<>({r=>import r._; _1.map(_=> TicketsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column TICKET_ID SqlType(INT), AutoInc, PrimaryKey */
     val ticketId: Rep[Int] = column[Int]("TICKET_ID", O.AutoInc, O.PrimaryKey)
@@ -137,8 +137,8 @@ trait Tables {
     val ticketSeatNo: Rep[Int] = column[Int]("TICKET_SEAT_NO")
     /** Database column TICKET_TYPE SqlType(VARCHAR), Length(20,true) */
     val ticketType: Rep[String] = column[String]("TICKET_TYPE", O.Length(20,varying=true))
-    /** Database column TICKET_STATUS SqlType(VARCHAR), Length(20,true), Default(Active) */
-    val ticketStatus: Rep[String] = column[String]("TICKET_STATUS", O.Length(20,varying=true), O.Default("Active"))
+    /** Database column TICKET_STATUS SqlType(VARCHAR), Length(20,true), Default(Some(Active)) */
+    val ticketStatus: Rep[Option[String]] = column[Option[String]]("TICKET_STATUS", O.Length(20,varying=true), O.Default(Some("Active")))
 
     /** Foreign key referencing Restaurants (database name TICKETS_ibfk_1) */
     lazy val restaurantsFk = foreignKey("TICKETS_ibfk_1", restaurantId, Restaurants)(r => r.restaurantId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.NoAction)
