@@ -36,19 +36,19 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                         .map(_.ticketNo).max
                         .result
 
-                    val now = Timestamp.valueOf(LocalDateTime.now())
-                    val newTicket = db.run(queryTicketLastTakenNo).map {
-                        case Some(ticketNo) =>
-                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
-                        case None =>
-                            TicketsRow(0, 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
-                    }
+                    val addTicketRowDBIO = for {
+                        ticketNo <- queryTicketLastTakenNo
+                        addTicketRow <- ticketNo match {
+                            case Some(ticketNo) =>
+                                Tickets += TicketsRow(0, ticketNo + 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                            case None =>
+                                Tickets += TicketsRow(0, 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                        }
+                    } yield addTicketRow
 
-                    newTicket.flatMap { newTicketRow =>
-                        db.run(Tickets += newTicketRow).map(_ =>
-                            Ok
-                        )
-                    }
+                    db.run(addTicketRowDBIO).map( _ => Ok )
                 }.recoverTotal { e =>
                     Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
                 }

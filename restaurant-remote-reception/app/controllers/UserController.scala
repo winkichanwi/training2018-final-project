@@ -43,8 +43,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             val newUser = UsersRow(0, form.userFullname, form.email)
             val addUserDBIO = for {
                 userId <- (Users returning Users.map(_.userId)) += newUser
-                userAcc = UserSecretRow(userId, form.password.bcrypt)
-                result <- UserSecret += userAcc
+                result <- UserSecret += UserSecretRow(userId, form.password.bcrypt)
             } yield result
 
             db.run(addUserDBIO).map { _ =>
