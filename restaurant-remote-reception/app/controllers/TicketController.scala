@@ -3,22 +3,20 @@ package controllers
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+
 import play.api.libs.json.Writes
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.json.Json._
 import play.api.libs.functional.syntax._
+
 import play.api.mvc.{Action, Controller}
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import models._
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -148,8 +146,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
             case Some(_) =>
                 db.run(groupTicketTypes)
                     .map(_.map(row => RestaurantTicketQueue(row._1, row._2)))
-                    .map(queues => Ok(Json.toJson(queues)))
-//                    .map(queues => Ok(Json.obj("restaurant_id" -> restaurantId, "ticket_counts" -> Json.toJson(queues))))
+                    .map(queues => Ok(Json.obj("restaurant_id" -> restaurantId, "ticket_counts" -> Json.toJson(queues))))
             case None =>
                 Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
         }
@@ -195,8 +192,6 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         }
     }
 }
-
-
 
 /**
   * Template for reading user ticket reservation form, used in create()
@@ -262,7 +257,7 @@ case class RestaurantTicketQueue(ticketType: String, count: Int)
 object RestaurantTicketQueue {
     implicit val restaurantTicketCountWrites: Writes[RestaurantTicketQueue] = (
     (__ \ "ticket_type").write[String] and
-    (__ \ "ticket_count").write[Int]
+    (__ \ "count").write[Int]
     )(unlift(RestaurantTicketQueue.unapply))
 }
 
