@@ -30,20 +30,14 @@ export class RestaurantTicketDisplayPanelComponent implements OnInit, OnDestroy 
 
   ngOnInit() {
     this.getReservedTickets();
-    if (this.hasReservedTickets) {
-      intervalCounter.subscribe(() => {
-        if (this.alive) {
-          this.getReservedTickets();
-        }
-      });
-    } else {
+    if (!this.hasReservedTickets) {
       this.getTicketCurrentCount();
-      intervalCounter.subscribe(() => {
-        if (this.alive) {
-          this.getTicketCurrentCount();
-        }
-      });
     }
+    intervalCounter.subscribe(() => {
+      if (this.alive) {
+        this.getReservedTickets();
+      }
+    });
   }
 
   ticketTypeSeatLabel(type: String): String {
