@@ -2,26 +2,26 @@
 @import '~bootstrap/dist/css/bootstrap.min.css';
 
 .btn-outline-primary {
-  color: #004F8B;
+  color: #06799F;
   background-color: white;
   background-image: none;
-  border-color: #004F8B;
+  border-color: #06799F;
 }
 
 .btn-primary:hover  {
-  background-color: #508DBB;
+  background-color: #4C9CB7;
   background-image: none;
-  border-color: #004F8B;
+  border-color: #06799F;
 }
 
 .btn-primary, .btn-outline-primary:hover {
   color: #fff;
-  background-color: #004F8B;
-  border-color: #004F8B;
+  background-color: #06799F;
+  border-color: #06799F;
 }
 
 .btn-link {
-  color: #004F8B;
+  color: #06799F;
 }
 
 a {
@@ -34,4 +34,32 @@ a:hover {
 
 .breadcrumb {
   background-color: #FFE0C0;
+}
+
+.ticket.card {
+  text-align: center;
+  background-color: #FFE8A4;
+}
+
+.ticket.ticket-no-label {
+  padding: 5px 20px;
+  border: 1px solid rgba(0,0,0,.125);
+  border-radius: 5px;
+  background-color: white;
+}
+
+.ticket.ticket-no-title {
+  font-size: 6px;
+}
+
+.ticket.ticket-no {
+  font-size: 25px;
+}
+
+.ticket.card-subtitle {
+  color: #A97700;
+}
+
+a:hover.ticket.card-subtitle {
+  color: #6B4C00;
 }

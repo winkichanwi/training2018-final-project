@@ -9,7 +9,6 @@ import {CustomErrorHandlerService} from '../../services/custom-error-handler.ser
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.css']
 })
 
 export class SignupComponent implements OnInit {

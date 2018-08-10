@@ -20,14 +20,13 @@ const animationIntervalCounter = interval(500);
 @Component({
   selector: 'app-user-ticket-item',
   templateUrl: './user-ticket-item.component.html',
-  styleUrls: ['./user-ticket-item.component.css'],
   animations: [
     trigger('flashState', [
       state('inactive',
-        style({backgroundColor: '#E4F1FB'})
+        style({backgroundColor: '#E3F5FB'})
       ),
       state('active',
-        style({backgroundColor: '#FFD2C0'})
+        style({backgroundColor: '#FFDAD3'})
       ),
     ])
   ]

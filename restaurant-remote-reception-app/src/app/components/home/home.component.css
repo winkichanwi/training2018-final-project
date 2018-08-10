@@ -1,0 +1,41 @@
+.main {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.title {
+  color: #06799F;
+  font-size: 4em;
+}
+
+.subtitle {
+  color: #034A61;
+  font-size: 1.5em;
+}
+
+.btn-outline-primary {
+  color: #FF8300;
+  background-color: white;
+  background-image: none;
+  border-color: #FF8300;
+}
+
+.btn-primary:hover  {
+  background-color: #C56500;
+  background-image: none;
+  border-color: #C56500;
+}
+
+.btn-primary, .btn-outline-primary:hover {
+  color: #fff;
+  background-color: #FF8300;
+  border-color: #FF8300;
+}
+
+.btn-link {
+  color: #FF8300;
+}
+
+.btn-link:hover {
+  color: #C56500;
+}

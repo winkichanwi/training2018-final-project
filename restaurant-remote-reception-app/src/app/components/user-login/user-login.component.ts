@@ -10,8 +10,7 @@ const LOCAL_STORAGE_TOKEN = 'authenticated';
 
 @Component({
   selector: 'app-user-login',
-  templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.css']
+  templateUrl: './user-login.component.html'
 })
 
 export class UserLoginComponent implements OnInit {
