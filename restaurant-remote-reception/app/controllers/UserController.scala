@@ -57,7 +57,8 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * @return Future[Result] Body containing logged in user information
       */
     def getCurrentUser = Action.async { implicit rs =>
-        db.run(getSessionUser(rs)).map {
+        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
             case Some(user) =>
                 Ok(Json.toJson(user))
             case None =>
