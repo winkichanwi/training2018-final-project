@@ -5,16 +5,18 @@ import play.api.db.slick._
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
+
 import models.Tables._
 import javax.inject.Inject
 import models.{Constants, StatusCode, StatusResponse}
-
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
+
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import com.github.t3hnar.bcrypt._
 import controllers.Utils._
+import UserController._
 
 /**
   * Controller for user related actions
