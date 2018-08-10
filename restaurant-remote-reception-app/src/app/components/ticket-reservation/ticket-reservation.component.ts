@@ -14,8 +14,9 @@ import {CustomErrorHandlerService} from '../../services/custom-error-handler.ser
   templateUrl: './ticket-reservation.component.html'
 })
 export class TicketReservationComponent implements OnInit {
-  restaurant: IRestaurant;
-  user: IUser;
+  restaurant: IRestaurant = {id: 0, floor: '', name: '', opening_hour: '', cuisine: '', seat_no: 0,
+    phone_no: '', status: '', shopping_center_id: 0, image_url: ''};
+  user: IUser = {id: 0, full_name: '', email: ''};
   ticket = new TicketReserve(0, 1);
   isSeatNoInvalid = false;
   isLoading = false;

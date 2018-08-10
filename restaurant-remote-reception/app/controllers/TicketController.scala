@@ -31,7 +31,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                         .map(_.typeName).head
 
                     val queryTicketLastTakenNo = Tickets.filter(t =>
-                        (t.restaurantId === form.restaurantId.bind) && (t.ticketStatus =!= TicketStatus.ARCHIVED.status) && (t.ticketType === ticketType.bind))
+                        (t.restaurantId === form.restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketType === ticketType.bind))
                         .sortBy(_.ticketNo.desc)
                         .map(_.ticketNo).max
                         .result
@@ -39,9 +39,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                     val now = Timestamp.valueOf(LocalDateTime.now())
                     val newTicket = db.run(queryTicketLastTakenNo).map {
                         case Some(ticketNo) =>
-                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
+                            TicketsRow(0, ticketNo + 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
                         case None =>
-                            TicketsRow(0, 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.toString)
+                            TicketsRow(0, 1, form.restaurantId, now, sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
                     }
 
                     newTicket.flatMap { newTicketRow =>
@@ -62,13 +62,19 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 rs.body.validate[TicketStatusUpdateForm].map { form =>
-                    if (TicketStatus.values.map(_.toString).contains(form.ticketStatus)) {
-                        val updateTicketStatus = Tickets.filter(t => t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
-                            .map(t => t.ticketStatus)
-                            .update(form.ticketStatus)
-                        db.run(updateTicketStatus).map(_ =>
-                            Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
-                        )
+                    if (TicketStatus.ACCEPTED.toString.equals(form.ticketStatus) || TicketStatus.CANCELLED.toString.equals(form.ticketStatus)) {
+                        val updateDoneTickets = Tickets.filter(t =>
+                            t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && t.ticketStatus =!= TicketStatus.ACTIVE.toString)
+                            .map(_.ticketStatus)
+                            .update(TicketStatus.NULL.status)
+                        db.run(updateDoneTickets).flatMap{_ =>
+                            val updateTicketStatus = Tickets.filter(t => t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
+                                .map(_.ticketStatus)
+                                .update(Some(form.ticketStatus))
+                            db.run(updateTicketStatus).map(_ =>
+                                Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message)))
+                            )
+                        }
                     } else {
                         Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
                     }
@@ -84,7 +90,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
 
         val groupTicketTypes = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) && (t.ticketStatus === TicketStatus.ACTIVE.status))
+            (t.restaurantId === restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
             .groupBy(_.ticketType)
             .map { case (ticketType, rows) => (ticketType, rows.length) }
             .result
@@ -102,9 +108,10 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     def getLastCalled(restaurantId: Int, ticketType: String) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
 
-        val lastCalledTicketStatusSeq: Seq[String] = Seq(TicketStatus.ACCEPTED, TicketStatus.CANCELLED).map(_.toString)
         val queryTicketLastCalled = Tickets.filter(t =>
-            (t.restaurantId === restaurantId.bind) && (t.ticketStatus inSet lastCalledTicketStatusSeq) && (t.ticketType === ticketType))
+            (t.restaurantId === restaurantId.bind) &&
+                ((!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.ACCEPTED.toString) || (!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.CANCELLED.toString)) &&
+                (t.ticketType === ticketType))
             .sortBy(_.ticketNo.desc)
             .map(_.ticketNo).max
             .result
@@ -125,7 +132,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     def getReservedTickets = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryUserActiveTicket = Tickets.filter(t =>
-            t.createdById === sessionUserId.toInt && t.ticketStatus === TicketStatus.ACTIVE.status)
+            t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
             .sortBy(_.createdAt desc)
             .result
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
@@ -141,7 +148,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     def getRestaurantReservedTickets(restaurantId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         val queryUserRestaurantActiveTicket = Tickets.filter(t =>
-            t.restaurantId === restaurantId.bind && t.createdById === sessionUserId.toInt && t.ticketStatus === TicketStatus.ACTIVE.status)
+            t.restaurantId === restaurantId.bind && t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
             .result
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>

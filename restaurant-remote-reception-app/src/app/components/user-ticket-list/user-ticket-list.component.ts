@@ -11,7 +11,7 @@ import {CustomErrorHandlerService} from '../../services/custom-error-handler.ser
   templateUrl: './user-ticket-list.component.html'
 })
 export class UserTicketListComponent implements OnInit, OnDestroy {
-  reservedTickets: IReservedTicket[];
+  reservedTickets: IReservedTicket[] = [];
   navigationSubscription;
 
   constructor(private ticketService: TicketService,
