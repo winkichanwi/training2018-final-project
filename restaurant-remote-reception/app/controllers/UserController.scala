@@ -49,7 +49,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
 
             db.run(addUser).map(_ => Ok)
         }.recoverTotal { e =>
-            Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
+            Future .successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
         }
     }
 
@@ -63,7 +63,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             case Some(user) =>
                 Ok(Json.toJson(user))
             case None =>
-            Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
+            Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse)
         }
     }
 
@@ -78,7 +78,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             case Some(_) =>
                 rs.body.validate[UsersRow].map { form => {
                         if (form.userId != sessionUserId.toInt)
-                            Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                            Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
                         else {
                             val user = UsersRow(form.userId, form.userFullname, form.email)
                             db.run(Users.filter(t => t.userId === user.userId.bind).update(user)).map { _ =>
@@ -87,10 +87,10 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
                         }
                     }
                 }.recoverTotal { e =>
-                    Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                    Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
                 }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 }

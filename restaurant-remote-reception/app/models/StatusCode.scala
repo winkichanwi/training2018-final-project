@@ -1,9 +1,13 @@
 package models
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Writes, __}
+import play.api.libs.functional.syntax.unlift
+import play.api.libs.json.{JsValue, Json, Writes, __}
 
-sealed abstract class StatusCode(val code: Int, val message: String)
+sealed abstract class StatusCode(val code: Int, val message: String) {
+    override def toString: String = message
+    def genJsonResponse: JsValue = Json.toJson(StatusResponse(code, message))
+}
 
 object StatusCode {
     case object OK extends StatusCode(2000, "OK")
@@ -16,7 +20,7 @@ object StatusCode {
     case object DUPLICATED_ENTRY extends StatusCode(5001, "Duplicated Entry")
 }
 
-case class StatusResponse(status_code: Int, message: String)
+sealed case class StatusResponse(status_code: Int, message: String)
 
 object StatusResponse {
     implicit val statusWrites: Writes[StatusResponse] = (

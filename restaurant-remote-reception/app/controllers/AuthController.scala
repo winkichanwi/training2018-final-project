@@ -36,13 +36,13 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
                     if (form.password.isBcrypted(userSecret.password)) {
                         Ok.withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
                     } else {
-                        Unauthorized(Json.toJson(StatusResponse(StatusCode.AUTHENTICATION_FAILURE.code, StatusCode.AUTHENTICATION_FAILURE.message)))
+                        Unauthorized(StatusCode.AUTHENTICATION_FAILURE.genJsonResponse)
                     }
                 case None =>
-                    Unauthorized(Json.toJson(StatusResponse(StatusCode.AUTHENTICATION_FAILURE.code, StatusCode.AUTHENTICATION_FAILURE.message)))
+                    Unauthorized(StatusCode.AUTHENTICATION_FAILURE.genJsonResponse)
             }
         }.recoverTotal { e =>
-            Future { BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message)))}
+            Future { BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse)}
         }
     }
 
@@ -56,7 +56,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
             case Some(_) =>
                 Ok
             case None =>
-                Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message)))
+                Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse)
         }
     }
 
@@ -65,7 +65,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * @return Future[Result] Result representing logout succeeded
       */
     def logout = Action.async { implicit rs =>
-        Future { Ok(Json.toJson(StatusResponse(StatusCode.OK.code, StatusCode.OK.message))).withNewSession }
+        Future { Ok.withNewSession }
     }
 
 }
