@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { TicketService} from '../../services/ticket.service';
 import {interval} from 'rxjs';
-import {IReservedTicket, IRestaurantTicketCount, TICKET_TYPES} from '../../models/ticket.model';
+import {IReservedTicket, IRestaurantTicketCount, IRestaurantTicketCountResponse, TICKET_TYPES} from '../../models/ticket.model';
 import {AlertService} from '../../services/alert.service';
 import {STATUS} from '../../models/status.model';
 import {Router} from '@angular/router';
@@ -50,8 +50,8 @@ export class RestaurantTicketDisplayPanelComponent implements OnInit, OnDestroy 
 
   private getTicketCurrentCount() {
     this.ticketService.getRestaurantTicketCounts(this.restaurantId).subscribe(
-      (res: IRestaurantTicketCount[]) => {
-        this.ticketCurrentCounts = res;
+      (res: IRestaurantTicketCountResponse) => {
+        this.ticketCurrentCounts = res.ticket_counts;
       },
       err => {
         this.errorHandler.handleError(err, '', '', '', this.router.url);

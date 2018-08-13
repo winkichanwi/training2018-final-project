@@ -6,9 +6,14 @@ export class TicketReserve {
   }
 }
 
+export interface IRestaurantTicketCountResponse {
+  restaurant_id: number;
+  ticket_counts: IRestaurantTicketCount[];
+}
+
 export interface IRestaurantTicketCount {
   ticket_type: string;
-  ticket_count: number;
+  count: number;
 }
 
 export interface IRestaurantLastCalled {
