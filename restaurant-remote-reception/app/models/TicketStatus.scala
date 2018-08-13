@@ -14,16 +14,3 @@ object TicketStatus extends Enumeration {
     // val ARCHIVED = Val(Some("Archived"), false) // archive when restaurant closes
     val NULL = Val(None, false) // TODO: hotfix at the moment for avoiding duplicate entries
 }
-
-object TicketType extends Enumeration {
-    protected case class Val(typeName : String, minSeatNo: Int, maxSeatNo: Int) extends super.Val {
-        override def toString = typeName
-    }
-
-    implicit def valueToTicketTypeVal(x: Value): Val = x.asInstanceOf[Val]
-
-    val A = Val("A", 1, 2)
-    val B = Val("B", 3, 5)
-    val C = Val("C", 6, 8)
-    val D = Val("D", 9, 12)
-}

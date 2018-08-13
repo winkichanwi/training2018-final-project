@@ -36,10 +36,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 rs.body.validate[TicketForm].map { form =>
-                    val ticketType = TicketType.values
-                        .filter(ticketType =>
-                            ticketType.minSeatNo <= form.ticketSeatNo && ticketType.maxSeatNo >= form.ticketSeatNo)
-                        .map(_.typeName).head
+                    val ticketType: String = TicketType.from(form).map(_.typeName).get
 
                     val queryTicketLastTakenNo = Tickets.filter(t =>
                         (t.restaurantId === form.restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketType === ticketType.bind))
