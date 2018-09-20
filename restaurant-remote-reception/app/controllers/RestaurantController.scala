@@ -39,10 +39,10 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
                         case restaurants if restaurants.nonEmpty =>
                             Ok(Json.toJson(restaurants))
                         case restaurants if restaurants.isEmpty =>
-                            NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                            NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
                     }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(Json.toJson(StatusCode.UNAUTHORIZED.genJsonResponse)))
         }
     }
 
@@ -62,10 +62,10 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
                     case Some(restaurant) =>
                         Ok(Json.toJson(restaurant))
                     case None =>
-                        NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                        NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
                 }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 

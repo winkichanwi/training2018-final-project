@@ -36,32 +36,34 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 rs.body.validate[TicketForm].map { form =>
-                    val ticketType: String = TicketType.from(form).map(_.typeName).get
+                    TicketType.from(form).map(_.typeName) match {
+                        case Some(ticketType) =>
+                            val addTicketRowDBIO = for {
+                                ticketNo <- Tickets.filter(t =>
+                                            (t.restaurantId === form.restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketType === ticketType.bind))
+                                            .sortBy(_.ticketNo.desc)
+                                            .map(_.ticketNo).max
+                                            .result
+                                addTicketRow <- ticketNo match {
+                                    case Some(ticketNo) =>
+                                        Tickets += TicketsRow(0, ticketNo + 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                            sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                                    case None =>
+                                        // Initial ticket no is 1
+                                        Tickets += TicketsRow(0, 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
+                                            sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
+                                }
+                            } yield addTicketRow
 
-                    val queryTicketLastTakenNo = Tickets.filter(t =>
-                        (t.restaurantId === form.restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketType === ticketType.bind))
-                        .sortBy(_.ticketNo.desc)
-                        .map(_.ticketNo).max
-                        .result
-
-                    val addTicketRowDBIO = for {
-                        ticketNo <- queryTicketLastTakenNo
-                        addTicketRow <- ticketNo match {
-                            case Some(ticketNo) =>
-                                Tickets += TicketsRow(0, ticketNo + 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
-                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
-                            case None =>
-                                Tickets += TicketsRow(0, 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
-                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
-                        }
-                    } yield addTicketRow
-
-                    db.run(addTicketRowDBIO).map( _ => Ok )
+                            db.run(addTicketRowDBIO).map( _ => Ok )
+                        case None =>
+                            Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
+                    }
                 }.recoverTotal { e =>
-                    Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                    Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
                 }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 
@@ -90,13 +92,13 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                             ).transactionally
                         db.run(updateTicketTransaction).map( _ => Ok)
                     } else {
-                        Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                        Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
                     }
                 }.recoverTotal { e =>
-                    Future.successful(BadRequest(Json.toJson(StatusResponse(StatusCode.UNSUPPORTED_FORMAT.code, StatusCode.UNSUPPORTED_FORMAT.message))))
+                    Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
                 }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 
@@ -117,7 +119,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                     .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketNo, row.ticketSeatNo, row.createdAt)))
                     .map(userTickets => Ok(Json.toJson(userTickets)))
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 
@@ -141,7 +143,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                     .map(_.map(row => RestaurantTicketQueue(row._1, row._2)))
                     .map(queues => Ok(Json.obj("restaurant_id" -> restaurantId, "ticket_counts" -> Json.toJson(queues))))
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 
@@ -162,10 +164,10 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
                     case Some(lastCalledNo) =>
                         Ok(Json.toJson(RestaurantLastCalled(ticketType, lastCalledNo)))
                     case None =>
-                        NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                        NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
                 }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 
@@ -181,7 +183,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
             .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketNo, row.ticketSeatNo, row.createdAt)))
             .map(userTickets => Ok(Json.toJson(userTickets)))
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 }

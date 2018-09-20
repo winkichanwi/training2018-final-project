@@ -35,10 +35,10 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
                         case shoppingCenters if shoppingCenters.nonEmpty =>
                             Ok(Json.toJson(shoppingCenters))
                         case shoppingCenters if shoppingCenters.isEmpty =>
-                            NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                            NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
                     }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 
@@ -59,10 +59,10 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
                     case Some(shoppingCenter) =>
                         Ok(Json.toJson(shoppingCenter))
                     case None =>
-                        NotFound(Json.toJson(StatusResponse(StatusCode.RESOURCE_NOT_FOUND.code, StatusCode.RESOURCE_NOT_FOUND.message)))
+                        NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
                 }
             case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusResponse(StatusCode.UNAUTHORIZED.code, StatusCode.UNAUTHORIZED.message))))
+                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
     }
 }
