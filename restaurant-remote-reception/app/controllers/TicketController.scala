@@ -124,9 +124,10 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     }
 
     /**
-      *
-      * @param restaurantId
-      * @return
+      * [Authentication required]
+      * Counting the queue for each ticket type of the restaurant, initialise as 0
+      * @param restaurantId ID of specfied restaurant
+      * @return Future[Result] List of ticket queue length
       */
     def countTicketQueue(restaurantId: Int) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
@@ -140,8 +141,15 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
                 db.run(groupTicketTypes)
-                    .map(_.map(row => RestaurantTicketQueue(row._1, row._2)))
-                    .map(queues => Ok(Json.obj("restaurant_id" -> restaurantId, "ticket_counts" -> Json.toJson(queues))))
+                    .map(rows =>
+                        (rows ++ (TicketType.types.filterNot(ticketType =>
+                            rows.map(_._1).contains(ticketType.typeName))
+                            .map(ticketType => (ticketType.typeName, 0))))
+                        .map(row => RestaurantTicketQueue(row._1, row._2))
+                    )
+                    .map(queues =>
+                        Ok(Json.obj("restaurant_id" -> restaurantId, "ticket_counts" -> Json.toJson(queues)))
+                    )
             case None =>
                 Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
@@ -243,9 +251,9 @@ object UserTickets {
 }
 
 /**
-  *
-  * @param ticketType
-  * @param count
+  * Template for writing ticket queues
+  * @param ticketType Ticket type of ticket (A-D)
+  * @param count Number indicating the length of queue
   */
 case class RestaurantTicketQueue(ticketType: String, count: Int)
 
