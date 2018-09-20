@@ -1,18 +1,16 @@
 package controllers
 
 import javax.inject._
-import models.StatusResponse
-import models.StatusCode
-import play.api.libs.json.Json
 import play.api.mvc._
+import utils.Foo
 
 /**
   * This controller creates an `Action` to handle HTTP requests to have a health check on the application
   */
 @Singleton
-class HealthCheckController @Inject() extends Controller {
+class HealthCheckController @Inject()(@Named("FooA") val foo: Foo) extends Controller {
 
     def healthCheck = Action { implicit request =>
-        Ok
+        Ok(foo.getMsg)
     }
 }
