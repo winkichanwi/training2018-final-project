@@ -18,8 +18,8 @@ export class TicketService {
     return '/api/restaurants/' + restaurantId + '/tickets/count';
   }
 
-  static genRestaurantLastCalledApiEndpoint(restaurantId: number, ticketType: string) {
-    return '/api/restaurants/' + restaurantId + '/tickets/' + ticketType + '/last-called';
+  static genRestaurantLastCalledApiEndpoint(restaurantId: number) {
+    return '/api/restaurants/' + restaurantId + '/tickets/last-called';
   }
 
   static genRestaurantReservedTicketsApiEndpoint(restaurantId: number) {
@@ -44,8 +44,8 @@ export class TicketService {
     return this.http.get(RESERVED_TICKETS_API_ENDPOINT);
   }
 
-  public getRestaurantLastCalled(restaurantId: number, ticketType: string) {
-    return this.http.get(TicketService.genRestaurantLastCalledApiEndpoint(restaurantId, ticketType));
+  public getRestaurantLastCalled(restaurantId: number) {
+    return this.http.get(TicketService.genRestaurantLastCalledApiEndpoint(restaurantId));
   }
 
   public getRestaurantReservedTicket(restaurantId: number) {

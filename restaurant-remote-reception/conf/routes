@@ -36,5 +36,5 @@ POST        /api/tickets                                  controllers.TicketCont
 PUT         /api/tickets                                  controllers.TicketController.update
 GET         /api/tickets/me                               controllers.TicketController.getReservedTickets
 GET         /api/restaurants/:restaurantId/tickets/count  controllers.TicketController.countTicketQueue(restaurantId: Int)
-GET         /api/restaurants/:restaurantId/tickets/:ticketType/last-called  controllers.TicketController.getLastCalled(restaurantId: Int, ticketType: String)
+GET         /api/restaurants/:restaurantId/tickets/last-called  controllers.TicketController.getLastCalled(restaurantId: Int)
 GET         /api/restaurants/:restaurantId/tickets/me     controllers.TicketController.getRestaurantReservedTickets(restaurantId: Int)
