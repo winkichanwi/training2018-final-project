@@ -7,7 +7,7 @@ import utils.Foo
 class Module extends AbstractModule {
     override def configure() = {
         bind(classOf[Foo])
-            .annotatedWith(Names.named("FooA"))
-            .toInstance(new Foo("FooA Test Message"))
+            .annotatedWith(Names.named("HealthCheck"))
+            .toInstance(new Foo("Health Check Done"))
     }
 }
