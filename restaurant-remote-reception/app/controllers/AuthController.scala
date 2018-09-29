@@ -7,7 +7,7 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.{Constants, StatusCode, StatusResponse}
+import models.{Constants, StatusCode}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
