@@ -11,6 +11,7 @@ import models.Tables._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import models.{Constants, StatusCode, StatusResponse}
+import security.SecureComponent
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -18,7 +19,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * Controller for restaurants
   */
 class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
-    extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
+    extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     import RestaurantController._
 
@@ -28,22 +29,17 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       * @param shoppingCenterId ID of specified shopping center
       * @return Future[Result] Body containing list of restaurants
       */
-    def list(shoppingCenterId: Int) = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+    def list(shoppingCenterId: Int) = SecureAction.async { implicit rs =>
         val queryRestaurantsByShoppingCenterId =
             Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                db.run(queryRestaurantsByShoppingCenterId)
-                    .map{
-                        case restaurants if restaurants.nonEmpty =>
-                            Ok(Json.toJson(restaurants))
-                        case restaurants if restaurants.isEmpty =>
-                            NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
-                    }
-            case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusCode.UNAUTHORIZED.genJsonResponse)))
-        }
+
+        db.run(queryRestaurantsByShoppingCenterId)
+            .map{
+                case restaurants if restaurants.nonEmpty =>
+                    Ok(Json.toJson(restaurants))
+                case restaurants if restaurants.isEmpty =>
+                    NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
+            }
     }
 
     /**
@@ -52,20 +48,14 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       * @param restaurantId ID of specified restaurant
       * @return Future[Result] Body containing information of restaurant
       */
-    def get(restaurantId: Int) = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
+    def get(restaurantId: Int) = SecureAction.async { implicit rs =>
         val queryRestaurantById =
             Restaurants.filter(t => t.restaurantId === restaurantId.bind).result.headOption
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                db.run(queryRestaurantById).map {
-                    case Some(restaurant) =>
-                        Ok(Json.toJson(restaurant))
-                    case None =>
-                        NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
-                }
+        db.run(queryRestaurantById).map {
+            case Some(restaurant) =>
+                Ok(Json.toJson(restaurant))
             case None =>
-                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
+                NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
         }
     }
 
