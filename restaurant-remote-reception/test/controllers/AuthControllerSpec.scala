@@ -47,7 +47,7 @@ class AuthControllerSpec extends PlaySpec with GuiceOneAppPerTest {
         "should be invalid if session user does not exists" in {
             val controller = application.injector.instanceOf(classOf[AuthController])
 
-            val fakeUserId = "0"
+            val fakeUserId = "3"
             val request = FakeRequest().withSession(Constants.SESSION_TOKEN_USER_ID -> fakeUserId)
             val result: Future[Result] = controller.authenticate.apply(request)
             status(result) mustBe UNAUTHORIZED

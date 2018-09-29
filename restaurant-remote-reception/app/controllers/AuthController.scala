@@ -14,12 +14,13 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import com.github.t3hnar.bcrypt._
+import security.SecureComponent
 
 /**
   * Controller for user authentication actions
   */
 class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-    extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
+    extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     /**
       * User login: authenticate user login information by comparing the password
@@ -50,14 +51,8 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * User authentication: determine whether a user has been authenticated or not
       * @return Future[Result] Result for authentication result
       */
-    def authenticate = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
-            case Some(_) =>
-                Ok
-            case None =>
-                Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse)
-        }
+    def authenticate = SecureAction.async { implicit rs =>
+        Future.successful(Ok)
     }
 
     /**
@@ -65,7 +60,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * @return Future[Result] Result representing logout succeeded
       */
     def logout = Action.async { implicit rs =>
-        Future { Ok.withNewSession }
+        Future.successful(Ok.withNewSession)
     }
 
 }
