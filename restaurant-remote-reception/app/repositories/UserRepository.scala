@@ -12,7 +12,8 @@ import scala.concurrent.ExecutionContext
 
 class UserRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
 
-    def list = Users.sortBy(t => t.userId).result
+    def list =
+        Users.sortBy(t => t.userId).result
 
     def create(userFullname: String, email: String, password: String) =
         for {
@@ -25,9 +26,11 @@ class UserRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
         Users.filter(t => t.userId === user.userId.bind).update(user)
     }
 
-    def findById(implicit sessionUserId: ID) = Users.filter(t => t.userId === sessionUserId.value).result.headOption
+    def findById(implicit sessionUserId: ID) =
+        Users.filter(t => t.userId === sessionUserId.value).result.headOption
 
-    def fetchInfoAndSecretByEmail(email: String) = Users.join(UserSecret).on(_.userId === _.userId)
+    def fetchInfoAndSecretByEmail(email: String) =
+        Users.join(UserSecret).on(_.userId === _.userId)
         .filter { case (t1, t2) => t1.email === email }
         .result.headOption
 }
