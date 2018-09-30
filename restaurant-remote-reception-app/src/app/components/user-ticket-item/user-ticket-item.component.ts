@@ -1,14 +1,9 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {
-  IReservedTicket,
-  IRestaurantLastCalled,
-  IRestaurantLastCalledResponse,
-  TICKET_STATUS_ACCEPTED,
-  TICKET_STATUS_CANCELLED
-} from '../../models/ticket.model';
+import {IReservedTicket, IRestaurantLastCalled, TICKET_STATUS_ACCEPTED, TICKET_STATUS_CANCELLED} from '../../models/ticket.model';
 import {IRestaurant, RestaurantService} from '../../services/restaurant.service';
 import {IShoppingCenter, ShoppingCenterService} from '../../services/shopping-center.service';
 import {AlertService} from '../../services/alert.service';
+import {STATUS} from '../../models/status.model';
 import {TicketService} from '../../services/ticket.service';
 import {interval} from 'rxjs';
 import {Router} from '@angular/router';
@@ -88,21 +83,18 @@ export class UserTicketItemComponent implements OnInit, OnDestroy {
   }
 
   private getRestaurantLastCalled(originalLastCalled = -1) {
-    this.ticketService.getRestaurantLastCalled(this.restaurant.id).subscribe(
-      (res: IRestaurantLastCalledResponse) => {
-        let i: any;
-        for ( i in res.last_called_tickets ) {
-          if ( res.last_called_tickets[i].ticket_type === this.reservedTicket.ticket_type ) {
-            this.restaurantLastCalled = res.last_called_tickets[i];
-            break;
-          }
-        }
-        if (originalLastCalled !== -1 && this.restaurantLastCalled.last_called !== originalLastCalled) {
+    this.ticketService.getRestaurantLastCalled(this.restaurant.id, this.reservedTicket.ticket_type).subscribe(
+      (res: IRestaurantLastCalled) => {
+        this.restaurantLastCalled = res;
+        if (originalLastCalled !== -1 && res.last_called !== originalLastCalled) {
           this.toggleBlinking();
         }
       },
       err => {
         this.errorHandler.handleError(err, '', '', 'Last called ticket number', this.router.url);
+        // TODO: initialise as 0 at API side
+        // } else if (err.error.status_code === STATUS['RESOURCE_NOT_FOUND']) {
+        //   this.restaurantLastCalled = { ticket_type: this.reservedTicket.ticket_type, last_called: 0 };
       }
     );
   }
