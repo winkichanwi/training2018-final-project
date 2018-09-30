@@ -3,27 +3,32 @@ package controllers
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-
 import javax.inject.Inject
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.json.Writes
-import play.api.libs.json.Reads._
-import play.api.libs.json._
-import play.api.libs.json.Json._
-import play.api.libs.functional.syntax._
-import play.api.mvc.{Action, Controller}
-import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
 import models.Tables._
+
 import models._
+import models.ticket._
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Json._
+
+import play.api.libs.json.Reads._
+import play.api.libs.json.{Writes, _}
+import play.api.mvc.Controller
+import repositories.UserRepository
 import security.SecureComponent
 
+import slick.driver.JdbcProfile
+import slick.driver.MySQLDriver.api._
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Controller for tickets
   */
-class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class TicketController @Inject()(
+    val userRepo: UserRepository,
+    val dbConfigProvider: DatabaseConfigProvider)(
+    implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     /**

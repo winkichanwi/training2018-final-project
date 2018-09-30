@@ -4,21 +4,26 @@ import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax.unlift
 import play.api.libs.json.{Writes, __}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.Controller
+
+import models.StatusCode
+import models.Tables._
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import repositories.UserRepository
+
+import security.SecureComponent
 import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
-import models.Tables._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import models.{Constants, StatusCode, StatusResponse}
-import security.SecureComponent
-
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 /**
   * Controller for restaurants
   */
-class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
+class RestaurantController @Inject()(
+    val userRepo: UserRepository,
+    val dbConfigProvider: DatabaseConfigProvider)(
+    implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     import RestaurantController._

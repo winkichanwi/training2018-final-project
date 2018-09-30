@@ -1,4 +1,4 @@
-package models
+package models.ticket
 
 import controllers.TicketForm
 

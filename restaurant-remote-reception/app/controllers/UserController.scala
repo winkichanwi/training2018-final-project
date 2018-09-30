@@ -1,36 +1,37 @@
 package controllers
 
-import play.api.mvc._
-import play.api.db.slick._
-import play.api.db.slick.DatabaseConfigProvider
-import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
-import models.Tables._
+import controllers.UserController._
 import javax.inject.Inject
-import models.{Constants, StatusCode, StatusResponse}
+import models.StatusCode
+import models.Tables._
+import play.api.db.slick.{DatabaseConfigProvider, _}
 
-import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.json._
-import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
-import com.github.t3hnar.bcrypt._
-import controllers.Utils._
-import UserController._
+import play.api.libs.json.Reads._
+import play.api.libs.json._
+import play.api.mvc._
+import repositories.UserRepository
+
 import security.SecureComponent
+import slick.driver.JdbcProfile
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Controller for user related actions
   */
-class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class UserController @Inject()(
+     val userRepo: UserRepository,
+     val dbConfigProvider: DatabaseConfigProvider)(
+     implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     /**
       * Listing existing users
       * @return Future[Result] Body containing list of users
       */
-    def list = Action.async { implicit rs =>
+    def list = SecureAction.async { implicit rs =>
         // IDの昇順にすべてのユーザ情報を取得
-        db.run(Users.sortBy(t => t.userId).result).map { users =>
+        db.run(userRepo.list).map { users =>
             // ユーザの一覧をJSONで返す
             Ok(Json.toJson(users))
         }
@@ -42,12 +43,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       */
     def create = Action.async(parse.json) { implicit rs =>
         rs.body.validate[UserSignUpForm].map { form =>
-            val addUser = for {
-                userId <- (Users returning Users.map(_.userId)) += UsersRow(0, form.userFullname, form.email)
-                result <- UserSecret += UserSecretRow(userId, form.password.bcrypt)
-            } yield result
-
-            db.run(addUser).map(_ => Ok)
+            db.run(userRepo.create(form.userFullname, form.email, form.password)).map(_ => Ok)
         }.recoverTotal { e =>
             Future .successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
         }
@@ -59,11 +55,9 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * @return Future[Result] Body containing logged in user information
       */
     def getCurrentUser = Action.async { implicit rs =>
-        db.run(getSessionUser(rs)).map {
-            case Some(user) =>
-                Ok(Json.toJson(user))
-            case None =>
-            Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse)
+        db.run(userRepo.findById).map {
+            case Some(user) => Ok(Json.toJson(user))
+            case None => Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse)
         }
     }
 
@@ -72,25 +66,17 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * User information update: update user information
       * @return Future[Result] Result of updating user information
       */
-    def update = Action.async(parse.json) { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                rs.body.validate[UsersRow].map { form => {
-                        if (form.userId != sessionUserId.toInt)
-                            Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
-                        else {
-                            val user = UsersRow(form.userId, form.userFullname, form.email)
-                            db.run(Users.filter(t => t.userId === user.userId.bind).update(user)).map { _ =>
-                                Ok
-                            }
-                        }
-                    }
-                }.recoverTotal { e =>
-                    Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
+    def update = SecureAction.async(parse.json) { implicit rs =>
+        rs.body.validate[UsersRow].map { form => {
+                if (form.userId != request2SessionUserId.value)
+                    // unauthorized for updating information of another user
+                    Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
+                else {
+                    db.run(userRepo.update(form.userId, form.userFullname, form.email)).map { _ => Ok }
                 }
-            case None =>
-                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
+            }
+        }.recoverTotal { e =>
+            Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
         }
     }
 }

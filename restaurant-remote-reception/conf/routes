@@ -15,7 +15,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 # JSON API
 # User CRUD
 POST        /api/users              controllers.UserController.create
-GET         /api/me                 controllers.UserController.getCurrentUser
+GET         /api/users/me           controllers.UserController.getCurrentUser
 PUT         /api/users              controllers.UserController.update
 
 # User authentication

@@ -7,17 +7,21 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.{Constants, StatusCode, StatusResponse}
+import models.StatusCode
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import repositories.UserRepository
 import security.SecureComponent
 
 /**
   * Controller for shopping center
   */
-class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
+class ShoppingCenterController @Inject()(
+    val userRepo: UserRepository,
+    val dbConfigProvider: DatabaseConfigProvider)(
+    implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     import ShoppingCenterController._
