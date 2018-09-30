@@ -16,11 +16,6 @@ export interface IRestaurantTicketCount {
   count: number;
 }
 
-export interface IRestaurantLastCalledResponse {
-  restaurant_id: number;
-  last_called_tickets: IRestaurantLastCalled[];
-}
-
 export interface IRestaurantLastCalled {
   ticket_type: string;
   last_called: number;
@@ -30,9 +25,8 @@ export interface IReservedTicket {
   ticket_id: number;
   restaurant_id: number;
   ticket_type: string;
-  ticket_no: number;
   seat_no: number;
-  created_at: string;
+  ticket_no: number;
 }
 
 export const TICKET_STATUS_ACCEPTED = 'Accepted';

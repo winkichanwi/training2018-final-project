@@ -126,7 +126,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
     /**
       * [Authentication required]
       * Counting the queue for each ticket type of the restaurant, initialise as 0
-      * @param restaurantId ID of specified restaurant
+      * @param restaurantId ID of specfied restaurant
       * @return Future[Result] List of ticket queue length
       */
     def countTicketQueue(restaurantId: Int) = Action.async { implicit rs =>
@@ -155,33 +155,25 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(i
         }
     }
 
-    /**
-      * [Authentication required]
-      * Retrieve the last called ticket number of specfic restaurant for each ticket type
-      * @param restaurantId ID of specified restaurant
-      * @return Future[Result] List of last called ticket number of each ticket type
-      */
-    def getLastCalled(restaurantId: Int) = Action.async { implicit rs =>
+    def getLastCalled(restaurantId: Int, ticketType: String) = Action.async { implicit rs =>
         val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
 
         val queryTicketLastCalled = Tickets.filter(t =>
-                (t.restaurantId === restaurantId.bind) &&
-                (!t.ticketStatus.isEmpty && t.ticketStatus =!= TicketStatus.ACTIVE.toString))
-            .groupBy(_.ticketType)
-            .map { case (ticketType, rows) => (ticketType, rows.map(_.ticketNo).max) }
+        (t.restaurantId === restaurantId.bind) &&
+        ((!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.ACCEPTED.toString) || (!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.CANCELLED.toString)) &&
+        (t.ticketType === ticketType))
+            .sortBy(_.ticketNo.desc)
+            .map(_.ticketNo).max
             .result
 
         db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
             case Some(_) =>
-                db.run(queryTicketLastCalled).map(rows =>
-                    (rows ++ (TicketType.types.filterNot(ticketType =>
-                        rows.map(_._1).contains(ticketType.typeName))
-                        .map(ticketType => (ticketType.typeName, Some(0)))))
-                    .map(row => RestaurantLastCalled(row._1, row._2.getOrElse(0)))
-                )
-                .map(lastCalled =>
-                    Ok(Json.obj("restaurant_id" -> restaurantId, "last_called_tickets" -> Json.toJson(lastCalled)))
-                )
+                db.run(queryTicketLastCalled).map {
+                    case Some(lastCalledNo) =>
+                        Ok(Json.toJson(RestaurantLastCalled(ticketType, lastCalledNo)))
+                    case None =>
+                        NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
+                }
             case None =>
                 Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
         }
