@@ -1,4 +1,4 @@
-package models
+package models.ticket
 
 object TicketStatus extends Enumeration {
     protected case class Val(status : Option[String], isWaiting: Boolean) extends super.Val {

@@ -7,17 +7,23 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.{Constants, StatusCode, StatusResponse}
+import models.StatusCode
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import repositories.{ShoppingCenterRepository, UserRepository}
+import security.SecureComponent
 
 /**
   * Controller for shopping center
   */
-class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-    extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
+class ShoppingCenterController @Inject()(
+    val userRepo: UserRepository,
+    val shoppingCenterRepo: ShoppingCenterRepository,
+    val dbConfigProvider: DatabaseConfigProvider)(
+    implicit ec: ExecutionContext)
+    extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     import ShoppingCenterController._
 
@@ -26,20 +32,14 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
       * Getting list of shopping centers
       * @return Future[Result] Body containing list of shopping centers
       */
-    def list = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)
-                    .map{
-                        case shoppingCenters if shoppingCenters.nonEmpty =>
-                            Ok(Json.toJson(shoppingCenters))
-                        case shoppingCenters if shoppingCenters.isEmpty =>
-                            NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
-                    }
-            case None =>
-                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
-        }
+    def list = SecureAction.async { implicit rs =>
+        db.run(shoppingCenterRepo.list)
+            .map{
+                case shoppingCenters if shoppingCenters.nonEmpty =>
+                    Ok(Json.toJson(shoppingCenters))
+                case shoppingCenters if shoppingCenters.isEmpty =>
+                    NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
+            }
     }
 
     /**
@@ -48,21 +48,12 @@ class ShoppingCenterController @Inject()(val dbConfigProvider: DatabaseConfigPro
       * @param shoppingCenterId ID of a shopping center
       * @return Future[Result] Body containing information of queried shopping center
       */
-    def get(shoppingCenterId: Int) = Action.async {implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        val queryShoppingCenterById =
-            ShoppingCenters.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result.headOption
-
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                db.run(queryShoppingCenterById).map {
-                    case Some(shoppingCenter) =>
-                        Ok(Json.toJson(shoppingCenter))
-                    case None =>
-                        NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
-                }
+    def get(shoppingCenterId: Int) = SecureAction.async {implicit rs =>
+        db.run(shoppingCenterRepo.findById(shoppingCenterId)).map {
+            case Some(shoppingCenter) =>
+                Ok(Json.toJson(shoppingCenter))
             case None =>
-                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
+                NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
         }
     }
 }

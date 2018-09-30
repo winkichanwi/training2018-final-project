@@ -1,6 +1,6 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {interval} from 'rxjs';
-import {IReservedTicket, IRestaurantLastCalled} from '../../models/ticket.model';
+import {IReservedTicket, IRestaurantLastCalled, IRestaurantLastCalledResponse} from '../../models/ticket.model';
 import {AlertService} from '../../services/alert.service';
 import {TicketService} from '../../services/ticket.service';
 import {STATUS} from '../../models/status.model';
@@ -31,7 +31,7 @@ const animationIntervalCounter = interval(500);
 })
 export class RestaurantTicketItemComponent implements OnInit, OnDestroy {
   @Input() reservedTicket: IReservedTicket;
-  restaurantLastCalled: IRestaurantLastCalled = {ticket_type: '', last_called: 0};
+  restaurantLastCalled: IRestaurantLastCalled;
   alive: boolean;
   flashState = 'inactive';
 
@@ -51,10 +51,16 @@ export class RestaurantTicketItemComponent implements OnInit, OnDestroy {
   }
 
   private getRestaurantLastCalled(originalLastCalled = -1) {
-    this.ticketService.getRestaurantLastCalled(this.reservedTicket.restaurant_id, this.reservedTicket.ticket_type).subscribe(
-      (res: IRestaurantLastCalled) => {
-        this.restaurantLastCalled = res;
-        if (originalLastCalled !== -1 && res.last_called !== originalLastCalled) {
+    this.ticketService.getRestaurantLastCalled(this.reservedTicket.restaurant_id).subscribe(
+      (res: IRestaurantLastCalledResponse) => {
+        let i: any;
+        for ( i in res.last_called_tickets ) {
+          if ( res.last_called_tickets[i].ticket_type === this.reservedTicket.ticket_type ) {
+            this.restaurantLastCalled = res.last_called_tickets[i];
+            break;
+          }
+        }
+        if (originalLastCalled !== -1 && this.restaurantLastCalled.last_called !== originalLastCalled) {
           this.toggleBlinking();
         }
       },

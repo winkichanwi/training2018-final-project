@@ -7,19 +7,24 @@ import slick.driver.JdbcProfile
 import slick.driver.MySQLDriver.api._
 import models.Tables._
 import javax.inject.Inject
-import models.{Constants, StatusCode, StatusResponse}
+import models.{Constants, StatusCode}
 
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import com.github.t3hnar.bcrypt._
+import repositories.UserRepository
+import security.SecureComponent
 
 /**
   * Controller for user authentication actions
   */
-class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)
-    extends Controller with HasDatabaseConfigProvider[JdbcProfile]  {
+class AuthController @Inject()(
+      val userRepo: UserRepository,
+      val dbConfigProvider: DatabaseConfigProvider)(
+      implicit ec: ExecutionContext)
+    extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     /**
       * User login: authenticate user login information by comparing the password
@@ -27,11 +32,7 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       */
     def login = Action.async(parse.json) { implicit rs =>
         rs.body.validate[UserLoginForm].map { form =>
-            val queryUserInfoSecretDBIO = Users.join(UserSecret).on(_.userId === _.userId)
-                .filter { case (t1, t2) => t1.email === form.email }
-                .result.headOption
-
-            db.run(queryUserInfoSecretDBIO).map {
+            db.run(userRepo.fetchInfoAndSecretByEmail(form.email)).map {
                 case Some((user, userSecret)) =>
                     if (form.password.isBcrypted(userSecret.password)) {
                         Ok.withSession(Constants.SESSION_TOKEN_USER_ID -> user.userId.toString())
@@ -50,24 +51,13 @@ class AuthController @Inject()(val dbConfigProvider: DatabaseConfigProvider)(imp
       * User authentication: determine whether a user has been authenticated or not
       * @return Future[Result] Result for authentication result
       */
-    def authenticate = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).map {
-            case Some(_) =>
-                Ok
-            case None =>
-                Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse)
-        }
-    }
+    def authenticate = SecureAction.async { implicit rs => Future.successful(Ok) }
 
     /**
       * User logout: renew user login session to logout the user
       * @return Future[Result] Result representing logout succeeded
       */
-    def logout = Action.async { implicit rs =>
-        Future { Ok.withNewSession }
-    }
-
+    def logout = Action.async { implicit rs => Future.successful(Ok.withNewSession) }
 }
 
 /**

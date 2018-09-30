@@ -4,21 +4,28 @@ import javax.inject.Inject
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax.unlift
 import play.api.libs.json.{Writes, __}
-import play.api.mvc.{Action, Controller}
-import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
-import models.Tables._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import models.{Constants, StatusCode, StatusResponse}
+import play.api.mvc.Controller
 
-import scala.concurrent.{ExecutionContext, Future}
+import models.StatusCode
+import models.Tables._
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import repositories.{RestaurantRepository, UserRepository}
+
+import security.SecureComponent
+import slick.driver.JdbcProfile
+
+import scala.concurrent.ExecutionContext
 
 /**
   * Controller for restaurants
   */
-class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext)
-    extends Controller with HasDatabaseConfigProvider[JdbcProfile] {
+class RestaurantController @Inject()(
+    val userRepo: UserRepository,
+    val restaurantRepo: RestaurantRepository,
+    val dbConfigProvider: DatabaseConfigProvider)(
+    implicit ec: ExecutionContext)
+    extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
 
     import RestaurantController._
 
@@ -28,22 +35,14 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       * @param shoppingCenterId ID of specified shopping center
       * @return Future[Result] Body containing list of restaurants
       */
-    def list(shoppingCenterId: Int) = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        val queryRestaurantsByShoppingCenterId =
-            Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                db.run(queryRestaurantsByShoppingCenterId)
-                    .map{
-                        case restaurants if restaurants.nonEmpty =>
-                            Ok(Json.toJson(restaurants))
-                        case restaurants if restaurants.isEmpty =>
-                            NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
-                    }
-            case None =>
-                Future.successful(Unauthorized(Json.toJson(StatusCode.UNAUTHORIZED.genJsonResponse)))
-        }
+    def list(shoppingCenterId: Int) = SecureAction.async { implicit rs =>
+        db.run(restaurantRepo.listByShoppingCenterId(shoppingCenterId))
+            .map{
+                case restaurants if restaurants.nonEmpty =>
+                    Ok(Json.toJson(restaurants))
+                case restaurants if restaurants.isEmpty =>
+                    NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
+            }
     }
 
     /**
@@ -52,20 +51,12 @@ class RestaurantController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       * @param restaurantId ID of specified restaurant
       * @return Future[Result] Body containing information of restaurant
       */
-    def get(restaurantId: Int) = Action.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        val queryRestaurantById =
-            Restaurants.filter(t => t.restaurantId === restaurantId.bind).result.headOption
-        db.run(Users.filter(t => t.userId === sessionUserId.toInt).result.headOption).flatMap {
-            case Some(_) =>
-                db.run(queryRestaurantById).map {
-                    case Some(restaurant) =>
-                        Ok(Json.toJson(restaurant))
-                    case None =>
-                        NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
-                }
+    def get(restaurantId: Int) = SecureAction.async { implicit rs =>
+        db.run(restaurantRepo.findById(restaurantId)).map {
+            case Some(restaurant) =>
+                Ok(Json.toJson(restaurant))
             case None =>
-                Future.successful(Unauthorized(StatusCode.UNAUTHORIZED.genJsonResponse))
+                NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
         }
     }
 
