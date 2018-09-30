@@ -75,14 +75,12 @@ class TicketRepository @Inject()
             .map { case (ticketType, rows) => (ticketType, rows.length) }
             .result
 
-    def fetchLastCalled(restaurantId: Int, ticketType: String) =
+    def fetchLastCalled(restaurantId: Int) =
         Tickets.filter(t =>
-        (t.restaurantId === restaurantId.bind) &&
-            ((!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.ACCEPTED.toString) ||
-                (!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.CANCELLED.toString)) &&
-            (t.ticketType === ticketType))
-        .sortBy(_.ticketNo.desc)
-        .map(_.ticketNo).max
+            (t.restaurantId === restaurantId.bind) &&
+                (!t.ticketStatus.isEmpty && t.ticketStatus =!= TicketStatus.ACTIVE.toString))
+            .groupBy(_.ticketType)
+            .map { case (ticketType, rows) => (ticketType, rows.map(_.ticketNo).max) }
         .result
 
     def fetchUserActiveReservedTicketsByRestaurant(restaurantId: Int)(implicit sessionUserId: ID) =

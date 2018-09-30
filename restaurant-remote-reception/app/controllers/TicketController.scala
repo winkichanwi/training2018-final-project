@@ -94,13 +94,22 @@ class TicketController @Inject()(
             )
     }
 
-    def getLastCalled(restaurantId: Int, ticketType: String) = SecureAction.async { implicit rs =>
-        db.run(ticketRepo.fetchLastCalled(restaurantId, ticketType)).map {
-            case Some(lastCalledNo) =>
-                Ok(Json.toJson(RestaurantLastCalled(ticketType, lastCalledNo)))
-            case None =>
-                NotFound(StatusCode.RESOURCE_NOT_FOUND.genJsonResponse)
-        }
+    /**
+      * [Authentication required]
+      * Retrieve the last called ticket number of specfic restaurant for each ticket type
+      * @param restaurantId ID of specified restaurant
+      * @return Future[Result] List of last called ticket number of each ticket type
+      */
+    def getLastCalled(restaurantId: Int) = SecureAction.async { implicit rs =>
+        db.run(ticketRepo.fetchLastCalled(restaurantId))
+            .map(rows =>
+                (rows ++ (TicketType.types.filterNot(ticketType =>
+                rows.map(_._1).contains(ticketType.typeName))
+                .map(ticketType => (ticketType.typeName, Some(0)))))
+            .map(row => RestaurantLastCalled(row._1, row._2.getOrElse(0))))
+            .map(lastCalled =>
+                Ok(Json.obj("restaurant_id" -> restaurantId, "last_called_tickets" -> Json.toJson(lastCalled)))
+            )
     }
 
     def getUserReservedTicketsByRestaurant(restaurantId: Int) = SecureAction.async { implicit rs =>
