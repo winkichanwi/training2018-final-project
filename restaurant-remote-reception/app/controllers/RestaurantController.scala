@@ -10,11 +10,11 @@ import models.StatusCode
 import models.Tables._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import repositories.UserRepository
+import repositories.{RestaurantRepository, UserRepository}
 
 import security.SecureComponent
 import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
+
 import scala.concurrent.ExecutionContext
 
 /**
@@ -22,6 +22,7 @@ import scala.concurrent.ExecutionContext
   */
 class RestaurantController @Inject()(
     val userRepo: UserRepository,
+    val restaurantRepo: RestaurantRepository,
     val dbConfigProvider: DatabaseConfigProvider)(
     implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
@@ -35,10 +36,7 @@ class RestaurantController @Inject()(
       * @return Future[Result] Body containing list of restaurants
       */
     def list(shoppingCenterId: Int) = SecureAction.async { implicit rs =>
-        val queryRestaurantsByShoppingCenterId =
-            Restaurants.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result
-
-        db.run(queryRestaurantsByShoppingCenterId)
+        db.run(restaurantRepo.listByShoppingCenterId(shoppingCenterId))
             .map{
                 case restaurants if restaurants.nonEmpty =>
                     Ok(Json.toJson(restaurants))
@@ -54,9 +52,7 @@ class RestaurantController @Inject()(
       * @return Future[Result] Body containing information of restaurant
       */
     def get(restaurantId: Int) = SecureAction.async { implicit rs =>
-        val queryRestaurantById =
-            Restaurants.filter(t => t.restaurantId === restaurantId.bind).result.headOption
-        db.run(queryRestaurantById).map {
+        db.run(restaurantRepo.findById(restaurantId)).map {
             case Some(restaurant) =>
                 Ok(Json.toJson(restaurant))
             case None =>

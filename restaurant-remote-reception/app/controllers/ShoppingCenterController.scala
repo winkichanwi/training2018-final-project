@@ -12,7 +12,7 @@ import models.StatusCode
 import scala.concurrent.ExecutionContext
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import repositories.UserRepository
+import repositories.{ShoppingCenterRepository, UserRepository}
 import security.SecureComponent
 
 /**
@@ -20,6 +20,7 @@ import security.SecureComponent
   */
 class ShoppingCenterController @Inject()(
     val userRepo: UserRepository,
+    val shoppingCenterRepo: ShoppingCenterRepository,
     val dbConfigProvider: DatabaseConfigProvider)(
     implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
@@ -32,7 +33,7 @@ class ShoppingCenterController @Inject()(
       * @return Future[Result] Body containing list of shopping centers
       */
     def list = SecureAction.async { implicit rs =>
-        db.run(ShoppingCenters.sortBy(t => t.shoppingCenterId).result)
+        db.run(shoppingCenterRepo.list)
             .map{
                 case shoppingCenters if shoppingCenters.nonEmpty =>
                     Ok(Json.toJson(shoppingCenters))
@@ -48,10 +49,7 @@ class ShoppingCenterController @Inject()(
       * @return Future[Result] Body containing information of queried shopping center
       */
     def get(shoppingCenterId: Int) = SecureAction.async {implicit rs =>
-        val queryShoppingCenterById =
-            ShoppingCenters.filter(t => t.shoppingCenterId === shoppingCenterId.bind).result.headOption
-
-        db.run(queryShoppingCenterById).map {
+        db.run(shoppingCenterRepo.findById(shoppingCenterId)).map {
             case Some(shoppingCenter) =>
                 Ok(Json.toJson(shoppingCenter))
             case None =>

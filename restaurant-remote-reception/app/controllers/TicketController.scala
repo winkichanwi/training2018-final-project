@@ -2,24 +2,21 @@ package controllers
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import javax.inject.Inject
-import models.Tables._
-
 import models._
 import models.ticket._
+
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Json._
-
 import play.api.libs.json.Reads._
 import play.api.libs.json.{Writes, _}
-import play.api.mvc.Controller
-import repositories.UserRepository
-import security.SecureComponent
 
+import play.api.mvc.Controller
+import repositories.{TicketRepository, UserRepository}
+import security.SecureComponent
 import slick.driver.JdbcProfile
-import slick.driver.MySQLDriver.api._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -27,6 +24,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class TicketController @Inject()(
     val userRepo: UserRepository,
+    val ticketRepo: TicketRepository,
     val dbConfigProvider: DatabaseConfigProvider)(
     implicit ec: ExecutionContext)
     extends Controller with HasDatabaseConfigProvider[JdbcProfile] with SecureComponent {
@@ -37,28 +35,10 @@ class TicketController @Inject()(
       * @return Future[Result] Result of creating ticket
       */
     def create = SecureAction.async(parse.json) { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         rs.body.validate[TicketForm].map { form =>
             TicketType.from(form).map(_.typeName) match {
                 case Some(ticketType) =>
-                    val addTicketRowDBIO = for {
-                        ticketNo <- Tickets.filter(t =>
-                                    (t.restaurantId === form.restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketType === ticketType.bind))
-                                    .sortBy(_.ticketNo.desc)
-                                    .map(_.ticketNo).max
-                                    .result
-                        addTicketRow <- ticketNo match {
-                            case Some(ticketNo) =>
-                                Tickets += TicketsRow(0, ticketNo + 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
-                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
-                            case None =>
-                                // Initial ticket no is 1
-                                Tickets += TicketsRow(0, 1, form.restaurantId, Timestamp.valueOf(LocalDateTime.now()),
-                                    sessionUserId.toInt, form.ticketSeatNo, ticketType, TicketStatus.ACTIVE.status)
-                        }
-                    } yield addTicketRow
-
-                    db.run(addTicketRowDBIO).map( _ => Ok )
+                    db.run(ticketRepo.create(form.restaurantId, ticketType, form.ticketSeatNo)).map( _ => Ok )
                 case None =>
                     Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
             }
@@ -73,22 +53,9 @@ class TicketController @Inject()(
       * @return Future[Result] Result of update
       */
     def update = SecureAction.async(parse.json) { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
         rs.body.validate[TicketStatusUpdateForm].map { form =>
             if (TicketStatus.ACCEPTED.toString.equals(form.ticketStatus) || TicketStatus.CANCELLED.toString.equals(form.ticketStatus)) {
-                val updateTicketTransaction = (
-                    for {
-                        _ <- Tickets.filter(t =>
-                                t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && t.ticketStatus =!= TicketStatus.ACTIVE.toString)
-                                .map(_.ticketStatus)
-                                .update(TicketStatus.NULL.status)
-                        _ <- Tickets.filter(t =>
-                                t.ticketId === form.ticketId.bind && t.createdById === sessionUserId.toInt)
-                                .map(_.ticketStatus)
-                                .update(Some(form.ticketStatus))
-                    } yield ()
-                    ).transactionally
-                db.run(updateTicketTransaction).map( _ => Ok)
+                db.run(ticketRepo.update(form.ticketId, form.ticketStatus)).map( _ => Ok)
             } else {
                 Future.successful(BadRequest(StatusCode.UNSUPPORTED_FORMAT.genJsonResponse))
             }
@@ -102,14 +69,8 @@ class TicketController @Inject()(
       * Get logged in user reserved ticket's information
       * @return Future[Result] List of reserved tickets and related information
       */
-    def getReservedTickets = SecureAction.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        val queryUserActiveTicket = Tickets.filter(t =>
-            t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
-            .sortBy(_.createdAt desc)
-            .result
-
-        db.run(queryUserActiveTicket)
+    def getUserReservedTickets = SecureAction.async { implicit rs =>
+        db.run(ticketRepo.fetchUserActiveReservedTickets)
             .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketNo, row.ticketSeatNo, row.createdAt)))
             .map(userTickets => Ok(Json.toJson(userTickets)))
     }
@@ -117,21 +78,15 @@ class TicketController @Inject()(
     /**
       * [Authentication required]
       * Counting the queue for each ticket type of the restaurant, initialise as 0
-      * @param restaurantId ID of specfied restaurant
+      * @param restaurantId ID of specified restaurant
       * @return Future[Result] List of ticket queue length
       */
-    def countTicketQueue(restaurantId: Int) = SecureAction.async { implicit rs =>
-        val groupTicketTypes = Tickets.filter(t =>
-        (t.restaurantId === restaurantId.bind) && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
-            .groupBy(_.ticketType)
-            .map { case (ticketType, rows) => (ticketType, rows.length) }
-            .result
-
-        db.run(groupTicketTypes)
+    def fetchRestaurantQueue(restaurantId: Int) = SecureAction.async { implicit rs =>
+        db.run(ticketRepo.fetchRestaurantQueues(restaurantId))
             .map(rows =>
                 (rows ++ (TicketType.types.filterNot(ticketType =>
                     rows.map(_._1).contains(ticketType.typeName))
-                    .map(ticketType => (ticketType.typeName, 0))))
+                    .map(ticketType => (ticketType.typeName, 0)))) // Initialize queue to 0 for ticket type without queue initialized
                 .map(row => RestaurantTicketQueue(row._1, row._2))
             )
             .map(queues =>
@@ -140,15 +95,7 @@ class TicketController @Inject()(
     }
 
     def getLastCalled(restaurantId: Int, ticketType: String) = SecureAction.async { implicit rs =>
-        val queryTicketLastCalled = Tickets.filter(t =>
-        (t.restaurantId === restaurantId.bind) &&
-        ((!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.ACCEPTED.toString) || (!t.ticketStatus.isEmpty && t.ticketStatus === TicketStatus.CANCELLED.toString)) &&
-        (t.ticketType === ticketType))
-            .sortBy(_.ticketNo.desc)
-            .map(_.ticketNo).max
-            .result
-
-        db.run(queryTicketLastCalled).map {
+        db.run(ticketRepo.fetchLastCalled(restaurantId, ticketType)).map {
             case Some(lastCalledNo) =>
                 Ok(Json.toJson(RestaurantLastCalled(ticketType, lastCalledNo)))
             case None =>
@@ -156,14 +103,8 @@ class TicketController @Inject()(
         }
     }
 
-
-    def getRestaurantReservedTickets(restaurantId: Int) = SecureAction.async { implicit rs =>
-        val sessionUserId = rs.session.get(Constants.SESSION_TOKEN_USER_ID).getOrElse("0")
-        val queryUserRestaurantActiveTicket = Tickets.filter(t =>
-            t.restaurantId === restaurantId.bind && t.createdById === sessionUserId.toInt && !t.ticketStatus.isEmpty && (t.ticketStatus === TicketStatus.ACTIVE.toString))
-            .result
-
-        db.run(queryUserRestaurantActiveTicket)
+    def getUserReservedTicketsByRestaurant(restaurantId: Int) = SecureAction.async { implicit rs =>
+        db.run(ticketRepo.fetchUserActiveReservedTicketsByRestaurant(restaurantId))
             .map(_.map(row => UserTickets(row.ticketId, row.restaurantId, row.ticketType, row.ticketNo, row.ticketSeatNo, row.createdAt)))
             .map(userTickets => Ok(Json.toJson(userTickets)))
     }

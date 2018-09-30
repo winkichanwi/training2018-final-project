@@ -10,7 +10,10 @@ import slick.driver.MySQLDriver.api._
 
 import scala.concurrent.ExecutionContext
 
-class UserRepository @Inject()(val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
+class UserRepository @Inject()
+    (val dbConfigProvider: DatabaseConfigProvider)
+    (implicit ec: ExecutionContext)
+    extends HasDatabaseConfigProvider[JdbcProfile] {
 
     def list =
         Users.sortBy(t => t.userId).result
